@@ -1,12 +1,11 @@
 #include <configuration.h>
 
 /******************************************************************************************************/
-void wait(int time)
+void wait(int milliseconds)
 {
     volatile int tmp;
 
-    for (tmp = 0; tmp < 10800 * time; tmp++)
-        ; // ~ 1ms
+    for (tmp = 0; tmp < 10800 * milliseconds; tmp++); // ~ 10800 = 1ms
 }
 
 void ConfigureADC(void)
@@ -87,7 +86,6 @@ void ConfigureUART(int SysClock)
 
 
 /*********************************************************************************************/
-/* Configure GPIOPM3 = D; PM2 = C; PM1 = B; PM0 = A; PL3 = nD */
 void ConfigureGPIO(void)
 {
     // Set Port M Pins 0-7 Output LCD Data
@@ -96,6 +94,7 @@ void ConfigureGPIO(void)
     GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
 
     // Set Port L  0-4 Multiplexer address output for 8x8 Array
+    // Pin 3 = D; Pin 2 = C; Pin 1 = B; Pin 0 = A; Pin 4 = nD
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
     GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4);
@@ -116,12 +115,12 @@ void ConfigureGPIO(void)
 /*********************************************************************************************/
 void ConfigureTimer0(int SysClock)
 {
-    // Configure Timer1 Interr
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);     // Clock Gate enable TIMER0upt
+    // Configure Timer1 Interrupt
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);           // Clock Gate enable TIMER0upt
     TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER0_BASE, TIMER_A, SysClock / 20);      // fires every 50 ms
+    TimerLoadSet(TIMER0_BASE, TIMER_A, SysClock / 10);      // fires every 50 ms
     TimerEnable(TIMER0_BASE, TIMER_A);
-    IntPrioritySet(INT_TIMER0A, HIGH_PRIORITY);                // set priority
+    IntPrioritySet(INT_TIMER0A, HIGH_PRIORITY);             // set priority
     TimerIntRegister(TIMER0_BASE, TIMER_A, Timer0IntHandler);
     IntEnable(INT_TIMER0A);
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);

@@ -10,9 +10,10 @@ GEN_CMDS__FLAG :=
 ORDERED_OBJS += \
 "./Interrupt_handler.obj" \
 "./configuration.obj" \
+"./fonts.obj" \
 "./functions.obj" \
 "./lcd_functions.obj" \
-"./main_06.obj" \
+"./main.obj" \
 "./tm4c1294ncpdt_startup_ccs.obj" \
 "../tm4c1294ncpdt.cmd" \
 $(GEN_CMDS__FLAG) \
@@ -124,42 +125,42 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-bc_magnet_sensor_06_2020-02-18.out \
+BP_TMR_sensor_array.out \
 
 EXE_OUTPUTS__QUOTED += \
-"bc_magnet_sensor_06_2020-02-18.out" \
+"BP_TMR_sensor_array.out" \
 
 BIN_OUTPUTS += \
-bc_magnet_sensor_06_2020-02-18.hex \
+BP_TMR_sensor_array.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"bc_magnet_sensor_06_2020-02-18.hex" \
+"BP_TMR_sensor_array.hex" \
 
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "bc_magnet_sensor_06_2020-02-18.out"
+	@$(MAKE) --no-print-directory -Onone "BP_TMR_sensor_array.out"
 
 # Tool invocations
-bc_magnet_sensor_06_2020-02-18.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+BP_TMR_sensor_array.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: ARM Linker'
-	"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C1294NCPDT -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"bc_magnet_sensor_06_2020-02-18.map" --heap_size=150000 --stack_size=20000 -i"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/lib" -i"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="bc_magnet_sensor_06_2020-02-18_linkInfo.xml" --rom_model -o "bc_magnet_sensor_06_2020-02-18.out" $(ORDERED_OBJS)
+	"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C1294NCPDT -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"BP_TMR_sensor_array.map" --heap_size=150000 --stack_size=20000 -i"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/lib" -i"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="BP_TMR_sensor_array_linkInfo.xml" --rom_model -o "BP_TMR_sensor_array.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
-bc_magnet_sensor_06_2020-02-18.hex: $(EXE_OUTPUTS)
+BP_TMR_sensor_array.hex: $(EXE_OUTPUTS)
 	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo 'Invoking: ARM Hex Utility'
-	"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/bin/armhex"  -o "bc_magnet_sensor_06_2020-02-18.hex" $(EXE_OUTPUTS__QUOTED)
+	"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/bin/armhex"  -o "BP_TMR_sensor_array.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "Interrupt_handler.obj" "configuration.obj" "functions.obj" "lcd_functions.obj" "main_06.obj" "tm4c1294ncpdt_startup_ccs.obj" 
-	-$(RM) "Interrupt_handler.d" "configuration.d" "functions.d" "lcd_functions.d" "main_06.d" "tm4c1294ncpdt_startup_ccs.d" 
+	-$(RM) "Interrupt_handler.obj" "configuration.obj" "fonts.obj" "functions.obj" "lcd_functions.obj" "main.obj" "tm4c1294ncpdt_startup_ccs.obj" 
+	-$(RM) "Interrupt_handler.d" "configuration.d" "fonts.d" "functions.d" "lcd_functions.d" "main.d" "tm4c1294ncpdt_startup_ccs.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

@@ -34,21 +34,19 @@ void SetUpTime(void)
 //Read whole Array
 void ReadArray(void)
 {
-    uint32_t i;
+    uint16_t i;
 
-    for(i = 0; i <= 7; i++)                                 // readCos-Values(=first8cycles)
+    GPIO_PORTL_DATA_R |= GPIO_PIN_4;
+    for(i = 0; i <= 7; i++)                                 // read Cos-Values(= first 8 cycles)
     {
-//        GPIO_PORTL_DATA_R = !(i & 0b1000) << 4 | i;
-//        // write address to the GPIO Pins for MU
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, i); //address to PortM
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, (i^GPIO_PIN_3)); //invert bit 'D'
+//        // write address to the GPIO Pins for MUX
+        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, i);
 
-        SetUpTime();                                    // set-uptime (short delay)
+        SetUpTime();                                    // set-up time (short delay)
         GetADCValues();                                 // read current values
 
         //left half
         CosResults[0][7 - i] = (int16_t) ADCValues_SS0[0];
-        //assign Values to result
         CosResults[1][7 - i] = (int16_t) ADCValues_SS0[1];
         //array ordered backwards!
         CosResults[2][7 - i] = (int16_t) ADCValues_SS0[2];
@@ -61,21 +59,21 @@ void ReadArray(void)
         CosResults[0][15 - i] = (int16_t) ADCValues_SS1[0];
         CosResults[1][15 - i] = (int16_t) ADCValues_SS1[1];
         CosResults[2][15 - i] = (int16_t) ADCValues_SS1[2];
-
         CosResults[3][15 - i] = (int16_t) ADCValues_SS1[3];
+
         CosResults[4][15 - i] = (int16_t) ADCValues_SS2[0];
         CosResults[5][15 - i] = (int16_t) ADCValues_SS2[1];
         CosResults[6][15 - i] = (int16_t) ADCValues_SS2[2];
         CosResults[7][15 - i] = (int16_t) ADCValues_SS2[3];
     }
 
+    GPIO_PORTL_DATA_R &= ~GPIO_PIN_4;
     for(i = 8; i <= 15; i++) //read Sin-Values(=second 8 cycles)
     {
         // write address to the GPIO Pins for MU
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, i); //address to PortM
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, (i^GPIO_PIN_3)); //invert bit 'D'
+        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, i);
 
-        SetUpTime(); // set-uptime (short delay)
+        SetUpTime(); // set-up time (short delay)
         GetADCValues(); // read current values
 
         // left half
@@ -92,6 +90,7 @@ void ReadArray(void)
         SinResults[1][i] = (int16_t) ADCValues_SS1[1];
         SinResults[2][i] = (int16_t) ADCValues_SS1[2];
         SinResults[3][i] = (int16_t) ADCValues_SS1[3];
+
         SinResults[4][i] = (int16_t) ADCValues_SS2[0];
         SinResults[5][i] = (int16_t) ADCValues_SS2[1];
         SinResults[6][i] = (int16_t) ADCValues_SS2[2];
@@ -126,9 +125,11 @@ void GetADCValues(void)
 
 /*********************************************************************************************/
 //Compute differential signal
+
 void Computations(void)
 {
-	int m = 0, n = 0;
+    int32_t max = 0, absolute;
+	uint16_t m, n;
 
     for(m = 0; m <= 7; m++)
     {
@@ -136,14 +137,37 @@ void Computations(void)
         {
             //shiftleft1: multiplication by 2
             //differential: 0-1, 2-3, ... , 14-15
-             negCosResults[m][n] = CosResults[m][(n << 1)]; // 0, 2, 4, ..., 14
-             posCosResults[m][n] = CosResults[m][(n << 1) + 1]; // 1, 3, 5, ..., 15
-            DiffCosResults[m][n] = negCosResults[m][n] - posCosResults[m][n];
+             negCosResults[m][n] = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
+             posCosResults[m][n] = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
+            DiffCosResults[m][n] =  negCosResults[m][n] - posCosResults[m][n];
                  CosOffset[m][n] = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
              negSinResults[m][n] = SinResults[m][(n << 1)];
              posSinResults[m][n] = SinResults[m][(n << 1) + 1];
-            DiffSinResults[m][n] = negSinResults[m][n] - posSinResults[m][n];
+            DiffSinResults[m][n] =  negSinResults[m][n] - posSinResults[m][n];
                  SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
+
+            // berechne die Betragsquadrate:
+            absolute = DiffCosResults[m][n]*DiffCosResults[m][n] + DiffSinResults[m][n]*DiffSinResults[m][n];
+
+            // finde den größten Betragsquadrat und speicher ihn
+            if(absolute > max)
+            {
+                max = absolute;
+            }
+        }
+    }
+    // Berechne aus dem ermittelten größten Betragsquadrat den Betrag
+    max = sqrt(max);
+    // Normalisiere den Betrag auf +- 16 (das ist die Breite des Rasters vom Array)
+    max >>= 5;
+
+    // normalisiere alle anderen Vektoren
+    for(m = 0; m <= 7; m++)
+    {
+        for(n = 0; n <= 7; n++)
+        {
+            DiffCosResults[m][n] = DiffCosResults[m][n] / (int16_t)max;
+            DiffSinResults[m][n] = DiffSinResults[m][n] / (int16_t)max;
         }
     }
 }

@@ -10,6 +10,7 @@
 /*****************************  # Includes #   ****************************/
 #include <stdbool.h>
 #include <stdint.h>
+#include <math.h>
 #include <tm4c1294ncpdt.h>
 #include <driverlib/sysctl.h>
 #include <driverlib/adc.h>      // ADCIntClear(), ADCIntStatus(), ADCProcessorTrigger(), ADCSequenceDataGet()

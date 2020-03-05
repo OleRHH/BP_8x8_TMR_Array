@@ -15,12 +15,12 @@
 #include <tm4c1294ncpdt.h>
 #include <driverlib/gpio.h>
 #include <driverlib/uart.h>
-#include <inc/hw_memmap.h>      // UART0_BASE
+#include <inc/hw_memmap.h>      // needed for UART0_BASE
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 #include <driverlib/timer.h>
-#include <lcd_functions.h>
 
+#include <lcd_functions.h>
 
 /*****************************  # defines #   *****************************/
 // defines for ADC init
@@ -57,7 +57,7 @@
 
 // Interrupt priority
 #define HIGH_PRIORITY 0x00
-#define LOW_PRIORITY 0x80
+#define LOW_PRIORITY  0x80
 
 /**************************  # Prototypes #   ****************************/
 void ConfigureUART(int);
