@@ -1,4 +1,4 @@
-/* Fonts for LC-Display
+/* Fonts for LC-Display     */
 /*  12x16_horizontal_LSB_1  */
 
 const char font_12_16[256][32]={

@@ -6,6 +6,9 @@
 #include <Interrupt_handler.h>
 
 
+extern int16_t DiffSinResults[8][8];
+extern int16_t DiffCosResults[8][8];
+
 /*****************************  # global variables #   ****************************/
 //Base address pointer to Value Arrays
 uint8_t *ucPtr;
@@ -14,7 +17,11 @@ int m = 0, n = 0;
 
 /***********************  TIMER 1 interrupt handler   ***********************/
 /* Periodicaly send Array Data via UART. This handler triggers the first byte */
-void Timer0IntHandler(void) {
+void Timer0IntHandler(void)
+{
+    #define YELLOW 0b0000100     // Debug Output to oscilloscope
+    GPIO_PORTN_DATA_R ^= YELLOW;
+
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
     ReadArray();
@@ -23,7 +30,7 @@ void Timer0IntHandler(void) {
 
     m = 0;
     n = 0;
-    ucPtr = (uint8_t*) &DiffSinResults[0][0];
+    ucPtr = (uint8_t*) DiffSinResults;
     while(n < 16)
     {
         UARTCharPutNonBlocking(UART0_BASE, *(ucPtr++));
@@ -58,9 +65,9 @@ void UARTIntHandler(void)
             n = 16;
             TimerDisable(TIMER0_BASE, TIMER_A);
             UARTFIFODisable(UART0_BASE);
-            SysCtlDelay(10000);
+            SysCtlDelay(1000);
             UARTFIFOEnable(UART0_BASE);
-            TimerLoadSet(TIMER0_BASE, TIMER_A, SysClock / 10);
+//            TimerLoadSet(TIMER0_BASE, TIMER_A, SysClock / 10);
             TimerEnable(TIMER0_BASE, TIMER_A);
         }
     }
@@ -71,7 +78,7 @@ void UARTIntHandler(void)
 //        GPIO_PORTM_DATA_R ^= YELLOW;
         if(m == 128)
         {
-            ucPtr = (uint8_t*) &DiffCosResults[0][0];
+            ucPtr = (uint8_t*) DiffCosResults;
         }
         while(n < 16)
         {
@@ -85,15 +92,18 @@ void UARTIntHandler(void)
 
 
 // some debug junk to be reused.. sometime ;)
-//#define YELLOW 0b100000;    // Debug Output to oscilloscope
-//#define BLUE   0b010000;    // Debug Output to oscilloscope
+
+//#define LED1   0b0000001
+//#define LED2   0b0000010
+//#define YELLOW 0b0000100     // Debug Output to oscilloscope
+//#define BLUE   0b0001000     // Debug Output to oscilloscope
 //
 //// some debug outputs:
-//GPIO_PORTM_DATA_R ^= YELLOW;
-//GPIO_PORTM_DATA_R |= BLUE;
+//GPIO_PORTN_DATA_R ^= YELLOW;
+//GPIO_PORTN_DATA_R |= BLUE;
 //GPIO_PORTN_DATA_R ^= 0b1;
 //
-//GPIO_PORTM_DATA_R ^= BLUE;
+//GPIO_PORTN_DATA_R ^= BLUE;
 //GPIO_PORTN_DATA_R |= 0b10;
 
 

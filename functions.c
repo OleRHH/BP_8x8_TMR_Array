@@ -24,13 +24,6 @@ uint32_t ADCValues_SS2[4];
 
 
 /*********************************************************************************************/
-void SetUpTime(void)
-{
-	SysCtlDelay(SysClock / 100 / 1000000); //(120MHz/3)∗1us=40
-}
-
-
-/*********************************************************************************************/
 //Read whole Array
 void ReadArray(void)
 {
@@ -39,11 +32,14 @@ void ReadArray(void)
     GPIO_PORTL_DATA_R |= GPIO_PIN_4;
     for(i = 0; i <= 7; i++)                                 // read Cos-Values(= first 8 cycles)
     {
-//        // write address to the GPIO Pins for MUX
+        // write address to the GPIO Pins for the analog multiplexer
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, i);
 
-        SetUpTime();                                    // set-up time (short delay)
-        GetADCValues();                                 // read current values
+        #define BLUE   0b0001000                            // Debug Output to oscilloscope
+        GPIO_PORTN_DATA_R |= BLUE;
+        SysCtlDelay(8);                                     // set-up time for multiplexer (~320 ns)
+        GPIO_PORTN_DATA_R ^= BLUE;
+        GetADCValues();                                     // read current values
 
         //left half
         CosResults[0][7 - i] = (int16_t) ADCValues_SS0[0];
@@ -68,13 +64,13 @@ void ReadArray(void)
     }
 
     GPIO_PORTL_DATA_R &= ~GPIO_PIN_4;
-    for(i = 8; i <= 15; i++) //read Sin-Values(=second 8 cycles)
+    for(i = 8; i <= 15; i++)                                //read Sin-Values(=second 8 cycles)
     {
         // write address to the GPIO Pins for MU
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, i);
 
-        SetUpTime(); // set-up time (short delay)
-        GetADCValues(); // read current values
+        SysCtlDelay(8);                                     // set-up time for multiplexer (~400 ns)
+        GetADCValues();                                     // read current values
 
         // left half
         SinResults[0][i - 8] = (int16_t) ADCValues_SS0[0]; // assign Values to result

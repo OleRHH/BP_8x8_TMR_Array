@@ -29,8 +29,5 @@
 void UARTIntHandler(void);
 
 
-extern int16_t DiffSinResults[8][8];
-extern int16_t DiffCosResults[8][8];
-extern uint32_t SysClock;
 
 #endif /* INTERRUPT_HANDLER_H_ */

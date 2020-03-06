@@ -1,12 +1,6 @@
 #include <configuration.h>
 
 /******************************************************************************************************/
-void wait(int milliseconds)
-{
-    volatile int tmp;
-
-    for (tmp = 0; tmp < 10800 * milliseconds; tmp++); // ~ 10800 = 1ms
-}
 
 void ConfigureADC(void)
 {
@@ -55,7 +49,7 @@ void ConfigureADC(void)
 
 
 /*********************************************************************************************/
-void ConfigureUART(int SysClock)
+void ConfigureUART(uint32_t SysClock)
 {
     // Enable the GPIO Peripheral used by the UART
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
@@ -89,8 +83,8 @@ void ConfigureUART(int SysClock)
 void ConfigureGPIO(void)
 {
     // Set Port M Pins 0-7 Output LCD Data
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
     GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
 
     // Set Port L  0-4 Multiplexer address output for 8x8 Array
@@ -99,10 +93,10 @@ void ConfigureGPIO(void)
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
     GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4);
 
-    // Onboard LEDs output: Port N (Pins 0-1)
+    // Onboard LEDs output: Port N (Pins 0-1)  debug outputs:Pin 2-3
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));
-    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
 
     // LCD Control output: Port Q (Pins 0-4)
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);  // Clock Port Q
@@ -113,12 +107,12 @@ void ConfigureGPIO(void)
 
 
 /*********************************************************************************************/
-void ConfigureTimer0(int SysClock)
+void ConfigureTimer0(uint32_t SysClock)
 {
-    // Configure Timer1 Interrupt
+    // Configure Timer0 Interrupt
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);           // Clock Gate enable TIMER0upt
     TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER0_BASE, TIMER_A, SysClock / 10);      // fires every 50 ms
+    TimerLoadSet(TIMER0_BASE, TIMER_A, SysClock / 10);      // fires every 100 ms
     TimerEnable(TIMER0_BASE, TIMER_A);
     IntPrioritySet(INT_TIMER0A, HIGH_PRIORITY);             // set priority
     TimerIntRegister(TIMER0_BASE, TIMER_A, Timer0IntHandler);
@@ -129,33 +123,32 @@ void ConfigureTimer0(int SysClock)
 
 /******************************************************************************************************/
 // LCD Panel initialize:
-void ConfigureLCD(void) {
-    short wert;
-    int value;
+void ConfigureLCD(uint32_t SysClock) {
+    uint32_t value;
 
     GPIO_PORTQ_DATA_R = 0x00;
-    wait(1);
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
-    wait(10);                               //
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
     GPIO_PORTQ_DATA_R &= ~RST;              // Hardware reset
-    wait(1);                                //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
     GPIO_PORTQ_DATA_R |= RST;               //
-    wait(1);                                //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
     write_command(SOFTWARE_RESET);          // Software reset
-    wait(10);                               //
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
-    wait(10);                               //
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
     GPIO_PORTQ_DATA_R &= ~RST;              // Hardware reset
-    wait(1);                                //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
     GPIO_PORTQ_DATA_R |= RST;               //
-    wait(1);                                //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
     write_command(SOFTWARE_RESET);          // Software reset
-    wait(10);
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
     write_command(SET_PLL_MN);              // Set PLL Freq to 120 MHz
     write_cmd_data(0x24);                   //
@@ -164,16 +157,16 @@ void ConfigureLCD(void) {
 
     write_command(START_PLL);               // Start PLL
     write_cmd_data(0x01);                   //
-    wait(1);                                //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
     write_command(START_PLL);               // Lock PLL
     write_cmd_data(0x03);                   //
-    wait(1);                                //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
     write_command(SOFTWARE_RESET);          // Software reset
-    wait(10);
-/*************************************************************************/
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
+/*************************************************************************/
     value = 0x01EFFF;
     write_command(SET_LSHIFT);              // Set LCD Pixel Clock 11,4Mhz (0x01D4C0)
     write_cmd_data(value>>16);              //
@@ -214,22 +207,22 @@ void ConfigureLCD(void) {
     write_command(0x30);                    // Set partial area
     write_cmd_data(0);                      // Start row High
     write_cmd_data(0);                      // Start row Low
-    wert = 543;
-    write_cmd_data(wert >> 8);              // Stop row High
-    write_cmd_data(wert);                   // Stop row Low
+    value = 543;
+    write_cmd_data(value >> 8);              // Stop row High
+    write_cmd_data(value);                   // Stop row Low
 
     write_command(0x12);                    // enter partial mode
 
     write_command(0x33);                    // Set scroll area
-    wert = 0;
-    write_cmd_data(wert >> 8);              // TFA high byte (TFA = 0)
-    write_cmd_data(wert);                   // TFA low byte
-    wert = 544;
-    write_cmd_data(wert >> 8);              // VSA high byte (VSA = 272)
-    write_cmd_data(wert);                   // VSA low byte
-    wert = 0;
-    write_cmd_data(wert >> 8);              // BFA high byte (BFA = 543)
-    write_cmd_data(wert);                   // BFA low byte
+    value = 0;
+    write_cmd_data(value >> 8);              // TFA high byte (TFA = 0)
+    write_cmd_data(value);                   // TFA low byte
+    value = 544;
+    write_cmd_data(value >> 8);              // VSA high byte (VSA = 272)
+    write_cmd_data(value);                   // VSA low byte
+    value = 0;
+    write_cmd_data(value >> 8);              // BFA high byte (BFA = 543)
+    write_cmd_data(value);                   // BFA low byte
 
     write_command(0x29);                    // Set display on
 }

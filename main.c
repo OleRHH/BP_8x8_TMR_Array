@@ -1,25 +1,22 @@
 #include <main.h>
 
-/*********************  # global variables #   ******************/
-uint32_t SysClock;
-
 int main(void)
 {
-    SysClock = SysCtlClockFreqSet( (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN
+    uint32_t SysClock = SysCtlClockFreqSet( (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN
                 | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), CLOCK_FREQ);
 
     // Initialize the UART, GPIO, ADC and Timer
-    IntMasterDisable();
+    IntMasterDisable();                     // disable all interrupts during setup
     ConfigureUART(SysClock);
     ConfigureGPIO();
     ConfigureADC();
     ConfigureTimer0(SysClock);
-    ConfigureLCD();
+    ConfigureLCD(SysClock);
 
-    write_screen_color((COLOR)WHITE);
+    write_screen_color((COLOR)WHITE);       // set the display background color
 
     IntMasterEnable();
 
-    while(1);       // busy waiting. Tasks running in interrupt handler.
+    while(1);                               // busy waiting. Tasks running in interrupt handler.
 }
 

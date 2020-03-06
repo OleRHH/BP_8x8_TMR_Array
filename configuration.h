@@ -23,23 +23,23 @@
 #include <lcd_functions.h>
 
 /*****************************  # defines #   *****************************/
-// defines for ADC init
-#define ROW_1_L ADC_CTL_CH13
-#define ROW_2_L ADC_CTL_CH15
-#define ROW_3_L ADC_CTL_CH14
-#define ROW_4_L ADC_CTL_CH12
-#define ROW_5_L ADC_CTL_CH5
-#define ROW_6_L ADC_CTL_CH4
-#define ROW_7_L ADC_CTL_CH7
-#define ROW_8_L ADC_CTL_CH6
-#define ROW_8_R ADC_CTL_CH19
-#define ROW_7_R ADC_CTL_CH18
-#define ROW_6_R ADC_CTL_CH17
-#define ROW_5_R ADC_CTL_CH16
-#define ROW_4_R ADC_CTL_CH8
-#define ROW_3_R ADC_CTL_CH9
-#define ROW_2_R ADC_CTL_CH0
-#define ROW_1_R ADC_CTL_CH1
+// defines for ADC init             // Port and Pin
+#define ROW_1_L ADC_CTL_CH13        // PD2
+#define ROW_2_L ADC_CTL_CH15        // PD0
+#define ROW_3_L ADC_CTL_CH14        // PD1
+#define ROW_4_L ADC_CTL_CH12        // PD3
+#define ROW_5_L ADC_CTL_CH5         // PD6
+#define ROW_6_L ADC_CTL_CH4         // PD7
+#define ROW_7_L ADC_CTL_CH7         // PD4
+#define ROW_8_L ADC_CTL_CH6         // PD5
+#define ROW_8_R ADC_CTL_CH19        // PK3
+#define ROW_7_R ADC_CTL_CH18        // PK2
+#define ROW_6_R ADC_CTL_CH17        // PK1
+#define ROW_5_R ADC_CTL_CH16        // PK0
+#define ROW_4_R ADC_CTL_CH8         // PE5
+#define ROW_3_R ADC_CTL_CH9         // PE4
+#define ROW_2_R ADC_CTL_CH0         // PE3
+#define ROW_1_R ADC_CTL_CH1         // PE2
 
 // defines for LCD init
 #define RST 0x10
@@ -60,11 +60,11 @@
 #define LOW_PRIORITY  0x80
 
 /**************************  # Prototypes #   ****************************/
-void ConfigureUART(int);
+void ConfigureUART(uint32_t);
 void ConfigureGPIO(void);
 void ConfigureADC(void);
-void ConfigureTimer0(int);
-void ConfigureLCD(void);
+void ConfigureTimer0(uint32_t);
+void ConfigureLCD(uint32_t);
 
 extern void UARTIntHandler(void);
 extern void Timer0IntHandler(void);

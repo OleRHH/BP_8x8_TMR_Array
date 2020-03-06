@@ -2,7 +2,6 @@
  * lcd_functions.h
  *
  *  Created on: 17.02.2020
- *      Author: ole
  */
 
 #ifndef LCD_FUNCTIONS_H_
@@ -15,7 +14,7 @@
 
 
 /*****************************  # defines #   *****************************/
-#define GRID_OFFSET_X ( 100 )
+#define GRID_OFFSET_X ( 120 )
 #define GRID_OFFSET_Y ( 20 )
 #define FONT_WIDTH_BIG 12
 #define FONT_HIGHT_BIG 16
@@ -48,8 +47,6 @@ void write_cmd_data(unsigned char);
 void write_data(COLOR);
 void write_position(uint16_t, uint16_t, uint16_t, uint16_t);
 void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR color);
-
-//void erase_line(short, short, short, short);
 
 
 #endif /* LCD_FUNCTIONS_H_ */

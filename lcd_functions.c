@@ -121,27 +121,29 @@ void write_screen_color(COLOR color)
 /****************************************************************************/
 void draw_arrows(void)
 {
-    uint16_t m = 0, n = 0, xGrid, yGrid;
+    int16_t m = 0, n = 0, xGrid, yGrid;
 
     // delete the old arrows
     for(xGrid = GRID_OFFSET_X; xGrid < ( 256 + GRID_OFFSET_X); xGrid += 32)
     {
-        for(yGrid = GRID_OFFSET_Y; yGrid < (256 + GRID_OFFSET_Y); yGrid += 32)
+        for(yGrid = 272 - GRID_OFFSET_Y; yGrid > GRID_OFFSET_Y; yGrid -= 32)
         {
-            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid + oldDiffSinResults[m][n], (COLOR)0xffffff);
+            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid - oldDiffSinResults[m][n], (COLOR)0xffffff);
             m++;
         }
         m = 0;
         n++;
     }
-
+//    draw_grid();
     // write the new arrows
     n = 0;
     for(xGrid = GRID_OFFSET_X; xGrid < ( 256 + GRID_OFFSET_X); xGrid += 32)
     {
-        for(yGrid = GRID_OFFSET_Y; yGrid < (256 + GRID_OFFSET_Y); yGrid += 32)
+        for(yGrid = 272 - GRID_OFFSET_Y; yGrid > GRID_OFFSET_Y; yGrid -= 32)
         {
-            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid + DiffSinResults[m][n], (COLOR)0xff0000);
+            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000ff);
+            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000ff);
+            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], (COLOR)0xff0000);
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
             m++;
@@ -222,7 +224,8 @@ void write_position(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uin
 
 /******************************  LCD WRITE LINE  *************************************************/
 //draws a line from startpoint x to stoppoint y directly to the display
-void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR color) {
+void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+{
     short x, y;
     int16_t delta_x, delta_y;
     double gain, gain2 = 0;
