@@ -1,7 +1,7 @@
 #include <configuration.h>
 
-/******************************************************************************************************/
 
+/******************************************************************************************************/
 void ConfigureADC(void)
 {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
@@ -11,9 +11,7 @@ void ConfigureADC(void)
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0));
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC1));
 
-    // ADC0, samplesequencer0, trigger processor, priority0
-    // ADC1, samplesequencer1, trigger processor, priority1
-    // ADC2, samplesequencer2, trigger processor, priority2
+    // ADC, sample sequencer, trigger processor, priority
     ADCSequenceConfigure(ADC0_BASE,0, ADC_TRIGGER_PROCESSOR, 0);
     ADCSequenceConfigure(ADC1_BASE,1, ADC_TRIGGER_PROCESSOR, 1);
     ADCSequenceConfigure(ADC1_BASE,2, ADC_TRIGGER_PROCESSOR, 2);

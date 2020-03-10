@@ -27,9 +27,9 @@ main.obj: /home/ole/workspace_v9/BP_TMR_sensor_array/tm4c1294ncpdt.h
 main.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/string.h
 main.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/_ti_config.h
 main.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/linkage.h
-main.obj: /home/ole/workspace_v9/BP_TMR_sensor_array/Interrupt_handler.h
 main.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdio.h
 main.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdarg.h
+main.obj: /home/ole/workspace_v9/BP_TMR_sensor_array/Interrupt_handler.h
 main.obj: /home/ole/workspace_v9/BP_TMR_sensor_array/tm4c1294ncpdt.h
 main.obj: /home/ole/workspace_v9/BP_TMR_sensor_array/functions.h
 main.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/math.h
@@ -64,9 +64,9 @@ main.obj: /home/ole/workspace_v9/BP_TMR_sensor_array/tm4c1294ncpdt.h
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/string.h: 
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/_ti_config.h: 
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/linkage.h: 
-/home/ole/workspace_v9/BP_TMR_sensor_array/Interrupt_handler.h: 
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdio.h: 
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdarg.h: 
+/home/ole/workspace_v9/BP_TMR_sensor_array/Interrupt_handler.h: 
 /home/ole/workspace_v9/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
 /home/ole/workspace_v9/BP_TMR_sensor_array/functions.h: 
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/math.h: 

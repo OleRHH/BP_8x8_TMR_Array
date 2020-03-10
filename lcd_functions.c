@@ -9,6 +9,7 @@ extern int16_t DiffSinResults[8][8];
 extern int16_t DiffCosResults[8][8];
 extern const char font_12_16[256][32];
 
+
 /***************************  screen_show_nr()   ****************************/
 // the display dimensions are 480*272 pixels => 130560 pixels               //
 // the lcd memory is much bigger, so three display screens can be saved     //
@@ -23,6 +24,7 @@ void screen_show_nr(uint16_t nr)
     write_cmd_data(value);                   // TFA low byte
 }
 
+
 /***************************  screen_show_nr()   *****************************/
 // the display dimensions are 480*272 pixels => 130560 pixels               //
 // the lcd memory is much bigger, so three display screens can be saved     //
@@ -32,6 +34,7 @@ void screen_write_nr(uint16_t nr)
 {
     offset = nr * 272;
 }
+
 
 /****************************  write_char()   *******************************/
 // writes a single letter with height 12 pixel                              //
@@ -65,6 +68,7 @@ void write_char(uint16_t letter, COLOR color, COLOR backcolor)
         letter >>= 1;
     }
 }
+
 
 /****************************************************************************/
 void print_string(char *text, uint16_t row, uint16_t column, COLOR color, COLOR backcolor)
@@ -119,31 +123,35 @@ void write_screen_color(COLOR color)
 
 
 /****************************************************************************/
-void draw_arrows(void)
+void draw_display(void)
 {
     int16_t m = 0, n = 0, xGrid, yGrid;
 
-    // delete the old arrows
+//    write_line(20, 50, 100, 80, (COLOR)0xff0000, WITH_ARROW);         // debug line
+//    write_line(40, 200, 40, 50, (COLOR)0xff0000, WITH_ARROW);         // debug line
+
+
+//     delete the old arrows
     for(xGrid = GRID_OFFSET_X; xGrid < ( 256 + GRID_OFFSET_X); xGrid += 32)
     {
         for(yGrid = 272 - GRID_OFFSET_Y; yGrid > GRID_OFFSET_Y; yGrid -= 32)
         {
-            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid - oldDiffSinResults[m][n], (COLOR)0xffffff);
+            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid - oldDiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
             m++;
         }
         m = 0;
         n++;
     }
-//    draw_grid();
+
     // write the new arrows
     n = 0;
     for(xGrid = GRID_OFFSET_X; xGrid < ( 256 + GRID_OFFSET_X); xGrid += 32)
     {
         for(yGrid = 272 - GRID_OFFSET_Y; yGrid > GRID_OFFSET_Y; yGrid -= 32)
         {
-            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000ff);
-            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000ff);
-            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], (COLOR)0xff0000);
+            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000ff, NO_ARROW);        // draw a small cross..
+            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000ff, NO_ARROW);        // ..as as grid indicator
+            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], (COLOR)0xff0000, WITH_ARROW);
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
             m++;
@@ -154,21 +162,6 @@ void draw_arrows(void)
 }
 
 
-/****************************************************************************/
-void draw_grid(void)
-{
-    uint16_t xGrid, yGrid;
-
-    for(xGrid = GRID_OFFSET_X; xGrid < ( 256 + GRID_OFFSET_X); xGrid += 32)
-    {
-        for(yGrid = GRID_OFFSET_Y; yGrid < (256 + GRID_OFFSET_Y); yGrid += 32)
-        {
-            write_line(xGrid - 1, yGrid, xGrid + 1, yGrid, (COLOR)0x00ff00);
-            write_line(xGrid, yGrid - 1, xGrid, yGrid + 1, (COLOR)0x00ff00);
-        }
-    }
-}
-
 /******************************************************************************************************/
 void write_command(unsigned char command)
 {
@@ -177,6 +170,7 @@ void write_command(unsigned char command)
     GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
 }
 
+
 /******************************************************************************************************/
 void write_cmd_data(unsigned char data)
 {
@@ -184,6 +178,7 @@ void write_cmd_data(unsigned char data)
     GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
     GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
 }
+
 
 /******************************************************************************************************/
 void write_data(COLOR color)
@@ -200,6 +195,7 @@ void write_data(COLOR color)
     GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
     GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
 }
+
 
 /******************************************************************************************************/
 void write_position(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uint16_t point2_y)
@@ -224,52 +220,53 @@ void write_position(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uin
 
 /******************************  LCD WRITE LINE  *************************************************/
 //draws a line from startpoint x to stoppoint y directly to the display
-void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR color, uint16_t arrowOption)
 {
-    short x, y;
-    int16_t delta_x, delta_y;
-    double gain, gain2 = 0;
+    double gain;
+    int16_t delta_x = stop_x - start_x;
+    int16_t delta_y = stop_y - start_y;
 
-    // 90� line:
+    // 90° or 270° line
     if (start_x == stop_x)
     {
-        if (start_y > stop_y)       // 90� from DOWN to UP   else: 270� from UP to DOWN
+        if (start_y > stop_y)
         {
-            write_position(start_x, stop_y, start_x, start_y);
-            write_command(0x2C);
-            for (y = stop_y; y <= start_y; y++)
+            write_line_270_degree(start_x, start_y, stop_x, stop_y, color);
+            if(arrowOption == WITH_ARROW && delta_y < 1)
             {
-                write_data(color);
+                write_line(start_x, stop_y, start_x - 3, stop_y + 5, color, NO_ARROW);
+                write_line(start_x, stop_y, start_x + 3, stop_y + 5, color, NO_ARROW);
             }
         }
         else
         {
-            write_position(start_x, start_y, start_x, stop_y);
-            write_command(0x2C);
-            for (y = start_y; y <= stop_y; y++)
+            write_line_90_degree(start_x, start_y, stop_x, stop_y, color);
+            if(arrowOption == WITH_ARROW && delta_y > 1)
             {
-                write_data(color);
+                write_line(start_x, stop_y, start_x - 3, stop_y - 5, color, NO_ARROW);
+                write_line(start_x, stop_y, start_x + 3, stop_y - 5, color, NO_ARROW);
             }
         }
     }
+    // 0° or 180° line
     else if (start_y == stop_y)
     {
         if (start_x > stop_x)
         {
-            write_position(stop_x, start_y, start_x, start_y);
-            write_command(0x2C);
-            for (x = stop_x; x <= start_x; x++)
+            write_line_180_degree(start_x, start_y, stop_x, stop_y, color);
+            if(arrowOption == WITH_ARROW && delta_x < 1)
             {
-                write_data(color);
+                write_line(stop_x, stop_y, stop_x + 5, stop_y - 3, color, NO_ARROW);
+                write_line(stop_x, stop_y, stop_x + 5, stop_y + 3, color, NO_ARROW);
             }
         }
-        else //(else if( start_x < stop_x)
+        else
         {
-            write_position(start_x, start_y, stop_x, start_y);
-            write_command(0x2C);
-            for (x = start_x; x <= stop_x; x++)
+            write_line_0_degree(start_x, start_y, stop_x, stop_y, color);
+            if(arrowOption == WITH_ARROW && delta_x > 1)
             {
-                write_data(color);
+                write_line(stop_x, stop_y, stop_x - 5, stop_y - 3, color, NO_ARROW);
+                write_line(stop_x, stop_y, stop_x - 5, stop_y + 3, color, NO_ARROW);
             }
         }
     }
@@ -277,130 +274,77 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
 /////////////////////////////////////////////////////////////////////////////////////////
     else
     {
-        delta_x = stop_x - start_x;
-        delta_y = stop_y - start_y;
-
-        if(delta_x > 0)             // Quadrant I oder IV (rechts von y-Achse)
+        if(start_x < stop_x)                    // Quadrant I oder IV (rechts von y-Achse)
         {
-            if(delta_y > 0)         // Quadrant I   (oberhalb von x-Achse)
+            if(start_y < stop_y)                // Quadrant I   (oberhalb von x-Achse)
             {
-                if(delta_x > delta_y)       // Quadrant I  1.
+                if(delta_x > delta_y)           // Quadrant I  1. (Steigung < 1)
                 {
                     gain = (double)delta_y / delta_x;
-
-                    while(start_y <= stop_y)
+                    write_line_quadrant_1_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    if(arrowOption == WITH_ARROW && delta_x > 1)
                     {
-                        write_position(start_x, start_y, stop_x, start_y);
-                        write_command(0x2C);
-                        while(gain2 < 1)
-                        {
-                            write_data(color);
-                            gain2 += gain;
-                            if( start_x < stop_x) start_x++;
-                        }
-                        gain2 -= 1;
-                        start_y++;
+                        // TODO: arrows
+//                        write_line(stop_x, stop_y, stop_x - 5/gain, stop_y + gain/3, color, NO_ARROW); //unten
+//                        write_line(stop_x, stop_y, stop_x - 5/gain, stop_y - 3/gain, color, NO_ARROW);
                     }
                 }
-                else                        // Quadrant I  2.
+                else                            // Quadrant I  2. (Steigung >= 1)
                 {
                     gain = (double)delta_x / delta_y;
-
-                    while(start_x <= stop_x)
+                    write_line_quadrant_1_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    if(arrowOption == WITH_ARROW && delta_x > 1)
                     {
-                        write_position(start_x, start_y, start_x, stop_y);
-                        write_command(0x2C);
-                        while(gain2 < 1)
-                        {
-                            write_data(color);
-                            gain2 += gain;
-                            if( start_y < stop_y) start_y++;
-                        }
-                        gain2 -= 1;
-                        start_x++;
+                        // TODO: arrows
+//                        write_line(stop_x, stop_y, stop_x - 5, stop_y - 3, color, NO_ARROW);
+//                        write_line(stop_x, stop_y, stop_x - 5, stop_y + 3, color, NO_ARROW);
                     }
                 }
             }
-            else
+
+            else                                // Quadrant IV   (unterhalb von x-Achse)
             {
                 if(delta_x > -delta_y)
                 {
                     gain = (double)-delta_y / delta_x;       // start_y -> stop_y  ;  y--
-
-                    while(start_y >= stop_y)
+                    write_line_quadrant_4_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    if(arrowOption == WITH_ARROW)
                     {
-                        write_position(start_x, start_y, stop_x, start_y);
-                        write_command(0x2C);
-                        while(gain2 < 1)
-                        {
-                            write_data(color);
-                            gain2 += gain;
-                            if( start_x < stop_x) start_x++;
-                        }
-                        gain2 -= 1;
-                        start_y--;
+                        // TODO: arrows
                     }
                 }
-                else            // Quadrant IV   2.          // stop_x -> start_x
+                else
                 {
                     gain = (double)delta_x / -delta_y;
-
-                    while(stop_x >= start_x)
+                    write_line_quadrant_4_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    if(arrowOption == WITH_ARROW)
                     {
-                        write_position(stop_x, stop_y, stop_x, start_y);
-                        write_command(0x2C);
-                        while(gain2 < 1)
-                        {
-                            write_data(color);
-                            gain2 += gain;
-                            if( stop_y < start_y) stop_y++;
-                        }
-                        gain2 -= 1;
-                        stop_x--;
+                        // TODO: arrows
                     }
                 }
             }
         }
-
 /////////////////////////////////////////////////////////////////////////////////////////
-        else     // x < 0                   // Quadrant 2 oder 3 (links von y-Achse)
+        else     // x < 0                       // Quadrant 2 oder 3 (links von y-Achse)
         {
-            if(delta_y > 0)         // Quadrant 2 (oberhalb von x-Achse)
+            if(start_y < stop_y)                // Quadrant 2 (oberhalb von x-Achse)
             {
                 if(-delta_x > delta_y)  // gain > 1
                 {
                     gain = (double)delta_y / -delta_x;
-
-                    while(stop_y >= start_y)
+                    write_line_quadrant_2_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    if(arrowOption == WITH_ARROW)
                     {
-                        write_position(stop_x, stop_y, start_x, stop_y);
-                        write_command(0x2C);
-                        while(gain2 < 1)
-                        {
-                            write_data(color);
-                            gain2 += gain;
-                            if( stop_x < start_x) stop_x++;
-                        }
-                        gain2 -= 1;
-                        stop_y--;
+                        // TODO: arrows
                     }
                 }
-                else                    // gain < 1
+                else
                 {
                     gain = (double)-delta_x / delta_y;
-
-                    while(start_x >= stop_x)
+                    write_line_quadrant_2_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    if(arrowOption == WITH_ARROW)
                     {
-                        write_position(start_x, start_y, start_x, stop_y);
-                        write_command(0x2C);
-                        while(gain2 < 1)
-                        {
-                            write_data(color);
-                            gain2 += gain;
-                            if( start_y < stop_y) start_y++;
-                        }
-                        gain2 -= 1;
-                        start_x--;
+                        // TODO: arrows
                     }
                 }
             }
@@ -409,40 +353,246 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 if(delta_x < delta_y)       // gain < -1
                 {
                     gain = (double)delta_y / delta_x;
-
-                    while(stop_y <= start_y)
+                    write_line_quadrant_3_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    if(arrowOption == WITH_ARROW)
                     {
-                        write_position(stop_x, stop_y, start_x, stop_y);
-                        write_command(0x2C);
-                        while(gain2 < 1)
-                        {
-                            write_data(color);
-                            gain2 += gain;
-                            if( stop_x < start_x) stop_x++;
-                        }
-                        gain2 -= 1;
-                        stop_y++;
+                        // TODO: arrows
                     }
                 }
                 else
                 {
                     gain = (double)delta_x / delta_y;
-
-                    while(stop_x <= start_x)
+                    write_line_quadrant_3_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    if(arrowOption == WITH_ARROW)
                     {
-                        write_position(stop_x, stop_y, stop_x, start_y);
-                        write_command(0x2C);
-                        while(gain2 < 1)
-                        {
-                            write_data(color);
-                            gain2 += gain;
-                            if( stop_y < start_y) stop_y++;
-                        }
-                        gain2 -= 1;
-                        stop_x++;
+                        // TODO: arrows
                     }
                 }
             }
         }
+    }
+}
+
+
+/****************************************************************************/
+void write_line_0_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+{
+    int16_t x;
+
+    write_position(start_x, start_y, stop_x, start_y);
+    write_command(0x2C);
+    for (x = start_x; x <= stop_x; x++)
+    {
+        write_data(color);
+    }
+}
+
+
+/****************************************************************************/
+void write_line_90_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+{
+    int16_t y;
+
+    write_position(start_x, start_y, start_x, stop_y);
+    write_command(0x2C);
+    for (y = start_y; y <= stop_y; y++)
+    {
+        write_data(color);
+    }
+}
+
+
+/****************************************************************************/
+void write_line_180_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+{
+    int16_t x;
+
+    write_position(stop_x, start_y, start_x, start_y);
+    write_command(0x2C);
+    for (x = stop_x; x <= start_x; x++)
+    {
+        write_data(color);
+    }
+}
+
+
+/****************************************************************************/
+void write_line_270_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+{
+    int16_t y;
+
+    write_position(start_x, stop_y, start_x, start_y);
+    write_command(0x2C);
+    for (y = stop_y; y <= start_y; y++)
+    {
+        write_data(color);
+    }
+}
+
+
+/****************************************************************************/
+void write_line_quadrant_1_I(short start_x, short start_y, short stop_x, short stop_y, double gain,COLOR color)
+{
+    double gain2 = 0;
+
+    while(start_y <= stop_y)
+    {
+        write_position(start_x, start_y, stop_x, start_y);
+        write_command(0x2C);
+        while(gain2 < 1)
+        {
+            write_data(color);
+            gain2 += gain;
+            if( start_x < stop_x) start_x++;
+        }
+        gain2 -= 1;
+        start_y++;
+    }
+}
+
+
+/****************************************************************************/
+void write_line_quadrant_1_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+{
+    double gain2 = 0;
+
+    while(start_x <= stop_x)
+    {
+        write_position(start_x, start_y, start_x, stop_y);
+        write_command(0x2C);
+        while(gain2 < 1)
+        {
+            write_data(color);
+            gain2 += gain;
+            if( start_y < stop_y) start_y++;
+        }
+        gain2 -= 1;
+        start_x++;
+    }
+}
+
+
+/****************************************************************************/
+void write_line_quadrant_2_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+{
+    double gain2 = 0;
+
+    while(stop_y >= start_y)
+    {
+        write_position(stop_x, stop_y, start_x, stop_y);
+        write_command(0x2C);
+        while(gain2 < 1)
+        {
+            write_data(color);
+            gain2 += gain;
+            if( stop_x < start_x) stop_x++;
+        }
+        gain2 -= 1;
+        stop_y--;
+    }
+}
+
+
+/****************************************************************************/
+void write_line_quadrant_2_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+{
+    double gain2 = 0;
+
+    while(start_x >= stop_x)
+    {
+        write_position(start_x, start_y, start_x, stop_y);
+        write_command(0x2C);
+        while(gain2 < 1)
+        {
+            write_data(color);
+            gain2 += gain;
+            if( start_y < stop_y) start_y++;
+        }
+        gain2 -= 1;
+        start_x--;
+    }
+}
+
+
+/****************************************************************************/
+void write_line_quadrant_3_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+{
+    double gain2 = 0;
+
+    while(stop_y <= start_y)
+    {
+        write_position(stop_x, stop_y, start_x, stop_y);
+        write_command(0x2C);
+        while(gain2 < 1)
+        {
+            write_data(color);
+            gain2 += gain;
+            if( stop_x < start_x) stop_x++;
+        }
+        gain2 -= 1;
+        stop_y++;
+    }
+}
+
+
+/****************************************************************************/
+void write_line_quadrant_3_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+{
+    double gain2 = 0;
+
+    while(stop_x <= start_x)
+    {
+        write_position(stop_x, stop_y, stop_x, start_y);
+        write_command(0x2C);
+        while(gain2 < 1)
+        {
+            write_data(color);
+            gain2 += gain;
+            if( stop_y < start_y) stop_y++;
+        }
+        gain2 -= 1;
+        stop_x++;
+    }
+}
+
+
+/****************************************************************************/
+void write_line_quadrant_4_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+{
+    double gain2 = 0;
+
+    while(start_y >= stop_y)
+    {
+        write_position(start_x, start_y, stop_x, start_y);
+        write_command(0x2C);
+        while(gain2 < 1)
+        {
+            write_data(color);
+            gain2 += gain;
+            if( start_x < stop_x) start_x++;
+        }
+        gain2 -= 1;
+        start_y--;
+    }
+}
+
+
+/****************************************************************************/
+void write_line_quadrant_4_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+{
+    double gain2 = 0;
+
+    while(stop_x >= start_x)
+    {
+        write_position(stop_x, stop_y, stop_x, start_y);
+        write_command(0x2C);
+        while(gain2 < 1)
+        {
+            write_data(color);
+            gain2 += gain;
+            if( stop_y < start_y) stop_y++;
+        }
+        gain2 -= 1;
+        stop_x--;
     }
 }

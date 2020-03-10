@@ -35,10 +35,9 @@ void ReadArray(void)
         // write address to the GPIO Pins for the analog multiplexer
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, i);
 
-        #define BLUE   0b0001000                            // Debug Output to oscilloscope
-        GPIO_PORTN_DATA_R |= BLUE;
+
         SysCtlDelay(8);                                     // set-up time for multiplexer (~320 ns)
-        GPIO_PORTN_DATA_R ^= BLUE;
+
         GetADCValues();                                     // read current values
 
         //left half
@@ -69,7 +68,8 @@ void ReadArray(void)
         // write address to the GPIO Pins for MU
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, i);
 
-        SysCtlDelay(8);                                     // set-up time for multiplexer (~400 ns)
+        SysCtlDelay(8);                                     // set-up time for multiplexer (~320 ns)
+
         GetADCValues();                                     // read current values
 
         // left half
@@ -104,9 +104,6 @@ void GetADCValues(void)
     ADCProcessorTrigger(ADC1_BASE, 1);
     ADCProcessorTrigger(ADC1_BASE, 2);
 
-    // Wait until the sample sequence has completed
-    // while(!ADCIntStatus(ADC0_BASE,0,false));
-    // while(!ADCIntStatus(ADC1_BASE,1,false));
     while(!ADCIntStatus(ADC1_BASE, 2, false));
 
     // Quit interrupt
