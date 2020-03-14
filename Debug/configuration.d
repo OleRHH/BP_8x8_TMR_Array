@@ -27,6 +27,9 @@ configuration.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/in
 configuration.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/linkage.h
 configuration.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdio.h
 configuration.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdarg.h
+configuration.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/math.h
+configuration.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/_defs.h
+configuration.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/machine/_limits.h
 
 ../configuration.c: 
 /home/ole/workspace_v9/BP_TMR_sensor_array/configuration.h: 
@@ -55,3 +58,6 @@ configuration.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/in
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/linkage.h: 
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdio.h: 
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdarg.h: 
+/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/math.h: 
+/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/_defs.h: 
+/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/machine/_limits.h: 

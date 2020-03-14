@@ -20,4 +20,3 @@ int main(void)
 
     while(1);                               // busy waiting. Tasks running in interrupt handler.
 }
-

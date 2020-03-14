@@ -222,7 +222,6 @@ void write_position(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uin
 //draws a line from startpoint x to stoppoint y directly to the display
 void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR color, uint16_t arrowOption)
 {
-    double gain;
     int16_t delta_x = stop_x - start_x;
     int16_t delta_y = stop_y - start_y;
 
@@ -234,8 +233,10 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
             write_line_270_degree(start_x, start_y, stop_x, stop_y, color);
             if(arrowOption == WITH_ARROW && delta_y < 1)
             {
-                write_line(start_x, stop_y, start_x - 3, stop_y + 5, color, NO_ARROW);
-                write_line(start_x, stop_y, start_x + 3, stop_y + 5, color, NO_ARROW);
+                write_line(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                write_line(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
         else
@@ -243,8 +244,10 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
             write_line_90_degree(start_x, start_y, stop_x, stop_y, color);
             if(arrowOption == WITH_ARROW && delta_y > 1)
             {
-                write_line(start_x, stop_y, start_x - 3, stop_y - 5, color, NO_ARROW);
-                write_line(start_x, stop_y, start_x + 3, stop_y - 5, color, NO_ARROW);
+                write_line(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                write_line(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
     }
@@ -256,8 +259,10 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
             write_line_180_degree(start_x, start_y, stop_x, stop_y, color);
             if(arrowOption == WITH_ARROW && delta_x < 1)
             {
-                write_line(stop_x, stop_y, stop_x + 5, stop_y - 3, color, NO_ARROW);
-                write_line(stop_x, stop_y, stop_x + 5, stop_y + 3, color, NO_ARROW);
+                write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
         else
@@ -265,8 +270,10 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
             write_line_0_degree(start_x, start_y, stop_x, stop_y, color);
             if(arrowOption == WITH_ARROW && delta_x > 1)
             {
-                write_line(stop_x, stop_y, stop_x - 5, stop_y - 3, color, NO_ARROW);
-                write_line(stop_x, stop_y, stop_x - 5, stop_y + 3, color, NO_ARROW);
+                write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
     }
@@ -274,6 +281,7 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
 /////////////////////////////////////////////////////////////////////////////////////////
     else
     {
+        double gain, angle;
         if(start_x < stop_x)                    // Quadrant I oder IV (rechts von y-Achse)
         {
             if(start_y < stop_y)                // Quadrant I   (oberhalb von x-Achse)
@@ -285,8 +293,11 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                     if(arrowOption == WITH_ARROW && delta_x > 1)
                     {
                         // TODO: arrows
-//                        write_line(stop_x, stop_y, stop_x - 5/gain, stop_y + gain/3, color, NO_ARROW); //unten
-//                        write_line(stop_x, stop_y, stop_x - 5/gain, stop_y - 3/gain, color, NO_ARROW);
+                        angle = atan(gain);
+                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
                 else                            // Quadrant I  2. (Steigung >= 1)
@@ -295,68 +306,97 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                     write_line_quadrant_1_II(start_x, start_y, stop_x, stop_y, gain, color);
                     if(arrowOption == WITH_ARROW && delta_x > 1)
                     {
+                        angle = atan(gain);
                         // TODO: arrows
-//                        write_line(stop_x, stop_y, stop_x - 5, stop_y - 3, color, NO_ARROW);
-//                        write_line(stop_x, stop_y, stop_x - 5, stop_y + 3, color, NO_ARROW);
+                        angle = 1.571 - atan(gain);
+                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                                   stop_y - 10*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
             }
 
             else                                // Quadrant IV   (unterhalb von x-Achse)
             {
-                if(delta_x > -delta_y)
+                if(delta_x > -delta_y)          // Quadrant IV  1. (Steigung < 1)
                 {
                     gain = (double)-delta_y / delta_x;       // start_y -> stop_y  ;  y--
                     write_line_quadrant_4_I(start_x, start_y, stop_x, stop_y, gain, color);
                     if(arrowOption == WITH_ARROW)
                     {
                         // TODO: arrows
+                        angle = atan(gain);
+                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
-                else
+                else                            // Quadrant IV  2. (Steigung >= 1)
                 {
                     gain = (double)delta_x / -delta_y;
                     write_line_quadrant_4_II(start_x, start_y, stop_x, stop_y, gain, color);
                     if(arrowOption == WITH_ARROW)
                     {
                         // TODO: arrows
+                        angle = 1.571 - atan(gain);
+                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
             }
         }
 /////////////////////////////////////////////////////////////////////////////////////////
-        else     // x < 0                       // Quadrant 2 oder 3 (links von y-Achse)
+        else     // x < 0                       // Quadrant II oder III (links von y-Achse)
         {
-            if(start_y < stop_y)                // Quadrant 2 (oberhalb von x-Achse)
+            if(start_y < stop_y)                // Quadrant II (oberhalb von x-Achse)
             {
-                if(-delta_x > delta_y)  // gain > 1
+                if(-delta_x > delta_y)          // Quadrant II 1. (Steigung < 1)
                 {
                     gain = (double)delta_y / -delta_x;
                     write_line_quadrant_2_I(start_x, start_y, stop_x, stop_y, gain, color);
                     if(arrowOption == WITH_ARROW)
                     {
                         // TODO: arrows
+                        angle = atan(gain);
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
-                else
+                else                            // Quadrant II  2. (Steigung >= 1)
                 {
                     gain = (double)-delta_x / delta_y;
                     write_line_quadrant_2_II(start_x, start_y, stop_x, stop_y, gain, color);
                     if(arrowOption == WITH_ARROW)
                     {
                         // TODO: arrows
+                        angle = 1.571 - atan(gain);
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
             }
-            else // delta_y < 0
+            else                                // Quadrant III  (unterhalb von x-Achse)
             {
-                if(delta_x < delta_y)       // gain < -1
+                if(delta_x < delta_y)       // gain < -1 (delta_x < 0 and delta_y < 0 !)
                 {
                     gain = (double)delta_y / delta_x;
                     write_line_quadrant_3_I(start_x, start_y, stop_x, stop_y, gain, color);
                     if(arrowOption == WITH_ARROW)
                     {
                         // TODO: arrows
+                        angle = atan(gain);
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
                 else
@@ -366,6 +406,11 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                     if(arrowOption == WITH_ARROW)
                     {
                         // TODO: arrows
+                        angle = 1.571 - atan(gain);
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
             }

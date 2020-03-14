@@ -12,6 +12,7 @@
 #include <tm4c1294ncpdt.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 
 /*****************************  # defines #   *****************************/
@@ -21,6 +22,8 @@
 #define FONT_HIGHT_BIG 16
 #define NO_ARROW        0
 #define WITH_ARROW      1
+#define ARROW_ANGLE     0.5236          // RAD = 30°
+#define ARROW_LENGTH    5
 
 
 /*****************************  # typedefs #   *****************************/
