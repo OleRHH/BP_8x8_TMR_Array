@@ -124,8 +124,8 @@ void ConfigureTimer0(uint32_t SysClock)
 void ConfigureLCD(uint32_t SysClock) {
     uint32_t value;
 
-    GPIO_PORTQ_DATA_R = 0x00;
-    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+//    GPIO_PORTQ_DATA_R = 0x00;
+//    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
@@ -140,13 +140,13 @@ void ConfigureLCD(uint32_t SysClock) {
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
-    GPIO_PORTQ_DATA_R &= ~RST;              // Hardware reset
-    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
-    GPIO_PORTQ_DATA_R |= RST;               //
-    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
-
-    write_command(SOFTWARE_RESET);          // Software reset
-    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+//    GPIO_PORTQ_DATA_R &= ~RST;              // Hardware reset
+//    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+//    GPIO_PORTQ_DATA_R |= RST;               //
+//    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+//
+//    write_command(SOFTWARE_RESET);          // Software reset
+//    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
     write_command(SET_PLL_MN);              // Set PLL Freq to 120 MHz
     write_cmd_data(0x24);                   //
