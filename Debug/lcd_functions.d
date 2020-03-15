@@ -16,6 +16,9 @@ lcd_functions.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/in
 lcd_functions.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/linkage.h
 lcd_functions.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdio.h
 lcd_functions.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdarg.h
+lcd_functions.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/math.h
+lcd_functions.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/_defs.h
+lcd_functions.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/machine/_limits.h
 
 ../lcd_functions.c: 
 /home/ole/workspace_v9/BP_TMR_sensor_array/lcd_functions.h: 
@@ -33,3 +36,6 @@ lcd_functions.obj: /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/in
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/linkage.h: 
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdio.h: 
 /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdarg.h: 
+/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/math.h: 
+/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/_defs.h: 
+/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/machine/_limits.h: 
