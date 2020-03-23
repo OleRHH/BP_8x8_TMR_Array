@@ -121,7 +121,7 @@ void ConfigureTimer0(uint32_t SysClock)
 
 /******************************************************************************************************/
 // LCD Panel initialize:
-void ConfigureLCD(uint32_t SysClock) {
+void ConfigureLCD5Inch(uint32_t SysClock) {
     uint32_t value;
 
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state

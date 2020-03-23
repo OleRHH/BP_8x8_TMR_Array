@@ -18,7 +18,7 @@ uint8_t *ucPtr;
 int m = 0, n = 0;
 
 
-/***********************  TIMER 1 interrupt handler   ***********************/
+/***********************  TIMER 0 interrupt handler   ***********************/
 /* Periodically measure the Array values and draw them to the display
 /* Also start the UART transmit sequences: This handler triggers the first 16 bytes */
 void Timer0IntHandler(void)
