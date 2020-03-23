@@ -19,17 +19,17 @@ int m = 0, n = 0;
 
 
 /***********************  TIMER 1 interrupt handler   ***********************/
-/* Periodicaly send Array Data via UART. This handler triggers the first byte */
+/* Periodically measure the Array values and draw them to the display
+/* Also start the UART transmit sequences: This handler triggers the first 16 bytes */
 void Timer0IntHandler(void)
 {
     GPIO_PORTN_DATA_R ^= YELLOW;                        // for debugging: toggle debug output each time handler is called
-    GPIO_PORTN_DATA_R |= BLUE;                          // for debugging:  set high when handler is called
+    GPIO_PORTN_DATA_R |= BLUE;                          // for debugging: set high when handler is called
 
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
     ReadArray();
     Computations();
-    draw_display();
 
     // start UART transmit by filling the FIFO with 16 bytes
     m = 0;
@@ -42,17 +42,19 @@ void Timer0IntHandler(void)
         n++;
     }
     n = 0;
-    GPIO_PORTN_DATA_R ^= BLUE;                          // for debugging:  set low when handler is finished
+//    drawDisplay5Inch();
+    drawDisplay7Inch();
+
+    GPIO_PORTN_DATA_R ^= BLUE;                          // for debugging: set low when handler is finished
 }
 
 
 /*********************************************************************************************/
 void UARTIntHandler(void)
 {
-    // Get the interrrupt status.
+    // Get the interrupt status.
     uint32_t UIstatus = UARTIntStatus(UART0_BASE, true);
     UARTIntClear(UART0_BASE, UIstatus);
-
 
     /* reset transfer if '0' signal received */
     if( UIstatus & UART_INT_RX) //  || UIstatus & UART_INT_RT)
@@ -65,13 +67,14 @@ void UARTIntHandler(void)
 
         if(receive == '0')
         {
+            GPIO_PORTN_DATA_R ^= 1;
             m = 256;
             n = 16;
             TimerDisable(TIMER0_BASE, TIMER_A);
             UARTFIFODisable(UART0_BASE);
             SysCtlDelay(1000);
             UARTFIFOEnable(UART0_BASE);
-//            TimerLoadSet(TIMER0_BASE, TIMER_A, SysClock / 10);
+            TimerLoadSet(TIMER0_BASE, TIMER_A, 120000000 / 10);
             TimerEnable(TIMER0_BASE, TIMER_A);
         }
     }

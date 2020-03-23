@@ -2,7 +2,7 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
-CG_TOOL_ROOT := /home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS
+CG_TOOL_ROOT := /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -18,7 +18,7 @@ ORDERED_OBJS += \
 "../tm4c1294ncpdt.cmd" \
 $(GEN_CMDS__FLAG) \
 -llibc.a \
--l"/home/ole/ccs930/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib" \
+-l"/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib" \
 
 -include ../makefile.init
 
@@ -145,14 +145,14 @@ all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 BP_TMR_sensor_array.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: ARM Linker'
-	"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C1294NCPDT -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"BP_TMR_sensor_array.map" --heap_size=150000 --stack_size=20000 -i"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/lib" -i"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="BP_TMR_sensor_array_linkInfo.xml" --rom_model -o "BP_TMR_sensor_array.out" $(ORDERED_OBJS)
+	"/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C1294NCPDT -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"BP_TMR_sensor_array.map" --heap_size=150000 --stack_size=20000 -i"/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/lib" -i"/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="BP_TMR_sensor_array_linkInfo.xml" --rom_model -o "BP_TMR_sensor_array.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
 BP_TMR_sensor_array.hex: $(EXE_OUTPUTS)
 	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo 'Invoking: ARM Hex Utility'
-	"/home/ole/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/bin/armhex"  -o "BP_TMR_sensor_array.hex" $(EXE_OUTPUTS__QUOTED)
+	"/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/bin/armhex"  -o "BP_TMR_sensor_array.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo ' '
 

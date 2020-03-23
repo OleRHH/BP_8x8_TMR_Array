@@ -9,6 +9,9 @@ int16_t CosResults[8][16];
 int16_t DiffSinResults[8][8];
 int16_t DiffCosResults[8][8];
 
+int16_t DiffCosResultsDisp[8][8];
+int16_t DiffSinResultsDisp[8][8];
+
 int16_t negSinResults[8][8];
 int16_t posSinResults[8][8];
 
@@ -152,7 +155,7 @@ void Computations(void)
     // Berechne aus dem ermittelten größten Betragsquadrat den Betrag
     max = sqrt(max);
     // Normalisiere den Betrag auf +- 16 (das ist die Breite des Rasters vom Array)
-    max >>= 5;
+    max >>= 6;
 
     // normalisiere alle anderen Vektoren
     for(m = 0; m <= 7; m++)

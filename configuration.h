@@ -65,6 +65,7 @@ void ConfigureGPIO(void);
 void ConfigureADC(void);
 void ConfigureTimer0(uint32_t);
 void ConfigureLCD(uint32_t);
+void ConfigureLCD7Inch(uint32_t SysClock);
 
 extern void UARTIntHandler(void);
 extern void Timer0IntHandler(void);
