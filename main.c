@@ -12,11 +12,19 @@ int main(void)
     ConfigureGPIO();
     ConfigureADC();
     ConfigureTimer0(SysClock);
-    ConfigureLCD(SysClock);
+//    Configure5LCD(SysClock);
+    ConfigureLCD7Inch(SysClock);
 
-    write_screen_color((COLOR)WHITE);       // set the display background color
+    write_screen_color((COLOR)BLACK);       // set the display background color
 
+    // write the frame for the Array Display
+    write_line(80, 10, 720, 10, (COLOR)YELLOW, 0);
+    write_line(80, 470, 720, 470, (COLOR)YELLOW, 0);
+//
+    write_line(80, 10, 80, 470, (COLOR)YELLOW, 0);
+    write_line(720, 10, 720, 470, (COLOR)YELLOW, 0);
     IntMasterEnable();
 
     while(1);                               // busy waiting. Tasks running in interrupt handler.
 }
+

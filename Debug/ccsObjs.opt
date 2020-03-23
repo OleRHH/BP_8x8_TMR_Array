@@ -1,1 +1,1 @@
-"./Interrupt_handler.obj" "./configuration.obj" "./fonts.obj" "./functions.obj" "./lcd_functions.obj" "./main.obj" "./tm4c1294ncpdt_startup_ccs.obj" "../tm4c1294ncpdt.cmd" -llibc.a -l"/home/ole/ccs930/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib" 
+"./Interrupt_handler.obj" "./configuration.obj" "./fonts.obj" "./functions.obj" "./lcd_functions.obj" "./main.obj" "./tm4c1294ncpdt_startup_ccs.obj" "../tm4c1294ncpdt.cmd" -llibc.a -l"/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib" 

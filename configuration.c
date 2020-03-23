@@ -196,27 +196,153 @@ void ConfigureLCD(uint32_t SysClock) {
     write_cmd_data(0);                      // Start row High
     write_cmd_data(0);                      // Start row Low
     value = 543;
-    write_cmd_data(value >> 8);              // Stop row High
-    write_cmd_data(value);                   // Stop row Low
+    write_cmd_data(value >> 8);             // Stop row High
+    write_cmd_data(value);                  // Stop row Low
 
     write_command(0x12);                    // enter partial mode
 
     write_command(0x33);                    // Set scroll area
     value = 0;
-    write_cmd_data(value >> 8);              // TFA high byte (TFA = 0)
-    write_cmd_data(value);                   // TFA low byte
+    write_cmd_data(value >> 8);             // TFA high byte (TFA = 0)
+    write_cmd_data(value);                  // TFA low byte
     value = 544;
-    write_cmd_data(value >> 8);              // VSA high byte (VSA = 272)
-    write_cmd_data(value);                   // VSA low byte
+    write_cmd_data(value >> 8);             // VSA high byte (VSA = 272)
+    write_cmd_data(value);                  // VSA low byte
     value = 0;
-    write_cmd_data(value >> 8);              // BFA high byte (BFA = 543)
-    write_cmd_data(value);                   // BFA low byte
+    write_cmd_data(value >> 8);             // BFA high byte (BFA = 543)
+    write_cmd_data(value);                  // BFA low byte
 
     write_command(0x29);                    // Set display on
 }
 
 
+/******************************************************************************************************/
+void ConfigureLCD7Inch(uint32_t SysClock) {
+    uint32_t value;
 
+    GPIO_PORTQ_DATA_R = 0x00;
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+    GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    GPIO_PORTQ_DATA_R &= ~RST;              // Hardware reset
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+    GPIO_PORTQ_DATA_R |= RST;               //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(SOFTWARE_RESET);          // Software reset
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    GPIO_PORTQ_DATA_R &= ~RST;              // Hardware reset
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+    GPIO_PORTQ_DATA_R |= RST;               //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(SOFTWARE_RESET);          // Software reset
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    write_command(SET_PLL_MN);              // Set PLL Freq to 120 MHz
+    write_cmd_data(0x24);                   //
+    write_cmd_data(0x02);                   //
+    write_cmd_data(0x04);                   //
+
+    write_command(START_PLL);               // Start PLL
+    write_cmd_data(0x01);                   //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(START_PLL);               // Lock PLL
+    write_cmd_data(0x03);                   //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(SOFTWARE_RESET);          // Software reset
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+/*************************************************************************/
+    write_command(0xe6);       // pixel clock frequency
+    write_cmd_data(0x04); // LCD_FPR = 290985 = 33.300 Mhz Result for 7" Display
+    write_cmd_data(0x70);   //
+    write_cmd_data(0xA9);   //
+
+    write_command(0xB0);          //SET LCD MODE   SIZE !!
+    write_cmd_data(0x19); //19 TFT panel data width - Enable FRC or dithering for color depth enhancement 8 18  1f- 38
+    write_cmd_data(0x20); //SET TFT MODE & hsync+Vsync+DEN MODE   20  or 00
+    write_cmd_data(0x03); //SET horizontal size=800+1 HightByte   !!!!!!!!!!!!
+    write_cmd_data(0x1F);      //SET horizontal size=800+1 LowByte
+    write_cmd_data(0x01);      //SET vertical size=480+1 HightByte
+    write_cmd_data(0xDF);      //SET vertical size=480+1 LowByte
+    write_cmd_data(0x00); //Even line RGB sequence / Odd line RGB sequence RGB
+
+    write_command(0xB4);            // Set Horizontal Period
+    write_cmd_data(0x03); //03 High byte of horizontal total period (display + non-display)
+    write_cmd_data(0x5E); //51 Low byte of the horizontal total period (display + non-display)
+    write_cmd_data(0x00); //High byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data.
+    write_cmd_data(0x46); //**   // 46 Low byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data
+    write_cmd_data(0x09);       // Set the vertical sync
+//    write_cmd_data(0x00);       //SET Hsync pulse start
+//    write_cmd_data(0x00);                                       //00
+//    write_cmd_data(0x00); //SET Hsync pulse subpixel start position  //00
+    write_cmd_data(0x00);             // Set horiz.Sync pulse start pos= 8    HB
+    write_cmd_data(0x08);             // Set horiz.Sync pulse start pos= 8    LB
+    write_cmd_data(0x00);                   //
+    //   ** too small will give you half a PICTURE !!
+
+    write_command(0xB6);          //Set Vertical Period
+    write_cmd_data(0x01); //01 High byte of the vertical total (display + non-display)
+    write_cmd_data(0xFE); //F4 Low byte F5 INCREASES SYNC TIME AND BACK PORCH
+    write_cmd_data(0x00);      // 00
+    write_cmd_data(0x0C); //0C =12 The non-display period in lines between the start of the frame and the first display data in line.
+//    write_cmd_data(0x00); //Set the vertical sync pulse width (LFRAME) in lines.
+//    write_cmd_data(0x00);      //SET Vsync pulse start position
+//    write_cmd_data(0x00);
+    write_cmd_data(0x00);              // Set vert.Sync pulse start pos= 8    HB
+    write_cmd_data(0x00);              // Set vert.Sync pulse start pos= 8    LB
+    write_cmd_data(0x04);                   //
+
+    write_command(0x36);
+    write_cmd_data(0x01);
+
+    // PWM signal frequency = PLL clock
+    write_command(0xBE);
+    write_cmd_data(0x08);
+    write_cmd_data(0x80);
+    write_cmd_data(0x01);
+
+//    write_command(0xBC);   //Set Post Proc
+//    write_cmd_data(0x40); //40 Set the contrast value
+//    write_cmd_data(0x80); //80 Set the brightness value
+//    write_cmd_data(0x40); //40 Set the saturation value
+//    write_cmd_data(0x01);  //1 Enable the postprocessor
+//
+//    write_command(0xE2);
+//    write_cmd_data(60);    //35 PLLclk = REFclk * 36 (360MHz)
+//    write_cmd_data(5);     // SYSclk = PLLclk / 3  (120MHz)
+//    write_cmd_data(0x54);  // validate M and N      dec 84
+//
+//    write_command(0x26);  //    Set Gamma Curve
+//    //  write_cmd_data(0x01); // Gamma curve selection =0
+//    write_cmd_data(0x08);  // Gamma curve selection =3
+//
+//    write_command(0x0B);          //SET SCAN MODE
+//    write_cmd_data(0x00); //SET TFT MODE   top to bottom, left to right normal etc
+
+    write_command(0x0A);
+    write_cmd_data(0x1C);         //Power Mode
+
+//    write_command(0x3A);          //SET Pixel Format
+//    write_cmd_data(0x50);       //16 bit pixel
+//    write_cmd_data(0x60);       //18 bit pixel
+//    write_cmd_data(0x70);       //24 bit pixel
+    write_command(0xF0); //set pixel data format 8bit
+    write_cmd_data(0x00);
+
+//    write_command(0xF0);      //  Set Pixel Data Interface
+//    write_cmd_data(0x03); // 16-bit (565 format)   011 16-bit (565 format)
+    write_command(0x29);                    // Set display on
+
+}
 
 
 

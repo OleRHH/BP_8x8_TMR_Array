@@ -16,14 +16,15 @@
 
 
 /*****************************  # defines #   *****************************/
-#define GRID_OFFSET_X ( 120 )
-#define GRID_OFFSET_Y ( 20 )
+
 #define FONT_WIDTH_BIG 12
 #define FONT_HIGHT_BIG 16
 #define NO_ARROW        0
 #define WITH_ARROW      1
 #define ARROW_ANGLE     0.5236          // RAD = 30°
 #define ARROW_LENGTH    5
+#define GRID_OFFSET_X ( 200 )
+#define GRID_OFFSET_Y ( 50 )
 
 
 /*****************************  # typedefs #   *****************************/
@@ -45,7 +46,8 @@ void screen_write_nr(uint16_t);
 void write_char(uint16_t, COLOR, COLOR);
 void print_string(char *, uint16_t, uint16_t, COLOR, COLOR);
 void write_screen_color(COLOR);
-void draw_display(void);
+void drawDisplay5Inch(void);
+void drawDisplay7Inch(void);
 void draw_arrow(short, short, short, short, COLOR);
 
 void write_command(unsigned char);
