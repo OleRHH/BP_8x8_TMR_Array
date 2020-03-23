@@ -12,7 +12,7 @@ int main(void)
     ConfigureGPIO();
     ConfigureADC();
     ConfigureTimer0(SysClock);
-//    Configure5LCD(SysClock);
+//    ConfigureLCD5Inch(SysClock);
     ConfigureLCD7Inch(SysClock);
 
     write_screen_color((COLOR)BLACK);       // set the display background color
