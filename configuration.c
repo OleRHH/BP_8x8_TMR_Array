@@ -1,5 +1,18 @@
 #include <configuration.h>
 
+// The control table used by the uDMA controller.  This table must be aligned
+// to a 1024 byte boundary.
+//
+//*****************************************************************************
+#if defined(ewarm)
+#pragma data_alignment=1024
+uint8_t pui8ControlTable[1024];
+#elif defined(ccs)
+#pragma DATA_ALIGN(pui8ControlTable, 1024)
+uint8_t pui8ControlTable[1024];
+#else
+uint8_t pui8ControlTable[1024] __attribute__ ((aligned(1024)));
+#endif
 
 /******************************************************************************************************/
 void ConfigureADC(void)
@@ -47,9 +60,11 @@ void ConfigureADC(void)
 
 
 /*********************************************************************************************/
-void ConfigureUART(uint32_t SysClock)
+/* UART0 is used to transfer Array Data (256 byes) via RS232 */
+void ConfigureUART0(uint32_t SysClock)
 {
     // Enable the GPIO Peripheral used by the UART
+    // Rx: PA0  Tx: PA1
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
 
     //Enable UART0
@@ -71,32 +86,65 @@ void ConfigureUART(uint32_t SysClock)
     UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_RT | UART_INT_TX);
     UARTFIFOLevelSet(UART0_BASE, UART_FIFO_TX1_8, UART_FIFO_RX1_8);
     UARTTxIntModeSet(UART0_BASE, UART_TXINT_MODE_EOT);
-    UARTIntRegister(UART0_BASE, UARTIntHandler);
+    UARTIntRegister(UART0_BASE, UART0IntHandler);
 
     IntEnable(INT_UART0);
 }
 
 
 /*********************************************************************************************/
+/* UART3 is used for communication with the stepper motor via RS485 */
+void ConfigureUART3(uint32_t SysClock)
+{
+    // Enable the GPIO Peripheral used by the UART
+    // Rx: PA4  Tx: PA5
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+
+    //Enable UART0
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART3);
+
+    // Configure GPIO Pins for UART mode
+    GPIOPinConfigure(GPIO_PA4_U3RX);
+    GPIOPinConfigure(GPIO_PA5_U3TX);
+    GPIOPinTypeUART(GPIO_PORTA_BASE,GPIO_PIN_4|GPIO_PIN_5);
+
+
+    UARTConfigSetExpClk(UART3_BASE, SysClock, 115200,
+                            (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
+                             UART_CONFIG_PAR_NONE));
+
+    // Enable the UART interrupt
+    UARTFIFOEnable(UART3_BASE);
+    IntPrioritySet(INT_UART3, LOW_PRIORITY);                // set priority
+    UARTIntEnable(UART3_BASE, UART_INT_RX | UART_INT_RT | UART_INT_TX);
+    UARTFIFOLevelSet(UART3_BASE, UART_FIFO_TX1_8, UART_FIFO_RX1_8);
+    UARTTxIntModeSet(UART3_BASE, UART_TXINT_MODE_EOT);
+    UARTIntRegister(UART3_BASE, UART3IntHandler);
+
+    IntEnable(INT_UART3);
+}
+
+
+/*********************************************************************************************/
 void ConfigureGPIO(void)
 {
-    // Set Port M Pins 0-7 Output LCD Data
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
-    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
-
-    // Set Port L  0-4 Multiplexer address output for 8x8 Array
+    // Set Port L  0-4: Multiplexer address output for 8x8 Array
     // Pin 3 = D; Pin 2 = C; Pin 1 = B; Pin 0 = A; Pin 4 = nD
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
     GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4);
 
-    // Onboard LEDs output: Port N (Pins 0-1)  debug outputs:Pin 2-3
+    // Set Port M Pins 0-7: Output LCD Data
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
+    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
+
+    // Set Port N Pins 0-3: Onboard LEDs output (0-1)  debug outputs (2-3)
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));
     GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
 
-    // LCD Control output: Port Q (Pins 0-4)
+    // Set Port Q Pins 0-4: LCD Control output:
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);  // Clock Port Q
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOQ));
     GPIOPinTypeGPIOOutput(GPIO_PORTQ_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
@@ -118,6 +166,36 @@ void ConfigureTimer0(uint32_t SysClock)
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 }
 
+/******************************************************************************************************/
+void ConfigureUDMA(void)
+{
+//    // enable the UDMA peripheral
+//    SysCtlPeripheralEnable(SYSCTL_PERIPH_UDMA);
+//
+//    // wait for the UDMA module to be ready
+//    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_UDMA))
+//    {
+//    }
+//
+//    // enable the uDMA controller
+//    uDMAEnable();
+//
+//    // set the base for the channel control table
+//    uDMAControlBaseSet(&puiDMAcontroltable);
+//
+//    // set attribute
+//    uDMAChannelAttributeDisable(UDMA_CHANNEL_SW, UDMA_ATTR_ALL);
+//
+//    // set channel control
+//    uDMAChannelControlSet(
+//    UDMA_CH8_UART0RX | UDMA_CH9_UART0TX | UDMA_CH9_UART0TX | UDMA_PRI_SELECT,
+//                          UDMA_SIZE_8 | UDMA_SRC_INC_8 | UDMA_DST_INC_NONE |
+//                          UDMA_ARB_1);
+//
+//    uDMAChannelEnable(UDMA_CHANNEL_SW);
+//    uDMAChannelRequest(UDMA_CHANNEL_SW);
+
+}
 
 /******************************************************************************************************/
 // LCD Panel initialize:
@@ -218,7 +296,6 @@ void ConfigureLCD5Inch(uint32_t SysClock) {
 
 /******************************************************************************************************/
 void ConfigureLCD7Inch(uint32_t SysClock) {
-    uint32_t value;
 
     GPIO_PORTQ_DATA_R = 0x00;
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
@@ -310,36 +387,12 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     write_cmd_data(0x80);
     write_cmd_data(0x01);
 
-//    write_command(0xBC);   //Set Post Proc
-//    write_cmd_data(0x40); //40 Set the contrast value
-//    write_cmd_data(0x80); //80 Set the brightness value
-//    write_cmd_data(0x40); //40 Set the saturation value
-//    write_cmd_data(0x01);  //1 Enable the postprocessor
-//
-//    write_command(0xE2);
-//    write_cmd_data(60);    //35 PLLclk = REFclk * 36 (360MHz)
-//    write_cmd_data(5);     // SYSclk = PLLclk / 3  (120MHz)
-//    write_cmd_data(0x54);  // validate M and N      dec 84
-//
-//    write_command(0x26);  //    Set Gamma Curve
-//    //  write_cmd_data(0x01); // Gamma curve selection =0
-//    write_cmd_data(0x08);  // Gamma curve selection =3
-//
-//    write_command(0x0B);          //SET SCAN MODE
-//    write_cmd_data(0x00); //SET TFT MODE   top to bottom, left to right normal etc
-
     write_command(0x0A);
     write_cmd_data(0x1C);         //Power Mode
 
-//    write_command(0x3A);          //SET Pixel Format
-//    write_cmd_data(0x50);       //16 bit pixel
-//    write_cmd_data(0x60);       //18 bit pixel
-//    write_cmd_data(0x70);       //24 bit pixel
     write_command(0xF0); //set pixel data format 8bit
     write_cmd_data(0x00);
 
-//    write_command(0xF0);      //  Set Pixel Data Interface
-//    write_cmd_data(0x03); // 16-bit (565 format)   011 16-bit (565 format)
     write_command(0x29);                    // Set display on
 
 }

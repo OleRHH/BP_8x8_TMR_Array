@@ -26,7 +26,8 @@
 
 
 /**************************  # Prototypes #   ****************************/
-void UARTIntHandler(void);
+void UART0IntHandler(void);
+void UART2IntHandler(void);
 
 
 

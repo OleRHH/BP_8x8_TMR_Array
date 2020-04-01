@@ -102,7 +102,33 @@ void print_string(char *text, uint16_t row, uint16_t column, COLOR color, COLOR 
 /****************************************************************************/
 // Writes the hole screen in one color                                      //
 /****************************************************************************/
-void write_screen_color(COLOR color)
+void write_screen_color5INCH(COLOR color)
+{
+    uint32_t count = 0;
+
+    write_position(0, 0, 479, 271);
+    write_command(0x2C);
+
+    while (count++ < 130560) {
+        GPIO_PORTM_DATA_R = color.red;       // Write data byte
+        GPIO_PORTQ_DATA_R = 0x15;            // Chip select = 0, Write state = 0
+        GPIO_PORTQ_DATA_R = 0x1F;            // Initial state
+
+        GPIO_PORTM_DATA_R = color.green;    // Write data byte
+        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
+        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
+
+        GPIO_PORTM_DATA_R = color.blue;     // Write data byte
+        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
+        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
+    }
+}
+
+
+/****************************************************************************/
+// Writes the hole screen in one color                                      //
+/****************************************************************************/
+void write_screen_color7INCH(COLOR color)
 {
     uint32_t count = 0;
 
@@ -131,9 +157,9 @@ void drawDisplay5Inch(void)
     int16_t m = 0, n = 0, xGrid, yGrid;
 
     // delete the old arrows
-    for(xGrid = GRID_OFFSET_X; xGrid < ( 256 + GRID_OFFSET_X); xGrid += 32)
+    for(xGrid = GRID_OFFSET_X_5_INCH; xGrid < ( 256 + GRID_OFFSET_X_5_INCH); xGrid += 32)
     {
-        for(yGrid = 272 - GRID_OFFSET_Y; yGrid > GRID_OFFSET_Y; yGrid -= 32)
+        for(yGrid = 272 - GRID_OFFSET_Y_5_INCH; yGrid > GRID_OFFSET_Y_5_INCH; yGrid -= 32)
         {
             write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid - oldDiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
             m++;
@@ -144,12 +170,12 @@ void drawDisplay5Inch(void)
 
     // write the new arrows
     n = 0;
-    for(xGrid = GRID_OFFSET_X; xGrid < ( 256 + GRID_OFFSET_X); xGrid += 32)
+    for(xGrid = GRID_OFFSET_X_5_INCH; xGrid < ( 256 + GRID_OFFSET_X_5_INCH); xGrid += 32)
     {
-        for(yGrid = 272 - GRID_OFFSET_Y; yGrid > GRID_OFFSET_Y; yGrid -= 32)
+        for(yGrid = 272 - GRID_OFFSET_Y_5_INCH; yGrid > GRID_OFFSET_Y_5_INCH; yGrid -= 32)
         {
-            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000ff, NO_ARROW);        // draw a small cross..
-            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000ff, NO_ARROW);        // ..as as grid indicator
+//            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000ff, NO_ARROW);        // draw a small cross..
+//            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000ff, NO_ARROW);        // ..as as grid indicator
             write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], (COLOR)0xff0000, WITH_ARROW);
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
@@ -167,9 +193,9 @@ void drawDisplay7Inch(void)
     int16_t m = 0, n = 0, xGrid, yGrid;
 
     // delete the old arrows
-    for(xGrid = GRID_OFFSET_X; xGrid < ( 480 + GRID_OFFSET_X); xGrid += 60)
+    for(xGrid = GRID_OFFSET_X_7_INCH; xGrid < ( 480 + GRID_OFFSET_X_7_INCH); xGrid += 60)
     {
-        for(yGrid = 470 - GRID_OFFSET_Y; yGrid > GRID_OFFSET_Y; yGrid -= 50)
+        for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
         {
             write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid - oldDiffSinResults[m][n], (COLOR)0x000000, WITH_ARROW);
             m++;
@@ -180,9 +206,9 @@ void drawDisplay7Inch(void)
 
     // write the new arrows
     n = 0;
-    for(xGrid = GRID_OFFSET_X; xGrid < ( 480 + GRID_OFFSET_X); xGrid += 60)
+    for(xGrid = GRID_OFFSET_X_7_INCH; xGrid < ( 480 + GRID_OFFSET_X_7_INCH); xGrid += 60)
     {
-        for(yGrid = 470 - GRID_OFFSET_Y; yGrid > GRID_OFFSET_Y; yGrid -= 50)
+        for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
         {
             write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
             write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000FF, NO_ARROW);        // draw a small cross..

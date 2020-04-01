@@ -20,7 +20,7 @@ int m = 0, n = 0;
 
 /***********************  TIMER 0 interrupt handler   ***********************/
 /* Periodically measure the Array values and draw them to the display
-/* Also start the UART transmit sequences: This handler triggers the first 16 bytes */
+   Also start the UART transmit sequences: This handler triggers the first 16 bytes */
 void Timer0IntHandler(void)
 {
     GPIO_PORTN_DATA_R ^= YELLOW;                        // for debugging: toggle debug output each time handler is called
@@ -38,19 +38,23 @@ void Timer0IntHandler(void)
     while(n < 16)
     {
         UARTCharPutNonBlocking(UART0_BASE, *(ucPtr++));
+//        UARTCharPutNonBlocking(UART3_BASE, *(ucPtr++));
         m++;
         n++;
     }
     n = 0;
-//    drawDisplay5Inch();
-    drawDisplay7Inch();
+
+    drawDisplay5Inch();
+//    drawDisplay7Inch();
 
     GPIO_PORTN_DATA_R ^= BLUE;                          // for debugging: set low when handler is finished
 }
 
 
 /*********************************************************************************************/
-void UARTIntHandler(void)
+
+
+void UART0IntHandler(void)
 {
     // Get the interrupt status.
     uint32_t UIstatus = UARTIntStatus(UART0_BASE, true);
@@ -90,6 +94,55 @@ void UARTIntHandler(void)
         while(n < 16)
         {
             UARTCharPutNonBlocking(UART0_BASE, *(ucPtr++));
+            m++;
+            n++;
+        }
+        n = 0;
+    }
+}
+
+
+/*********************************************************************************************/
+void UART3IntHandler(void)
+{
+    // Get the interrupt status.
+    uint32_t UIstatus = UARTIntStatus(UART3_BASE, true);
+    UARTIntClear(UART3_BASE, UIstatus);
+
+    /* reset transfer if '0' signal received */
+    if( UIstatus & UART_INT_RX) //  || UIstatus & UART_INT_RT)
+    {
+        char receive = UARTCharGet(UART3_BASE);
+        while(UARTCharsAvail(UART3_BASE))
+        {
+            UARTCharGet(UART3_BASE);
+        }
+
+        if(receive == '0')
+        {
+            GPIO_PORTN_DATA_R ^= 1;
+            m = 256;
+            n = 16;
+            TimerDisable(TIMER0_BASE, TIMER_A);
+            UARTFIFODisable(UART3_BASE);
+            SysCtlDelay(1000);
+            UARTFIFOEnable(UART3_BASE);
+            TimerLoadSet(TIMER0_BASE, TIMER_A, 120000000 / 10);
+            TimerEnable(TIMER0_BASE, TIMER_A);
+        }
+    }
+
+    /* send data while m < 256 (= send sin 0-127 and cos 0-127 = 256 values) */
+    if(UIstatus & UART_INT_TX && ( m < 256 ) )
+    {
+//        GPIO_PORTM_DATA_R ^= YELLOW;
+        if(m == 128)
+        {
+            ucPtr = (uint8_t*) DiffCosResults;
+        }
+        while(n < 16)
+        {
+            UARTCharPutNonBlocking(UART3_BASE, *(ucPtr++));
             m++;
             n++;
         }

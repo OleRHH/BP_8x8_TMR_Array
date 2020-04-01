@@ -60,14 +60,18 @@
 #define LOW_PRIORITY  0x80
 
 /**************************  # Prototypes #   ****************************/
-void ConfigureUART(uint32_t);
+void ConfigureUART0(uint32_t);
+void ConfigureUART3(uint32_t);
+void ConfigureUDMA(void);
 void ConfigureGPIO(void);
 void ConfigureADC(void);
 void ConfigureTimer0(uint32_t);
+
 void ConfigureLCD5Inch(uint32_t);
 void ConfigureLCD7Inch(uint32_t SysClock);
 
-extern void UARTIntHandler(void);
+extern void UART0IntHandler(void);
+extern void UART3IntHandler(void);
 extern void Timer0IntHandler(void);
 
 
