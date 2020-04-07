@@ -31,10 +31,10 @@ Interrupt_handler.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/sysctl.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/adc.h
+Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/lcd_functions.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/string.h
-Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h
 
 ../Interrupt_handler.c: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/Interrupt_handler.h: 
@@ -67,7 +67,7 @@ Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.17
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/sysctl.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/adc.h: 
+/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/lcd_functions.h: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/string.h: 
-/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h: 

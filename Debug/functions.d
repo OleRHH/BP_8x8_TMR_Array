@@ -22,6 +22,7 @@ functions.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driver
 functions.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/gpio.h
 functions.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h
 functions.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/uart.h
+functions.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h
 
 ../functions.c: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/functions.h: 
@@ -45,3 +46,4 @@ functions.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driver
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/gpio.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/uart.h: 
+/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h: 
