@@ -8,13 +8,14 @@ int main(void)
 
     // Initialize the UART, GPIO, ADC and Timer peripherie
     IntMasterDisable();                     // disable all interrupts during setup
-    ConfigureUART0(SysClock);
-//    ConfigureUART3(SysClock);
+
     ConfigureGPIO();
     ConfigureADC();
     ConfigureTimer0(SysClock);
     ConfigureLCD5Inch(SysClock);
 //    ConfigureLCD7Inch(SysClock);
+    ConfigureUART0(SysClock);
+    ConfigureUART2(SysClock);
 
    write_screen_color5INCH((COLOR)WHITE);       // set the display background color
 

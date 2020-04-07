@@ -16,9 +16,11 @@
 #include <driverlib/gpio.h>
 #include <driverlib/uart.h>
 #include <inc/hw_memmap.h>      // needed for UART0_BASE
+#include "inc/hw_uart.h"        // needed for UART_O_DR
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 #include <driverlib/timer.h>
+#include <driverlib/udma.h>
 
 #include <lcd_functions.h>
 
@@ -61,7 +63,7 @@
 
 /**************************  # Prototypes #   ****************************/
 void ConfigureUART0(uint32_t);
-void ConfigureUART3(uint32_t);
+void ConfigureUART2(uint32_t);
 void ConfigureUDMA(void);
 void ConfigureGPIO(void);
 void ConfigureADC(void);
@@ -71,7 +73,7 @@ void ConfigureLCD5Inch(uint32_t);
 void ConfigureLCD7Inch(uint32_t SysClock);
 
 extern void UART0IntHandler(void);
-extern void UART3IntHandler(void);
+extern void UART2IntHandler(void);
 extern void Timer0IntHandler(void);
 
 

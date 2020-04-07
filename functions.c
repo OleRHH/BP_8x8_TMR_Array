@@ -25,7 +25,7 @@ uint32_t ADCValues_SS0[8];
 uint32_t ADCValues_SS1[4];
 uint32_t ADCValues_SS2[4];
 
-
+int16_t DiffResults[2][8][8];
 /*********************************************************************************************/
 //Read whole Array
 void ReadArray(void)
@@ -125,7 +125,7 @@ void GetADCValues(void)
 void Computations(void)
 {
     int32_t max = 0, absolute;
-	uint16_t m, n;
+    uint16_t m, n;
 
     for(m = 0; m <= 7; m++)
     {
@@ -135,15 +135,15 @@ void Computations(void)
             //differential: 0-1, 2-3, ... , 14-15
              negCosResults[m][n] = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
              posCosResults[m][n] = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
-            DiffCosResults[m][n] =  negCosResults[m][n] - posCosResults[m][n];
+            DiffResults[1][m][n] = negCosResults[m][n] - posCosResults[m][n];
                  CosOffset[m][n] = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
              negSinResults[m][n] = SinResults[m][(n << 1)];
              posSinResults[m][n] = SinResults[m][(n << 1) + 1];
-            DiffSinResults[m][n] =  negSinResults[m][n] - posSinResults[m][n];
+             DiffResults[0][m][n] = negSinResults[m][n] - posSinResults[m][n];
                  SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
 
             // berechne die Betragsquadrate:
-            absolute = DiffCosResults[m][n]*DiffCosResults[m][n] + DiffSinResults[m][n]*DiffSinResults[m][n];
+            absolute = DiffResults[1][m][n]*DiffResults[1][m][n] + DiffResults[0][m][n]*DiffResults[0][m][n];
 
             // finde den größten Betragsquadrat und speicher ihn
             if(absolute > max)
@@ -155,15 +155,67 @@ void Computations(void)
     // Berechne aus dem ermittelten größten Betragsquadrat den Betrag
     max = sqrt(max);
     // Normalisiere den Betrag auf +- 16 (das ist die Breite des Rasters vom Array)
-    max >>= 6;
+    max >>= 4;
 
     // normalisiere alle anderen Vektoren
     for(m = 0; m <= 7; m++)
     {
         for(n = 0; n <= 7; n++)
         {
-            DiffCosResults[m][n] = DiffCosResults[m][n] / (int16_t)max;
-            DiffSinResults[m][n] = DiffSinResults[m][n] / (int16_t)max;
+            DiffCosResults[m][n] = DiffResults[1][m][n] / (int16_t)max;
+            DiffSinResults[m][n] = DiffResults[0][m][n] / (int16_t)max;
         }
     }
 }
+
+
+
+
+///*********************************************************************************************/
+////Compute differential signal
+//
+//void Computations(void)
+//{
+//    int32_t max = 0, absolute;
+//	uint16_t m, n;
+//
+//    for(m = 0; m <= 7; m++)
+//    {
+//        for(n = 0; n <= 7; n++)
+//        {
+//            //shiftleft1: multiplication by 2
+//            //differential: 0-1, 2-3, ... , 14-15
+//             negCosResults[m][n] = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
+//             posCosResults[m][n] = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
+//            DiffCosResults[m][n] =  negCosResults[m][n] - posCosResults[m][n];
+//                 CosOffset[m][n] = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
+//             negSinResults[m][n] = SinResults[m][(n << 1)];
+//             posSinResults[m][n] = SinResults[m][(n << 1) + 1];
+//            DiffSinResults[m][n] =  negSinResults[m][n] - posSinResults[m][n];
+//                 SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
+//
+//            // berechne die Betragsquadrate:
+//            absolute = DiffCosResults[m][n]*DiffCosResults[m][n] + DiffSinResults[m][n]*DiffSinResults[m][n];
+//
+//            // finde den größten Betragsquadrat und speicher ihn
+//            if(absolute > max)
+//            {
+//                max = absolute;
+//            }
+//        }
+//    }
+//    // Berechne aus dem ermittelten größten Betragsquadrat den Betrag
+//    max = sqrt(max);
+//    // Normalisiere den Betrag auf +- 16 (das ist die Breite des Rasters vom Array)
+//    max >>= 6;
+//
+//    // normalisiere alle anderen Vektoren
+//    for(m = 0; m <= 7; m++)
+//    {
+//        for(n = 0; n <= 7; n++)
+//        {
+//            DiffCosResults[m][n] = DiffCosResults[m][n] / (int16_t)max;
+//            DiffSinResults[m][n] = DiffSinResults[m][n] / (int16_t)max;
+//        }
+//    }
+//}
