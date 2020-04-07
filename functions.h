@@ -17,6 +17,7 @@
 #include <driverlib/gpio.h>
 #include <inc/hw_memmap.h>      // UART0_BASE, ADC0_BASE, ADC1_BASE
 #include <driverlib/uart.h>
+#include <driverlib/interrupt.h>
 
 
 

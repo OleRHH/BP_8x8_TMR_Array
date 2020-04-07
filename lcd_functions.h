@@ -23,8 +23,10 @@
 #define WITH_ARROW      1
 #define ARROW_ANGLE     0.5236          // RAD = 30°
 #define ARROW_LENGTH    5
-#define GRID_OFFSET_X ( 200 )
-#define GRID_OFFSET_Y ( 50 )
+#define GRID_OFFSET_X_5_INCH ( 80 )
+#define GRID_OFFSET_Y_5_INCH ( 20 )
+#define GRID_OFFSET_X_7_INCH ( 200 )
+#define GRID_OFFSET_Y_7_INCH ( 50 )
 
 
 /*****************************  # typedefs #   *****************************/
@@ -45,7 +47,8 @@ void screen_show_nr(uint16_t);
 void screen_write_nr(uint16_t);
 void write_char(uint16_t, COLOR, COLOR);
 void print_string(char *, uint16_t, uint16_t, COLOR, COLOR);
-void write_screen_color(COLOR);
+void write_screen_color5INCH(COLOR);
+void write_screen_color7INCH(COLOR);
 void drawDisplay5Inch(void);
 void drawDisplay7Inch(void);
 void draw_arrow(short, short, short, short, COLOR);

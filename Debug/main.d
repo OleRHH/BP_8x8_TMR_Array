@@ -21,9 +21,11 @@ main.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294n
 main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/gpio.h
 main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/uart.h
 main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h
+main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_uart.h
 main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/pin_map.h
 main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h
 main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/timer.h
+main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/udma.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/lcd_functions.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h
 main.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/string.h
@@ -34,6 +36,8 @@ main.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LT
 main.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/machine/_limits.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/Interrupt_handler.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h
+main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/rom.h
+main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/rom_map.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/functions.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h
 
@@ -58,9 +62,11 @@ main.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294n
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/gpio.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/uart.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h: 
+/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_uart.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/pin_map.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/timer.h: 
+/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/udma.h: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/lcd_functions.h: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/string.h: 
@@ -71,5 +77,7 @@ main.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294n
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/machine/_limits.h: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/Interrupt_handler.h: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
+/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/rom.h: 
+/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/rom_map.h: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/functions.h: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
