@@ -19,6 +19,8 @@ lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_
 lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/math.h
 lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/_defs.h
 lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/machine/_limits.h
+lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdbool.h
+lcd_functions.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/sysctl.h
 
 ../lcd_functions.c: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/lcd_functions.h: 
@@ -39,3 +41,5 @@ lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/math.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/_defs.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/machine/_limits.h: 
+/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdbool.h: 
+/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/sysctl.h: 

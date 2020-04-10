@@ -1,4 +1,5 @@
 #include <functions.h>
+#include <lcd_functions.h>
 
 
 /*****************************  # global variables #   ****************************/
@@ -122,100 +123,102 @@ void GetADCValues(void)
 /*********************************************************************************************/
 //Compute differential signal
 
-void Computations(void)
+void Computations(bool relative, uint16_t maxArrowSize)
 {
-    int32_t max = 0, absolute;
+    int32_t max = 1, absolute, maxSquare;
     uint16_t m, n;
+    char text[100];
+    bool clipping = false;
 
-    for(m = 0; m <= 7; m++)
+    if(relative == true)
     {
-        for(n = 0; n <= 7; n++)
+        for(m = 0; m <= 7; m++)
         {
-            //shiftleft1: multiplication by 2
-            //differential: 0-1, 2-3, ... , 14-15
-             negCosResults[m][n] = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
-             posCosResults[m][n] = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
-            DiffResults[1][m][n] = negCosResults[m][n] - posCosResults[m][n];
-                 CosOffset[m][n] = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
-             negSinResults[m][n] = SinResults[m][(n << 1)];
-             posSinResults[m][n] = SinResults[m][(n << 1) + 1];
-             DiffResults[0][m][n] = negSinResults[m][n] - posSinResults[m][n];
-                 SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
-
-            // berechne die Betragsquadrate:
-            absolute = DiffResults[1][m][n]*DiffResults[1][m][n] + DiffResults[0][m][n]*DiffResults[0][m][n];
-
-            // finde den größten Betragsquadrat und speicher ihn
-            if(absolute > max)
+            for(n = 0; n <= 7; n++)
             {
-                max = absolute;
+                //shiftleft1: multiplication by 2
+                //differential: 0-1, 2-3, ... , 14-15
+                 negCosResults[m][n] = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
+                 posCosResults[m][n] = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
+                DiffResults[1][m][n] = negCosResults[m][n] - posCosResults[m][n];
+                     CosOffset[m][n] = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
+                 negSinResults[m][n] = SinResults[m][(n << 1)];
+                 posSinResults[m][n] = SinResults[m][(n << 1) + 1];
+                 DiffResults[0][m][n] = negSinResults[m][n] - posSinResults[m][n];
+                     SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
+
+                // berechne die Betragsquadrate:
+                absolute = DiffResults[1][m][n]*DiffResults[1][m][n] + DiffResults[0][m][n]*DiffResults[0][m][n];
+
+                // finde den größten Betragsquadrat und speicher ihn
+                if(absolute > max)
+                {
+                    max = absolute;
+                }
+            }
+        }
+        max = sqrt(max);
+        sprintf(text, "%.3u", max);
+        print_string(text, 220, 420, (COLOR)BLACK, (COLOR)WHITE);
+        max /= maxArrowSize;
+
+        // normalisiere alle anderen Vektoren
+        for(m = 0; m <= 7; m++)
+        {
+            for(n = 0; n <= 7; n++)
+            {
+                DiffCosResults[m][n] = DiffResults[1][m][n] / (int16_t)max;
+                DiffSinResults[m][n] = DiffResults[0][m][n] / (int16_t)max;
             }
         }
     }
-    // Berechne aus dem ermittelten größten Betragsquadrat den Betrag
-    max = sqrt(max);
-    // Normalisiere den Betrag auf +- 16 (das ist die Breite des Rasters vom Array)
-    max >>= 4;
-
-    // normalisiere alle anderen Vektoren
-    for(m = 0; m <= 7; m++)
+    else
     {
-        for(n = 0; n <= 7; n++)
+        maxSquare = maxArrowSize * maxArrowSize;        for(m = 0; m <= 7; m++)
         {
-            DiffCosResults[m][n] = DiffResults[1][m][n] / (int16_t)max;
-            DiffSinResults[m][n] = DiffResults[0][m][n] / (int16_t)max;
+            for(n = 0; n <= 7; n++)
+            {
+                //shiftleft1: multiplication by 2
+                //differential: 0-1, 2-3, ... , 14-15
+                 negCosResults[m][n] = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
+                 posCosResults[m][n] = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
+                DiffResults[1][m][n] = negCosResults[m][n] - posCosResults[m][n];
+                     CosOffset[m][n] = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
+                 negSinResults[m][n] = SinResults[m][(n << 1)];
+                 posSinResults[m][n] = SinResults[m][(n << 1) + 1];
+                 DiffResults[0][m][n] = negSinResults[m][n] - posSinResults[m][n];
+                     SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
+
+                // berechne die Betragsquadrate:
+                absolute = DiffResults[1][m][n]*DiffResults[1][m][n] + DiffResults[0][m][n]*DiffResults[0][m][n];
+
+                // finde den größten Betragsquadrat und speicher ihn
+                if(absolute > maxSquare)
+                {
+                    clipping = true;
+                    absolute = sqrt(absolute);
+                    DiffResults[1][m][n] *= maxArrowSize;
+                    DiffResults[1][m][n] /= absolute;
+                    DiffResults[0][m][n] *= maxArrowSize;
+                    DiffResults[0][m][n] /= absolute;
+                }
+            }
+            if(clipping == true)
+                print_string("Clipping!      ", 220, 300, (COLOR)BLACK, (COLOR)WHITE);
+            else
+                print_string("               ", 220, 300, (COLOR)BLACK, (COLOR)WHITE);
+
+        }
+
+
+        for(m = 0; m <= 7; m++)
+        {
+            for(n = 0; n <= 7; n++)
+            {
+                DiffCosResults[m][n] = DiffResults[1][m][n];
+                DiffSinResults[m][n] = DiffResults[0][m][n];
+            }
         }
     }
 }
 
-
-
-
-///*********************************************************************************************/
-////Compute differential signal
-//
-//void Computations(void)
-//{
-//    int32_t max = 0, absolute;
-//	uint16_t m, n;
-//
-//    for(m = 0; m <= 7; m++)
-//    {
-//        for(n = 0; n <= 7; n++)
-//        {
-//            //shiftleft1: multiplication by 2
-//            //differential: 0-1, 2-3, ... , 14-15
-//             negCosResults[m][n] = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
-//             posCosResults[m][n] = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
-//            DiffCosResults[m][n] =  negCosResults[m][n] - posCosResults[m][n];
-//                 CosOffset[m][n] = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
-//             negSinResults[m][n] = SinResults[m][(n << 1)];
-//             posSinResults[m][n] = SinResults[m][(n << 1) + 1];
-//            DiffSinResults[m][n] =  negSinResults[m][n] - posSinResults[m][n];
-//                 SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
-//
-//            // berechne die Betragsquadrate:
-//            absolute = DiffCosResults[m][n]*DiffCosResults[m][n] + DiffSinResults[m][n]*DiffSinResults[m][n];
-//
-//            // finde den größten Betragsquadrat und speicher ihn
-//            if(absolute > max)
-//            {
-//                max = absolute;
-//            }
-//        }
-//    }
-//    // Berechne aus dem ermittelten größten Betragsquadrat den Betrag
-//    max = sqrt(max);
-//    // Normalisiere den Betrag auf +- 16 (das ist die Breite des Rasters vom Array)
-//    max >>= 6;
-//
-//    // normalisiere alle anderen Vektoren
-//    for(m = 0; m <= 7; m++)
-//    {
-//        for(n = 0; n <= 7; n++)
-//        {
-//            DiffCosResults[m][n] = DiffCosResults[m][n] / (int16_t)max;
-//            DiffSinResults[m][n] = DiffSinResults[m][n] / (int16_t)max;
-//        }
-//    }
-//}

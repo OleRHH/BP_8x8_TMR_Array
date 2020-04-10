@@ -27,8 +27,7 @@
 /**************************  # Prototypes #   ****************************/
 void ReadArray(void);
 void GetADCValues(void);
-void Computations(void);
-
+void Computations(bool, uint16_t);
 
 
 #endif /* FUNCTIONS_H_ */

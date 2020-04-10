@@ -18,6 +18,13 @@ int main(void)
     ConfigureUART2(SysClock);
 
    write_screen_color5INCH((COLOR)WHITE);       // set the display background color
+   print_string("Grid gap: 32", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
+   print_string("relative: true", 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+   print_string("arrows", 60, 300, (COLOR)BLACK, (COLOR)WHITE);
+   print_string("  max:     16", 90, 300, (COLOR)BLACK, (COLOR)WHITE);
+   print_string("length", 110, 300, (COLOR)BLACK, (COLOR)WHITE);
+   print_string("absolute", 200, 300, (COLOR)BLACK, (COLOR)WHITE);
+   print_string("maximum", 220, 300, (COLOR)BLACK, (COLOR)WHITE);
 
     // write the frame for the Array Display
 //    write_line(80, 10, 720, 10, (COLOR)YELLOW, 0);

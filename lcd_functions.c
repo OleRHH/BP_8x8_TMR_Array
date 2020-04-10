@@ -1,4 +1,32 @@
+
+
 #include <lcd_functions.h>
+
+// intern prototypes
+void write_char(uint16_t, COLOR, COLOR);
+void draw_arrow(short, short, short, short, COLOR);
+
+void write_command(unsigned char);
+void write_cmd_data(unsigned char);
+void write_data(COLOR);
+void write_position(uint16_t, uint16_t, uint16_t, uint16_t);
+
+void write_line(short, short, short, short, COLOR, uint16_t);
+void write_line_0_degree  (short, short, short, short, COLOR);
+void write_line_90_degree (short, short, short, short, COLOR);
+void write_line_180_degree(short, short, short, short, COLOR);
+void write_line_270_degree(short, short, short, short, COLOR);
+void write_line_quadrant_1_I (short, short, short, short, double, COLOR);      //   0° < degree < 90°
+void write_line_quadrant_1_II(short, short, short, short, double, COLOR);      //   0° < degree < 90°
+void write_line_quadrant_2_I (short, short, short, short, double, COLOR);      //  90° < degree < 180°
+void write_line_quadrant_2_II(short, short, short, short, double, COLOR);      //  90° < degree < 180°
+void write_line_quadrant_3_I (short, short, short, short, double, COLOR);      // 180° < degree < 270°
+void write_line_quadrant_3_II(short, short, short, short, double, COLOR);      // 180° < degree < 270°
+void write_line_quadrant_4_I (short, short, short, short, double, COLOR);      // 270° < degree < 360°
+void write_line_quadrant_4_II(short, short, short, short, double, COLOR);      // 270° < degree < 360°
+
+
+
 
 uint16_t offset = 0;
 
@@ -8,8 +36,6 @@ int16_t oldDiffCosResults[8][8];
 extern int16_t DiffCosResults[8][8];
 extern int16_t DiffSinResults[8][8];
 
-extern int16_t DiffCosResultsDisp[8][8];
-extern int16_t DiffSinResultsDisp[8][8];
 extern const char font_12_16[256][32];
 
 
@@ -174,8 +200,8 @@ void drawDisplay5Inch(void)
     {
         for(yGrid = 272 - GRID_OFFSET_Y_5_INCH; yGrid > GRID_OFFSET_Y_5_INCH; yGrid -= 32)
         {
-//            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000ff, NO_ARROW);        // draw a small cross..
-//            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000ff, NO_ARROW);        // ..as as grid indicator
+            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000ff, NO_ARROW);        // draw a small cross..
+            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000ff, NO_ARROW);        // ..as as grid indicator
             write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], (COLOR)0xff0000, WITH_ARROW);
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
@@ -701,4 +727,204 @@ void write_line_quadrant_4_II(short start_x, short start_y, short stop_x, short 
         gain2 -= 1;
         stop_x--;
     }
+}
+
+/******************************************************************************************************/
+// LCD Panel initialize:
+void ConfigureLCD5Inch(uint32_t SysClock) {
+    uint32_t value;
+
+    GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    GPIO_PORTQ_DATA_R &= ~RST;              // Hardware reset
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+    GPIO_PORTQ_DATA_R |= RST;               //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(SOFTWARE_RESET);          // Software reset
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    write_command(SET_PLL_MN);              // Set PLL Freq to 120 MHz
+    write_cmd_data(0x24);                   //
+    write_cmd_data(0x02);                   //
+    write_cmd_data(0x04);                   //
+
+    write_command(START_PLL);               // Start PLL
+    write_cmd_data(0x01);                   //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(START_PLL);               // Lock PLL
+    write_cmd_data(0x03);                   //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(SOFTWARE_RESET);          // Software reset
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+/*************************************************************************/
+    value = 0x01EFFF;
+    write_command(SET_LSHIFT);              // Set LCD Pixel Clock 12.7 Mhz (0x01EFFF)
+    write_cmd_data(value>>16);              //
+    write_cmd_data(value>>8);               //
+    write_cmd_data(value);                  //
+    write_command(SET_LCD_MODE);            // Set LCD Panel mode to:
+    write_cmd_data(0x20);                   // ..TFT panel 24bit
+    write_cmd_data(0x00);                   // ..TFT mode
+    write_cmd_data(0x01);                   // Horizontal size 480-1 (aka 479 ;)    HB
+    write_cmd_data(0xDF);                   // Horizontal size 480-1                LB
+    write_cmd_data(0x01);                   // Vertical size 272-1   (aka 271 ;)    HB
+    write_cmd_data(0x0F);                   // Vertical size 272-1                  LB
+    write_cmd_data(0x00);                   // even/odd line RGB
+
+    write_command(SET_HORI_PERIOD);         // Set Horizontal period
+    write_cmd_data(0x02);                   // Set HT total pixel=531               HB
+    write_cmd_data(0x13);                   // Set HT total pixel=531               LB
+    write_cmd_data(0x00);                   // Set Horiz.sync pulse start pos = 43  HB
+    write_cmd_data(0x2B);                   // Set Horiz.sync pulse start pos = 43  LB
+    write_cmd_data(0x0A);                   // Set horiz.sync pulse with = 10
+    write_cmd_data(0x00);                   // Set horiz.Sync pulse start pos= 8    HB
+    write_cmd_data(0x08);                   // Set horiz.Sync pulse start pos= 8    LB
+    write_cmd_data(0x00);                   //
+
+    write_command(SET_VERT_PERIOD);         // Set Vertical Period
+    write_cmd_data(0x01);                   // Set VT lines = 288                   HB
+    write_cmd_data(0x20);                   // Set VT lines = 288                   LB
+    write_cmd_data(0x00);                   // Set VPS = 12                         HB
+    write_cmd_data(0x0C);                   // Set VPS = 12                         LB
+    write_cmd_data(0x0A);                   // Set vert.sync pulse with = 10
+    write_cmd_data(0x00);                   // Set vert.Sync pulse start pos= 8    HB
+    write_cmd_data(0x00);                   // Set vert.Sync pulse start pos= 8    LB
+    write_cmd_data(0x04);                   //
+
+    write_command(0xF0);                    // Set LCD color data format
+    write_cmd_data(0x00);                   // Set pixel data format = 8 bit
+
+    write_command(0x30);                    // Set partial area
+    write_cmd_data(0);                      // Start row High
+    write_cmd_data(0);                      // Start row Low
+    value = 543;
+    write_cmd_data(value >> 8);             // Stop row High
+    write_cmd_data(value);                  // Stop row Low
+
+    write_command(0x12);                    // enter partial mode
+
+    write_command(0x33);                    // Set scroll area
+    value = 0;
+    write_cmd_data(value >> 8);             // TFA high byte (TFA = 0)
+    write_cmd_data(value);                  // TFA low byte
+    value = 544;
+    write_cmd_data(value >> 8);             // VSA high byte (VSA = 272)
+    write_cmd_data(value);                  // VSA low byte
+    value = 0;
+    write_cmd_data(value >> 8);             // BFA high byte (BFA = 543)
+    write_cmd_data(value);                  // BFA low byte
+
+    write_command(0x29);                    // Set display on
+}
+
+
+/******************************************************************************************************/
+void ConfigureLCD7Inch(uint32_t SysClock) {
+
+    GPIO_PORTQ_DATA_R = 0x00;
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+    GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    GPIO_PORTQ_DATA_R &= ~RST;              // Hardware reset
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+    GPIO_PORTQ_DATA_R |= RST;               //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(SOFTWARE_RESET);          // Software reset
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    GPIO_PORTQ_DATA_R &= ~RST;              // Hardware reset
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+    GPIO_PORTQ_DATA_R |= RST;               //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(SOFTWARE_RESET);          // Software reset
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+    write_command(SET_PLL_MN);              // Set PLL Freq to 120 MHz
+    write_cmd_data(0x24);                   //
+    write_cmd_data(0x02);                   //
+    write_cmd_data(0x04);                   //
+
+    write_command(START_PLL);               // Start PLL
+    write_cmd_data(0x01);                   //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(START_PLL);               // Lock PLL
+    write_cmd_data(0x03);                   //
+    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
+
+    write_command(SOFTWARE_RESET);          // Software reset
+    SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
+
+/*************************************************************************/
+    write_command(0xe6);       // pixel clock frequency
+    write_cmd_data(0x04); // LCD_FPR = 290985 = 33.300 Mhz Result for 7" Display
+    write_cmd_data(0x70);   //
+    write_cmd_data(0xA9);   //
+
+    write_command(0xB0);          //SET LCD MODE   SIZE !!
+    write_cmd_data(0x19); //19 TFT panel data width - Enable FRC or dithering for color depth enhancement 8 18  1f- 38
+    write_cmd_data(0x20); //SET TFT MODE & hsync+Vsync+DEN MODE   20  or 00
+    write_cmd_data(0x03); //SET horizontal size=800+1 HightByte   !!!!!!!!!!!!
+    write_cmd_data(0x1F);      //SET horizontal size=800+1 LowByte
+    write_cmd_data(0x01);      //SET vertical size=480+1 HightByte
+    write_cmd_data(0xDF);      //SET vertical size=480+1 LowByte
+    write_cmd_data(0x00); //Even line RGB sequence / Odd line RGB sequence RGB
+
+    write_command(0xB4);            // Set Horizontal Period
+    write_cmd_data(0x03); //03 High byte of horizontal total period (display + non-display)
+    write_cmd_data(0x5E); //51 Low byte of the horizontal total period (display + non-display)
+    write_cmd_data(0x00); //High byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data.
+    write_cmd_data(0x46); //**   // 46 Low byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data
+    write_cmd_data(0x09);       // Set the vertical sync
+//    write_cmd_data(0x00);       //SET Hsync pulse start
+//    write_cmd_data(0x00);                                       //00
+//    write_cmd_data(0x00); //SET Hsync pulse subpixel start position  //00
+    write_cmd_data(0x00);             // Set horiz.Sync pulse start pos= 8    HB
+    write_cmd_data(0x08);             // Set horiz.Sync pulse start pos= 8    LB
+    write_cmd_data(0x00);                   //
+    //   ** too small will give you half a PICTURE !!
+
+    write_command(0xB6);          //Set Vertical Period
+    write_cmd_data(0x01); //01 High byte of the vertical total (display + non-display)
+    write_cmd_data(0xFE); //F4 Low byte F5 INCREASES SYNC TIME AND BACK PORCH
+    write_cmd_data(0x00);      // 00
+    write_cmd_data(0x0C); //0C =12 The non-display period in lines between the start of the frame and the first display data in line.
+//    write_cmd_data(0x00); //Set the vertical sync pulse width (LFRAME) in lines.
+//    write_cmd_data(0x00);      //SET Vsync pulse start position
+//    write_cmd_data(0x00);
+    write_cmd_data(0x00);              // Set vert.Sync pulse start pos= 8    HB
+    write_cmd_data(0x00);              // Set vert.Sync pulse start pos= 8    LB
+    write_cmd_data(0x04);                   //
+
+    write_command(0x36);
+    write_cmd_data(0x01);
+
+    // PWM signal frequency = PLL clock
+    write_command(0xBE);
+    write_cmd_data(0x08);
+    write_cmd_data(0x80);
+    write_cmd_data(0x01);
+
+    write_command(0x0A);
+    write_cmd_data(0x1C);         //Power Mode
+
+    write_command(0xF0); //set pixel data format 8bit
+    write_cmd_data(0x00);
+
+    write_command(0x29);                    // Set display on
+
 }

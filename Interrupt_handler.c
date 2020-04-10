@@ -9,14 +9,16 @@
 #define BLUE   0b0001000                            // Debug Output to oscilloscope
 
 /*****************************  # global variables #   ****************************/
-char command[9] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
 
 // Array holding the sin and cos values
 extern int16_t DiffResults[2][8][8];
 
-/***********************  TIMER 0 interrupt handler   ***********************/
-/* Periodically measure the Array values and draw them to the display
-   Also start the UART transmit sequences: This handler triggers the first 16 bytes */
+bool relative = true;
+uint16_t maxArrowSize = 16;
+
+/***********************  TIMER 0 interrupt handler   ************************/
+/* Periodically measure the sensor Array values and draw them to the display */
 void Timer0IntHandler(void)
 {
     GPIO_PORTN_DATA_R ^= YELLOW;                        // for debugging: toggle debug output each time handler is called
@@ -25,8 +27,23 @@ void Timer0IntHandler(void)
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
     ReadArray();
-    Computations();
+    Computations(relative, maxArrowSize);
     drawDisplay5Inch();
+    print_string("Grid gap:", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
+    print_string("relative:", 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+    print_string("arrows", 60, 300, (COLOR)BLACK, (COLOR)WHITE);
+    print_string("  max:", 90, 300, (COLOR)BLACK, (COLOR)WHITE);
+    print_string("length", 110, 300, (COLOR)BLACK, (COLOR)WHITE);
+    if(relative == true)
+    {
+        print_string("absolute", 200, 300, (COLOR)BLACK, (COLOR)WHITE);
+        print_string("maximum:", 220, 300, (COLOR)BLACK, (COLOR)WHITE);
+    }
+    else
+    {
+        print_string("absolute", 200, 300, (COLOR)WHITE, (COLOR)WHITE);
+        print_string("maximum:", 220, 300, (COLOR)WHITE, (COLOR)WHITE);
+    }
 //    drawDisplay7Inch();
 
     GPIO_PORTN_DATA_R ^= BLUE;                          // for debugging: set low when handler is finished
@@ -36,20 +53,20 @@ void Timer0IntHandler(void)
 /*********************************************************************************************/
 void UART0IntHandler(void)
 {
+    static char command[9] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     uint32_t ui32Status;
     int i = 0;
     int checksum = 1;
+    static char text[100];
 
    char receive[100];
 
     // Read the interrupt status of the UART.
     ui32Status = UARTIntStatus(UART0_BASE, 1);
 
-    // Clear any pending status, even though there should be none since no UART
-    // interrupts were enabled.  If UART error interrupts were enabled, then
+    // Clear any pending status. If UART error interrupts were enabled, then
     // those interrupts could occur here and should be handled.  Since uDMA is
-    // used for both the RX and TX, then neither of those interrupts should be
-    // enabled.
+    // used for TX, it interrupt should not be enabled.
     UARTIntClear(UART0_BASE, ui32Status);
 
     if( ui32Status & UART_INT_RX) //  || UIstatus & UART_INT_RT)
@@ -62,11 +79,45 @@ void UART0IntHandler(void)
         }
 
         // command to send Array Data via serial interface to Matlab
-        if(receive[0] == 0)
+        if(receive[0] == '0')
             uDMAChannelEnable(UDMA_CHANNEL_UART0TX);    // The uDMA TX channel must be re-enabled to send a data burst.
 
+        // arrow realtive/absolute and arrow size
+        else if(receive[0] == '1')
+        {
+            if(receive[1] == '0')
+            {
+                relative = false;
+                print_string("relative: false", 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+            }
+            else if(receive[1] == '1')
+            {
+                relative = true;
+                print_string("relative:  true", 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+            }
+            maxArrowSize = (receive[5]-'0') * 100 + (receive[6]-'0') * 10 + (receive[7]-'0');
+            sprintf(text, "%.3u", maxArrowSize);
+            print_string(text, 90, 420, (COLOR)BLACK, (COLOR)WHITE);
+        }
+        // arrow realtive/absolute and arrow size
+        else if(receive[0] == '1')
+        {
+            if(receive[1] == '0')
+            {
+                relative = false;
+                print_string("relative: false", 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+            }
+            else if(receive[1] == '1')
+            {
+                relative = true;
+                print_string("relative:  true", 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+            }
+            maxArrowSize = (receive[5]-'0') * 100 + (receive[6]-'0') * 10 + (receive[7]-'0');
+            sprintf(text, "%.3u", maxArrowSize);
+            print_string(text, 90, 420, (COLOR)BLACK, (COLOR)WHITE);
+        }
         // commands for the stepper motor
-        else if(receive[0] == 1)
+        else if(receive[0] == '2')
         {
             for(i = 1; i < 8; i++)
             {
