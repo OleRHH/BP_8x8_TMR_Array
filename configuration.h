@@ -22,7 +22,6 @@
 #include <driverlib/timer.h>
 #include <driverlib/udma.h>
 
-#include <lcd_functions.h>
 
 /*****************************  # defines #   *****************************/
 // defines for ADC init             // Port and Pin
@@ -43,20 +42,6 @@
 #define ROW_2_R ADC_CTL_CH0         // PE3
 #define ROW_1_R ADC_CTL_CH1         // PE2
 
-// defines for LCD init
-#define RST 0x10
-#define INITIAL_STATE (0x1F)
-#define SOFTWARE_RESET (0x01)
-#define SET_PLL_MN (0xE2)
-#define START_PLL (0xE0)
-#define SET_LSHIFT (0xE6)
-#define SET_LCD_MODE (0xB0)
-#define SET_HORI_PERIOD (0xB4)
-#define SET_VERT_PERIOD (0xB6)
-#define SET_ADRESS_MODE (0x36)
-#define SET_PIXEL_DATA_FORMAT (0xF0)
-#define SET_DISPLAY_ON (0x29)
-
 // Interrupt priority
 #define HIGH_PRIORITY 0x00
 #define LOW_PRIORITY  0x80
@@ -68,9 +53,6 @@ void ConfigureUDMA(void);
 void ConfigureGPIO(void);
 void ConfigureADC(void);
 void ConfigureTimer0(uint32_t);
-
-void ConfigureLCD5Inch(uint32_t);
-void ConfigureLCD7Inch(uint32_t SysClock);
 
 extern void UART0IntHandler(void);
 extern void UART2IntHandler(void);

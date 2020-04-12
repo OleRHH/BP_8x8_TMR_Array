@@ -26,15 +26,5 @@
 
 /**************************  # Prototypes #   ****************************/
 
-// enum colors
-enum
-{
-    BLACK   = 0x000000,
-    RED     = 0x0000FF,
-    GREEN   = 0x00FF00,
-    YELLOW  = 0x00FFFF,
-    BLUE    = 0xFF0000,
-    WHITE   = 0xFFFFFF
-};
 
 #endif /* MAIN_H_ */

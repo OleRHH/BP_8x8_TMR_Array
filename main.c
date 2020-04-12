@@ -17,14 +17,16 @@ int main(void)
     ConfigureUART0(SysClock);
     ConfigureUART2(SysClock);
 
+    // write initial data to the display
    write_screen_color5INCH((COLOR)WHITE);       // set the display background color
-
+   write_Infos(true, 16, 0);
     // write the frame for the Array Display
 //    write_line(80, 10, 720, 10, (COLOR)YELLOW, 0);
 //    write_line(80, 470, 720, 470, (COLOR)YELLOW, 0);
 //
 //    write_line(80, 10, 80, 470, (COLOR)YELLOW, 0);
 //    write_line(720, 10, 720, 470, (COLOR)YELLOW, 0);
+
     IntMasterEnable();
 
     while(1);                               // busy waiting. Tasks running in interrupt handler.

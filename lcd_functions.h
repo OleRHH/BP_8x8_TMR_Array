@@ -13,9 +13,25 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <driverlib/sysctl.h>
 
 
 /*****************************  # defines #   *****************************/
+// defines for LCD init
+#define RST 0x10
+#define INITIAL_STATE (0x1F)
+#define SOFTWARE_RESET (0x01)
+#define SET_PLL_MN (0xE2)
+#define START_PLL (0xE0)
+#define SET_LSHIFT (0xE6)
+#define SET_LCD_MODE (0xB0)
+#define SET_HORI_PERIOD (0xB4)
+#define SET_VERT_PERIOD (0xB6)
+#define SET_ADRESS_MODE (0x36)
+#define SET_PIXEL_DATA_FORMAT (0xF0)
+#define SET_DISPLAY_ON (0x29)
 
 #define FONT_WIDTH_BIG 12
 #define FONT_HIGHT_BIG 16
@@ -23,7 +39,7 @@
 #define WITH_ARROW      1
 #define ARROW_ANGLE     0.5236          // RAD = 30°
 #define ARROW_LENGTH    5
-#define GRID_OFFSET_X_5_INCH ( 80 )
+#define GRID_OFFSET_X_5_INCH ( 30 )
 #define GRID_OFFSET_Y_5_INCH ( 20 )
 #define GRID_OFFSET_X_7_INCH ( 200 )
 #define GRID_OFFSET_Y_7_INCH ( 50 )
@@ -41,38 +57,31 @@ typedef union color
     };
 } COLOR;
 
+// enum colors
+enum
+{
+    BLACK   = 0x000000,
+    RED     = 0x0000FF,
+    GREEN   = 0x00FF00,
+    YELLOW  = 0x00FFFF,
+    BLUE    = 0xFF0000,
+    WHITE   = 0xFFFFFF
+};
+
+
 
 /**************************  # Prototypes #   ****************************/
+
+void ConfigureLCD5Inch(uint32_t);
+void ConfigureLCD7Inch(uint32_t SysClock);
+
 void screen_show_nr(uint16_t);
 void screen_write_nr(uint16_t);
-void write_char(uint16_t, COLOR, COLOR);
 void print_string(char *, uint16_t, uint16_t, COLOR, COLOR);
 void write_screen_color5INCH(COLOR);
 void write_screen_color7INCH(COLOR);
 void drawDisplay5Inch(void);
 void drawDisplay7Inch(void);
-void draw_arrow(short, short, short, short, COLOR);
-
-void write_command(unsigned char);
-void write_cmd_data(unsigned char);
-void write_data(COLOR);
-void write_position(uint16_t, uint16_t, uint16_t, uint16_t);
-
-void write_line(short, short, short, short, COLOR, uint16_t);
-
-void write_line_0_degree  (short, short, short, short, COLOR);
-void write_line_90_degree (short, short, short, short, COLOR);
-void write_line_180_degree(short, short, short, short, COLOR);
-void write_line_270_degree(short, short, short, short, COLOR);
-
-void write_line_quadrant_1_I (short, short, short, short, double, COLOR);      //   0° < degree < 90°
-void write_line_quadrant_1_II(short, short, short, short, double, COLOR);      //   0° < degree < 90°
-void write_line_quadrant_2_I (short, short, short, short, double, COLOR);      //  90° < degree < 180°
-void write_line_quadrant_2_II(short, short, short, short, double, COLOR);      //  90° < degree < 180°
-void write_line_quadrant_3_I (short, short, short, short, double, COLOR);      // 180° < degree < 270°
-void write_line_quadrant_3_II(short, short, short, short, double, COLOR);      // 180° < degree < 270°
-void write_line_quadrant_4_I (short, short, short, short, double, COLOR);      // 270° < degree < 360°
-void write_line_quadrant_4_II(short, short, short, short, double, COLOR);      // 270° < degree < 360°
-
+void write_Infos(bool, uint16_t, uint32_t);
 
 #endif /* LCD_FUNCTIONS_H_ */
