@@ -1,26 +1,21 @@
 #include <configuration.h>
 
 //*****************************************************************************
-// The size of the UART transmit and receive buffers.  They do not need to be
-// the same size.
-#define UART_TXBUF_SIZE         256
-
-//*****************************************************************************
-// The transmit and receive buffers used for the UART transfers.  There is one
-// transmit buffer and a pair of receive ping-pong buffers.
-extern int16_t DiffResults[2][8][8];
-char g_ui8TxBuf[256];
-
-
-
 // The control table used by the uDMA controller.  This table must be aligned
 // to a 1024 byte boundary.
-//
-//*****************************************************************************
 #pragma DATA_ALIGN(pui8ControlTable, 1024)
 uint8_t pui8ControlTable[1024];
 
+
+//*****************************************************************************
+// The transmit buffer used for the UART transfer.
+extern int16_t DiffResults[2][8][8];
+
+
 /******************************************************************************************************/
+/* The sensor array has 64 TMR-Sensors with four analog singals each (sin+, sin-, cos+, cos-).
+ * This makes in total 256 analog signals to be measured. They are multiplexed to 16 analog inputs.
+ * So there are 16 analog inputs to be measured simultaneously */
 void ConfigureADC(void)
 {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
@@ -66,7 +61,7 @@ void ConfigureADC(void)
 
 
 /*********************************************************************************************/
-/* UART0 is used to transfer Array Data (256 byes) via RS232 */
+/* UART0 is used to transmit Array Data (256 byes) via RS232 and to receive control commands*/
 void ConfigureUART0(uint32_t SysClock)
 {
     // Enable the uDMA controller at the system level.  Enable it to continue
@@ -157,7 +152,7 @@ void ConfigureUART0(uint32_t SysClock)
 
     // Enable the UART DMA TX/RX interrupts.
     UARTIntRegister(UART0_BASE, UART0IntHandler);
-    UARTIntEnable(UART0_BASE, UART_INT_RX);
+//    UARTIntEnable(UART0_BASE, UART_INT_RX);
     UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_DMATX | UART_INT_DMATX);
 
     // Enable the UART peripheral interrupts.
@@ -179,22 +174,21 @@ void ConfigureUART2(uint32_t SysClock)
     // Configure GPIO Pins for UART mode
     GPIOPinConfigure(GPIO_PA6_U2RX);
     GPIOPinConfigure(GPIO_PA7_U2TX);
-    GPIOPinTypeUART(GPIO_PORTA_BASE,GPIO_PIN_6|GPIO_PIN_7);
+    GPIOPinTypeUART(GPIO_PORTA_BASE,GPIO_PIN_6 | GPIO_PIN_7);
 
 
     UARTConfigSetExpClk(UART2_BASE, SysClock, 9600, //115200,
                             (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                              UART_CONFIG_PAR_NONE));
 
-    // Enable the UART interrupt
+    UARTIntRegister(UART2_BASE, UART2IntHandler);
     UARTFIFOEnable(UART2_BASE);
-//    IntPrioritySet(INT_UART2, LOW_PRIORITY);                // set priority
-//    UARTIntEnable(UART2_BASE, UART_INT_RX | UART_INT_RT | UART_INT_TX);
-    UARTFIFOLevelSet(UART2_BASE, UART_FIFO_TX1_8, UART_FIFO_RX1_8);
-//    UARTTxIntModeSet(UART2_BASE, UART_TXINT_MODE_EOT);
-//    UARTIntRegister(UART2_BASE, UART2IntHandler);
-//
-//    IntEnable(INT_UART2);
+    UARTFIFOLevelSet(UART2_BASE, UART_FIFO_TX1_8, UART_FIFO_RX4_8);
+    IntEnable(INT_UART2);
+    UARTIntEnable(UART2_BASE, UART_INT_RX | UART_INT_RT); // | UART_INT_TX);
+
+
+
 }
 
 
@@ -227,6 +221,8 @@ void ConfigureGPIO(void)
 
 /*********************************************************************************************/
 void ConfigureTimer0(uint32_t SysClock)
+/* this timer is used to run the program periodically. Upon call the analog inputs are read,
+ * converted and send to the LC-Display */
 {
     // Configure Timer0 Interrupt
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);           // Clock Gate enable TIMER0upt

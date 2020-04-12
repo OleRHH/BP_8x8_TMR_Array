@@ -27,7 +27,8 @@
 /**************************  # Prototypes #   ****************************/
 void ReadArray(void);
 void GetADCValues(void);
-void Computations(bool, uint16_t);
+uint32_t compute_relative(uint16_t);
+uint32_t compute_absolute(uint16_t);
 
 
 #endif /* FUNCTIONS_H_ */

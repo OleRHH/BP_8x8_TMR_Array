@@ -22,7 +22,6 @@
 #include <driverlib/timer.h>
 #include <driverlib/udma.h>
 
-#include <lcd_functions.h>
 
 /*****************************  # defines #   *****************************/
 // defines for ADC init             // Port and Pin
@@ -54,7 +53,6 @@ void ConfigureUDMA(void);
 void ConfigureGPIO(void);
 void ConfigureADC(void);
 void ConfigureTimer0(uint32_t);
-
 
 extern void UART0IntHandler(void);
 extern void UART2IntHandler(void);

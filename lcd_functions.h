@@ -82,5 +82,6 @@ void write_screen_color5INCH(COLOR);
 void write_screen_color7INCH(COLOR);
 void drawDisplay5Inch(void);
 void drawDisplay7Inch(void);
+void write_Infos(bool, uint16_t, uint32_t);
 
 #endif /* LCD_FUNCTIONS_H_ */

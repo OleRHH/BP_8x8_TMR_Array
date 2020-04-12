@@ -16,14 +16,14 @@ void write_line_0_degree  (short, short, short, short, COLOR);
 void write_line_90_degree (short, short, short, short, COLOR);
 void write_line_180_degree(short, short, short, short, COLOR);
 void write_line_270_degree(short, short, short, short, COLOR);
-void write_line_quadrant_1_I (short, short, short, short, double, COLOR);      //   0° < degree < 90°
-void write_line_quadrant_1_II(short, short, short, short, double, COLOR);      //   0° < degree < 90°
-void write_line_quadrant_2_I (short, short, short, short, double, COLOR);      //  90° < degree < 180°
-void write_line_quadrant_2_II(short, short, short, short, double, COLOR);      //  90° < degree < 180°
-void write_line_quadrant_3_I (short, short, short, short, double, COLOR);      // 180° < degree < 270°
-void write_line_quadrant_3_II(short, short, short, short, double, COLOR);      // 180° < degree < 270°
-void write_line_quadrant_4_I (short, short, short, short, double, COLOR);      // 270° < degree < 360°
-void write_line_quadrant_4_II(short, short, short, short, double, COLOR);      // 270° < degree < 360°
+void write_line_quadrant_1_I (short, short, short, short, double, COLOR);  //   0° < degree < 90°
+void write_line_quadrant_1_II(short, short, short, short, double, COLOR);  //   0° < degree < 90°
+void write_line_quadrant_2_I (short, short, short, short, double, COLOR);  //  90° < degree < 180°
+void write_line_quadrant_2_II(short, short, short, short, double, COLOR);  //  90° < degree < 180°
+void write_line_quadrant_3_I (short, short, short, short, double, COLOR);  // 180° < degree < 270°
+void write_line_quadrant_3_II(short, short, short, short, double, COLOR);  // 180° < degree < 270°
+void write_line_quadrant_4_I (short, short, short, short, double, COLOR);  // 270° < degree < 360°
+void write_line_quadrant_4_II(short, short, short, short, double, COLOR);  // 270° < degree < 360°
 
 
 
@@ -39,6 +39,53 @@ extern int16_t DiffSinResults[8][8];
 extern const char font_12_16[256][32];
 
 
+/***************************  write_Infos()   *******************************/
+// writes some info as text on the display.                                 //
+// Infos are: absolute or relative arrow mode, maximum measured analog,     //
+// arrow max length.                                                        //
+/****************************************************************************/
+void write_Infos(bool relative, uint16_t maxArrowSize, uint32_t maximumAnalogValue)
+{
+    char charValue[100];
+    static bool old = true;
+
+    if(old != relative)
+    {
+        old = relative;
+        write_screen_color5INCH((COLOR)WHITE);
+    }
+    if(relative == true)
+    {
+        print_string("relative:  true", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
+
+        sprintf(charValue, "length: %.3d", maxArrowSize);
+        print_string(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+
+        sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
+        print_string(charValue, 70, 300, (COLOR)BLACK, (COLOR)WHITE);
+    }
+    else
+    {
+        print_string("relative: false", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
+
+        sprintf(charValue, "length: %.3d", maxArrowSize);
+        print_string(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+
+        sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
+        print_string(charValue, 70, 300, (COLOR)BLACK, (COLOR)WHITE);
+
+        if(maximumAnalogValue > maxArrowSize)
+        {
+            print_string("Clipping!", 100, 300, (COLOR)BLACK, (COLOR)WHITE);
+        }
+        else
+        {
+            print_string("Clipping!", 100, 300, (COLOR)WHITE, (COLOR)WHITE);
+        }
+    }
+}
+
+
 /***************************  screen_show_nr()   ****************************/
 // the display dimensions are 480*272 pixels => 130560 pixels               //
 // the lcd memory is much bigger, so three display screens can be saved     //
@@ -48,7 +95,7 @@ void screen_show_nr(uint16_t nr)
 {
     uint16_t value = nr * 272;
 
-    write_command(0x37);                    // Set scroll area
+    write_command(0x37);                     // Set scroll area
     write_cmd_data(value >> 8);              // TFA high byte
     write_cmd_data(value);                   // TFA low byte
 }
@@ -65,7 +112,36 @@ void screen_write_nr(uint16_t nr)
 }
 
 
+/****************************  print_string()   *****************************/
+// writes a string to the given position on the LD-Display                  //
+/****************************************************************************/
+void print_string(char *text, uint16_t row, uint16_t column, COLOR color, COLOR backcolor)
+{
+    uint16_t letter, numLetter, lv;
+    uint16_t length = strlen(text);
+    uint16_t columnStart = column;
+    uint16_t columnStop = columnStart + FONT_WIDTH_BIG - 1;
+    uint16_t rowStart = row;
+    uint16_t rowStop = rowStart + FONT_HIGHT_BIG - 1;
+
+    for (numLetter = 0; numLetter < length; numLetter++)
+    {
+        write_position(columnStart, rowStart, columnStop, rowStop);
+        write_command(0x2C);
+        for (lv = 0; lv < 32; lv += 2)
+        {
+            letter = (font_12_16[text[numLetter]][lv + 1] << 4)
+                    | (font_12_16[text[numLetter]][lv] >> 4);
+            write_char(letter, color, backcolor);
+        }
+        columnStart += FONT_WIDTH_BIG;
+        columnStop  += FONT_WIDTH_BIG;
+    }
+}
+
+
 /****************************  write_char()   *******************************/
+// helper function for print_string():                                      //
 // writes a single letter with height 12 pixel                              //
 /****************************************************************************/
 void write_char(uint16_t letter, COLOR color, COLOR backcolor)
@@ -99,33 +175,7 @@ void write_char(uint16_t letter, COLOR color, COLOR backcolor)
 }
 
 
-/****************************************************************************/
-void print_string(char *text, uint16_t row, uint16_t column, COLOR color, COLOR backcolor)
-{
-    uint16_t letter, numLetter, lv;
-    uint16_t length = strlen(text);
-    uint16_t columnStart = column;
-    uint16_t columnStop = columnStart + FONT_WIDTH_BIG - 1;
-    uint16_t rowStart = row;
-    uint16_t rowStop = rowStart + FONT_HIGHT_BIG - 1;
-
-    for (numLetter = 0; numLetter < length; numLetter++)
-    {
-        write_position(columnStart, rowStart, columnStop, rowStop);
-        write_command(0x2C);
-        for (lv = 0; lv < 32; lv += 2)
-        {
-            letter = (font_12_16[text[numLetter]][lv + 1] << 4)
-                    | (font_12_16[text[numLetter]][lv] >> 4);
-            write_char(letter, color, backcolor);
-        }
-        columnStart += FONT_WIDTH_BIG;
-        columnStop  += FONT_WIDTH_BIG;
-    }
-}
-
-
-/****************************************************************************/
+/***********************  write_screen_color5INCH()   ***********************/
 // Writes the hole screen in one color                                      //
 /****************************************************************************/
 void write_screen_color5INCH(COLOR color)
@@ -151,7 +201,7 @@ void write_screen_color5INCH(COLOR color)
 }
 
 
-/****************************************************************************/
+/***********************  write_screen_color7INCH()   ***********************/
 // Writes the hole screen in one color                                      //
 /****************************************************************************/
 void write_screen_color7INCH(COLOR color)
@@ -177,6 +227,8 @@ void write_screen_color7INCH(COLOR color)
 }
 
 
+/**************************  drawDisplay5Inch()   ***************************/
+// draws all arrows to the 5 inch LC-Display.                               //
 /****************************************************************************/
 void drawDisplay5Inch(void)
 {
@@ -213,6 +265,8 @@ void drawDisplay5Inch(void)
 }
 
 
+/**************************  drawDisplay7Inch()   ***************************/
+// draws all arrows to the 7 inch LC-Display.                               //
 /****************************************************************************/
 void drawDisplay7Inch(void)
 {
@@ -364,7 +418,6 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
             }
         }
     }
-
 /////////////////////////////////////////////////////////////////////////////////////////
     else
     {

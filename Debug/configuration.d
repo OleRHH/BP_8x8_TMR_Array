@@ -24,14 +24,6 @@ configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/dr
 configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h
 configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/timer.h
 configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/udma.h
-configuration.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/lcd_functions.h
-configuration.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h
-configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/string.h
-configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdio.h
-configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdarg.h
-configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/math.h
-configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/_defs.h
-configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/machine/_limits.h
 
 ../configuration.c: 
 /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/configuration.h: 
@@ -57,11 +49,3 @@ configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/timer.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/udma.h: 
-/home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/lcd_functions.h: 
-/home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
-/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/string.h: 
-/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdio.h: 
-/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdarg.h: 
-/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/math.h: 
-/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/_defs.h: 
-/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/machine/_limits.h: 
