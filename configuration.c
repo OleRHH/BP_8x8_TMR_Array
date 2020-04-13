@@ -101,7 +101,7 @@ void ConfigureUART0(uint32_t SysClock)
     // uDMA TX and RX channels will be configured so that it can transfer 4
     // bytes in a burst when the UART is ready to transfer more data.
     UARTFIFOEnable(UART0_BASE);
-    UARTFIFOLevelSet(UART0_BASE, UART_FIFO_TX4_8, UART_FIFO_RX4_8);
+    UARTFIFOLevelSet(UART0_BASE, UART_FIFO_TX7_8, UART_FIFO_RX4_8);
 
     // Enable the UART for operation, and enable the uDMA interface for both TX
     // and RX channels.
@@ -133,27 +133,12 @@ void ConfigureUART0(uint32_t SysClock)
     uDMAChannelControlSet(UDMA_CHANNEL_UART0TX | UDMA_PRI_SELECT,
                               UDMA_SIZE_8 | UDMA_SRC_INC_8 |
                               UDMA_DST_INC_NONE |
-                              UDMA_ARB_4);
-
-    // Set up the transfer parameters for the uDMA UART TX channel.  This will
-    // configure the transfer source and destination and the transfer size.
-    // Basic mode is used because the peripheral is making the uDMA transfer
-    // request.  The source is the TX buffer and the destination is the UART
-    // data register.
-    uDMAChannelTransferSet(UDMA_CHANNEL_UART0TX | UDMA_PRI_SELECT,
-                               UDMA_MODE_BASIC, (char *)DiffResults,
-                               (void *)(UART0_BASE + UART_O_DR),
-                               sizeof(DiffResults));
-
-    // Now both the uDMA UART TX and RX channels are primed to start a
-    // transfer.  As soon as the channels are enabled, the peripheral will
-    // issue a transfer request and the data transfers will begin.
-//    uDMAChannelEnable(UDMA_CHANNEL_UART0TX);      // starts the first uDMA transfer (256 bytes)
+                              UDMA_ARB_8);
 
     // Enable the UART DMA TX/RX interrupts.
     UARTIntRegister(UART0_BASE, UART0IntHandler);
 //    UARTIntEnable(UART0_BASE, UART_INT_RX);
-    UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_DMATX | UART_INT_DMATX);
+    UARTIntEnable(UART0_BASE, UART_INT_RX);
 
     // Enable the UART peripheral interrupts.
     IntEnable(INT_UART0);
