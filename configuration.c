@@ -10,7 +10,7 @@ uint8_t pui8ControlTable[1024];
 //*****************************************************************************
 // The transmit buffer used for the UART transfer.
 extern int16_t DiffResults[2][8][8];
-
+extern char receive[100];
 
 /******************************************************************************************************/
 /* The sensor array has 64 TMR-Sensors with four analog singals each (sin+, sin-, cos+, cos-).
@@ -101,14 +101,46 @@ void ConfigureUART0(uint32_t SysClock)
     // uDMA TX and RX channels will be configured so that it can transfer 4
     // bytes in a burst when the UART is ready to transfer more data.
     UARTFIFOEnable(UART0_BASE);
-    UARTFIFOLevelSet(UART0_BASE, UART_FIFO_TX4_8, UART_FIFO_RX4_8);
+    UARTFIFOLevelSet(UART0_BASE, UART_FIFO_TX7_8, UART_FIFO_RX4_8);
 
     // Enable the UART for operation, and enable the uDMA interface for both TX
     // and RX channels.
     UARTEnable(UART0_BASE);
-    UARTDMAEnable(UART0_BASE, UART_DMA_TX);
+    UARTDMAEnable(UART0_BASE, UART_DMA_RX | UART_DMA_TX);
 
 
+    // uDMA Rx:
+    // Put the attributes in a known state for the uDMA UART0RX channel.  These
+      // should already be disabled by default.
+      uDMAChannelAttributeDisable(UDMA_CHANNEL_UART0RX,
+                                      UDMA_ATTR_ALTSELECT | UDMA_ATTR_USEBURST |
+                                      UDMA_ATTR_HIGH_PRIORITY |
+                                      UDMA_ATTR_REQMASK);
+
+      // Configure the control parameters for the primary control structure for
+      // the UART RX channel.  The primary contol structure is used for the "A"
+      // part of the ping-pong receive.  The transfer data size is 8 bits, the
+      // source address does not increment since it will be reading from a
+      // register.  The destination address increment is byte 8-bit bytes.  The
+      // arbitration size is set to 4 to match the RX FIFO trigger threshold.
+      // The uDMA controller will use a 4 byte burst transfer if possible.  This
+      // will be somewhat more effecient that single byte transfers.
+      uDMAChannelControlSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT,
+                                UDMA_SIZE_8 | UDMA_SRC_INC_NONE | UDMA_DST_INC_8 |
+                                UDMA_ARB_4);
+
+
+      // Set up the transfer parameters for the UART RX primary control
+      // structure.  The mode is set to ping-pong, the transfer source is the
+      // UART data register, and the destination is the receive "A" buffer.  The
+      // transfer size is set to match the size of the
+      uDMAChannelTransferSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT,
+                             UDMA_MODE_BASIC,
+                                 (void *)(UART0_BASE + UART_O_DR),
+                                 receive, 8);
+
+
+    // uDMA Tx:
     // Put the attributes in a known state for the uDMA UART0TX channel.  These
     // should already be disabled by default.
     uDMAChannelAttributeDisable(UDMA_CHANNEL_UART0TX,
@@ -133,27 +165,18 @@ void ConfigureUART0(uint32_t SysClock)
     uDMAChannelControlSet(UDMA_CHANNEL_UART0TX | UDMA_PRI_SELECT,
                               UDMA_SIZE_8 | UDMA_SRC_INC_8 |
                               UDMA_DST_INC_NONE |
-                              UDMA_ARB_4);
-
-    // Set up the transfer parameters for the uDMA UART TX channel.  This will
-    // configure the transfer source and destination and the transfer size.
-    // Basic mode is used because the peripheral is making the uDMA transfer
-    // request.  The source is the TX buffer and the destination is the UART
-    // data register.
-    uDMAChannelTransferSet(UDMA_CHANNEL_UART0TX | UDMA_PRI_SELECT,
-                               UDMA_MODE_BASIC, (char *)DiffResults,
-                               (void *)(UART0_BASE + UART_O_DR),
-                               sizeof(DiffResults));
+                              UDMA_ARB_8);
 
     // Now both the uDMA UART TX and RX channels are primed to start a
     // transfer.  As soon as the channels are enabled, the peripheral will
     // issue a transfer request and the data transfers will begin.
-//    uDMAChannelEnable(UDMA_CHANNEL_UART0TX);      // starts the first uDMA transfer (256 bytes)
+//    uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
+
 
     // Enable the UART DMA TX/RX interrupts.
     UARTIntRegister(UART0_BASE, UART0IntHandler);
 //    UARTIntEnable(UART0_BASE, UART_INT_RX);
-    UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_DMATX | UART_INT_DMATX);
+    UARTIntEnable(UART0_BASE, UART_INT_DMARX);
 
     // Enable the UART peripheral interrupts.
     IntEnable(INT_UART0);
@@ -167,7 +190,6 @@ void ConfigureUART2(uint32_t SysClock)
     // Enable the GPIO Peripheral used by the UART
     // Rx: PA6  Tx: PA7
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-
     //Enable UART0
     SysCtlPeripheralEnable(SYSCTL_PERIPH_UART2);
 
