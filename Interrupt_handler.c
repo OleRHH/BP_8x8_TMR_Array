@@ -9,6 +9,7 @@
 /*****************************  # global variables #   ****************************/
 // Array holding the sin and cos values
 extern int16_t DiffResults[2][8][8];
+char receive[8];
 
 bool relative = true;
 uint16_t maxArrowSize = 16;
@@ -19,8 +20,8 @@ uint16_t maxArrowSize = 16;
 void Timer0IntHandler(void)
 {
     uint32_t maximumAnalogValue;
-//    GPIO_PORTN_DATA_R ^= YELLOW;                  // for debugging: toggle debug output each time handler is called
-//    GPIO_PORTN_DATA_R |= BLUE;                    // for debugging: set high when handler is called
+    GPIO_PORTN_DATA_R ^= YELLOW;                  // for debugging: toggle debug output each time handler is called
+    GPIO_PORTN_DATA_R |= BLUE;                    // for debugging: set high when handler is called
 
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
@@ -38,6 +39,7 @@ void Timer0IntHandler(void)
     write_Infos(relative, maxArrowSize, maximumAnalogValue);
 
     drawDisplay5Inch();
+
 //    drawDisplay7Inch();
 
     // send command to stepper-motor to send back position data (absolute)
@@ -46,8 +48,7 @@ void Timer0IntHandler(void)
 //        UARTCharPutNonBlocking(UART2_BASE, readCommand[i]);
 //    }
 
-
-//    GPIO_PORTN_DATA_R ^= BLUE;                   // for debugging: set low when handler is finished
+    GPIO_PORTN_DATA_R ^= BLUE;                   // for debugging: set low when handler is finished
 }
 
 
@@ -58,28 +59,26 @@ void UART0IntHandler(void)
     uint32_t ui32Status;
     int i = 0;
     int checksum = 1;
-    char receive[100];
 
     // Read the interrupt status of the UART.
     ui32Status = UARTIntStatus(UART0_BASE, 1);
 
-    // Clear any pending status. If UART error interrupts were enabled, then
-    // those interrupts could occur here and should be handled.  Since uDMA is
-    // used for TX, it interrupt should not be enabled.
+    // Clear any pending status. We are expecting a uDMA Receive Interrupt
     UARTIntClear(UART0_BASE, ui32Status);
 
-    if( ui32Status & UART_INT_RX) //  || UIstatus & UART_INT_RT)
+    if( ui32Status & UART_INT_DMARX) //  || UIstatus & UART_INT_RT)
     {
+        // prepare uDMA for the next receive (8 bytes)
+        uDMAChannelTransferSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT,
+                               UDMA_MODE_BASIC,
+                                   (void *)(UART0_BASE + UART_O_DR),
+                                   receive, sizeof(receive));
+        uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
 
-        while(UARTCharsAvail(UART0_BASE))
-        {
-            receive[i++] = UARTCharGetNonBlocking(UART0_BASE);
-        }
-
-        // command to send Array Data via serial interface to Matlab
+        // now its time to see what we received:
+        // '0': send Array Data (256 bytes) via serial interface to Matlab
         if(receive[0] == '0')
         {
-            GPIO_PORTN_DATA_R ^= YELLOW;
             // Set up the transfer parameters for the uDMA UART TX channel.  This will
             // configure the transfer source and destination and the transfer size.
             // Basic mode is used because the peripheral is making the uDMA transfer
@@ -94,7 +93,7 @@ void UART0IntHandler(void)
             uDMAChannelEnable(UDMA_CHANNEL_UART0TX);
         }
 
-        // set arrow relative/absolute and arrow size
+        // '1': set arrow relative/absolute and arrow size
         else if(receive[0] == '1')
         {
             if(receive[1] == '0')
@@ -105,9 +104,10 @@ void UART0IntHandler(void)
             {
                 relative = true;
             }
+            // restore the 32 bit integer what was send in four peaces
             maxArrowSize = receive[4] << 24 | receive[5] << 16 | receive[6] << 8 | receive[7];
         }
-        // commands for the stepper motor
+        // '2': commands for the stepper motor
         else if(receive[0] == '2')
         {
             for(i = 1; i < 8; i++)
@@ -146,7 +146,6 @@ void UART2IntHandler(void)
         // receive position data from stepper-motor (absolute)
         if(receive[2] == 100 && receive[3] == 6)
         {
-            GPIO_PORTN_DATA_R ^= 1;     // debug toggle for osci
             value = receive[4];
             value <<= 8;
             value |= receive[5];

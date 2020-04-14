@@ -341,7 +341,6 @@ void write_data(COLOR color)
 /******************************************************************************************************/
 void write_position(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uint16_t point2_y)
 {
-    GPIO_PORTN_DATA_R ^= 4;
 	// offset: 1x272 or 2x272 or 3x272 => points to screen 1 or 2 or 3
     point1_y += offset;
     point2_y += offset;
