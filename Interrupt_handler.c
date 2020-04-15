@@ -12,33 +12,29 @@ extern int16_t DiffResults[2][8][8];
 char receive[8];
 
 bool relative = true;
-uint16_t maxArrowSize = 16;
+bool busy = false;
+uint16_t maxArrowSize = 32;
+uint16_t step = 0;
 
-
+uint32_t maximumAnalogValue;
 /***********************  TIMER 0 interrupt handler   ************************/
 /* Periodically measure the sensor Array values and draw them to the display */
 void Timer0IntHandler(void)
 {
-    uint32_t maximumAnalogValue;
+
     GPIO_PORTN_DATA_R ^= YELLOW;                  // for debugging: toggle debug output each time handler is called
     GPIO_PORTN_DATA_R |= BLUE;                    // for debugging: set high when handler is called
 
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
-    ReadArray();
+//    IntTrigger(INT_ADC0SS0);
 
-    if(relative == true)
-    {
-        maximumAnalogValue = compute_relative(maxArrowSize);
-    }
-    else
-    {
-        maximumAnalogValue = compute_absolute(maxArrowSize);
-    }
-
-    write_Infos(relative, maxArrowSize, maximumAnalogValue);
+    ADCProcessorTrigger(ADC0_BASE, 0);
+    ADCProcessorTrigger(ADC1_BASE, 1);
+    ADCProcessorTrigger(ADC1_BASE, 2);
 
     drawDisplay5Inch();
+    write_Infos(relative, maxArrowSize, maximumAnalogValue);
 
 //    drawDisplay7Inch();
 
@@ -49,6 +45,55 @@ void Timer0IntHandler(void)
 //    }
 
     GPIO_PORTN_DATA_R ^= BLUE;                   // for debugging: set low when handler is finished
+}
+
+
+
+
+void ADC0IntHandler(void)
+{
+    while(!ADCIntStatus(ADC0_BASE, 0, false));
+    while(!ADCIntStatus(ADC1_BASE, 1, false));
+    while(!ADCIntStatus(ADC1_BASE, 2, false));
+    ADCIntClear(ADC0_BASE, 0);
+    ADCIntClear(ADC1_BASE, 1);
+    ADCIntClear(ADC1_BASE, 2);
+
+    if(step == 8)
+    {
+        GPIO_PORTL_DATA_R &= ~GPIO_PIN_4;
+    }
+
+    GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
+
+    GetADCValues();
+    SysCtlDelay(8);
+    ReadArray(step);
+
+    (relative == true) ? compute_relative(maxArrowSize): compute_absolute(maxArrowSize);
+
+    if(step < 15)
+    {
+        step++;
+        ADCProcessorTrigger(ADC0_BASE, 0);
+        ADCProcessorTrigger(ADC1_BASE, 1);
+        ADCProcessorTrigger(ADC1_BASE, 2);
+    }
+    else
+    {
+        step = 0;
+        GPIO_PORTL_DATA_R |= GPIO_PIN_4;
+    }
+
+////    GPIO_PORTN_DATA_R ^= YELLOW;
+//    while(!ADCIntStatus(ADC0_BASE, 0, false));
+//    // Quit interrupt
+//
+//    while(!ADCIntStatus(ADC1_BASE, 1, false));
+//    // Quit interrupt
+//
+//    while(!ADCIntStatus(ADC1_BASE, 2, false));
+////     Quit interrupt
 }
 
 
@@ -66,6 +111,8 @@ void UART0IntHandler(void)
     // Clear any pending status. We are expecting a uDMA Receive Interrupt
     UARTIntClear(UART0_BASE, ui32Status);
 
+//    GPIO_PORTN_DATA_R ^= LED_D2;
+
     if( ui32Status & UART_INT_DMARX) //  || UIstatus & UART_INT_RT)
     {
         // prepare uDMA for the next receive (8 bytes)
@@ -74,9 +121,11 @@ void UART0IntHandler(void)
                                    (void *)(UART0_BASE + UART_O_DR),
                                    receive, sizeof(receive));
         uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
+        printf("%s\n", receive);
 
         // now its time to see what we received:
         // '0': send Array Data (256 bytes) via serial interface to Matlab
+
         if(receive[0] == '0')
         {
             // Set up the transfer parameters for the uDMA UART TX channel.  This will
@@ -119,6 +168,25 @@ void UART0IntHandler(void)
             for(i = 0; i < 9; i++)
             {
                 UARTCharPutNonBlocking(UART2_BASE, command[i]);
+            }
+        }
+        // oversampling enabled/disabled
+        else if(receive[0] == '4')
+        {
+            if(receive[1] == '0')
+            {
+                GPIO_PORTN_DATA_R ^= LED_D1;
+                ADCHardwareOversampleConfigure(ADC0_BASE, 1);
+                ADCHardwareOversampleConfigure(ADC1_BASE, 1);
+                printf("Oversampling off\n");
+            }
+            else if(receive[1] == '1')
+            {
+                // set hardware oversampling for better resolution
+                ADCHardwareOversampleConfigure(ADC0_BASE, 64);
+                ADCHardwareOversampleConfigure(ADC1_BASE, 64);
+                printf("Oversampling on\n");
+
             }
         }
     }

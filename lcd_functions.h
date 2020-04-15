@@ -84,4 +84,9 @@ void drawDisplay5Inch(void);
 void drawDisplay7Inch(void);
 void write_Infos(bool, uint16_t, uint32_t);
 
+void enter_sleepmode(void);
+void exit_sleepmode(void);
+
+
+
 #endif /* LCD_FUNCTIONS_H_ */

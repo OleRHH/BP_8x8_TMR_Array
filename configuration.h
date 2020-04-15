@@ -57,6 +57,7 @@ void ConfigureTimer0(uint32_t);
 extern void UART0IntHandler(void);
 extern void UART2IntHandler(void);
 extern void Timer0IntHandler(void);
+extern void ADC0IntHandler(void);
 
 
 #endif /* CONFIGURATION_H_ */
