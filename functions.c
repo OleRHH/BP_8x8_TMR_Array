@@ -28,11 +28,17 @@ uint32_t ADCValues_SS2[4];
 
 int16_t DiffResults[2][8][8];
 
-extern bool busy;
+
 /*********************************************************************************************/
 //Read whole Array
 void ReadArray(uint16_t step)
 {
+
+    // Read the values from the ADC and store them in the arrays ADCValues_SSX
+    ADCSequenceDataGet(ADC0_BASE, 0, ADCValues_SS0);
+    ADCSequenceDataGet(ADC1_BASE, 1, ADCValues_SS1);
+    ADCSequenceDataGet(ADC1_BASE, 2, ADCValues_SS2);
+
     if (step < 8)                                 // read Cos-Values(= first 8 cycles)
     {
         //left half
@@ -79,17 +85,6 @@ void ReadArray(uint16_t step)
         SinResults[6][step] = (int16_t) ADCValues_SS2[2];
         SinResults[7][step] = (int16_t) ADCValues_SS2[3];
     }
-}
-
-
-/*********************************************************************************************/
-// Get ADC Values
-void GetADCValues(void)
-{
-    // Read the values from the ADC and store them in the arrays ADCValues_SSX
-    ADCSequenceDataGet(ADC0_BASE, 0, ADCValues_SS0);
-    ADCSequenceDataGet(ADC1_BASE, 1, ADCValues_SS1);
-    ADCSequenceDataGet(ADC1_BASE, 2, ADCValues_SS2);
 }
 
 

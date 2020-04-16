@@ -26,8 +26,8 @@ void ConfigureADC(void)
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC1));
 
     // set hardware oversampling for better resolution
-//    ADCHardwareOversampleConfigure(ADC0_BASE, 64);
-//    ADCHardwareOversampleConfigure(ADC1_BASE, 64);
+    ADCHardwareOversampleConfigure(ADC0_BASE, 64);
+    ADCHardwareOversampleConfigure(ADC1_BASE, 64);
 
     // ADC, sample sequencer, trigger processor, priority
     ADCSequenceConfigure(ADC0_BASE,0, ADC_TRIGGER_PROCESSOR, 0);
@@ -49,15 +49,15 @@ void ConfigureADC(void)
     ADCSequenceStepConfigure(ADC1_BASE, 1, 0, ROW_1_R); // sequence1,step0
     ADCSequenceStepConfigure(ADC1_BASE, 1, 1, ROW_2_R); // sequence1,step1
     ADCSequenceStepConfigure(ADC1_BASE, 1, 2, ROW_3_R); // sequence1,step2
-    ADCSequenceStepConfigure(ADC1_BASE, 1, 3, ROW_4_R|  // sequence1,step3
-                             ADC_CTL_IE|ADC_CTL_END);
+    ADCSequenceStepConfigure(ADC1_BASE, 1, 3, ROW_4_R); //|  // sequence1,step3
+//                             ADC_CTL_IE|ADC_CTL_END);
 
     // Sample sequencer 2, lower right side of the array
     ADCSequenceStepConfigure(ADC1_BASE, 2, 0, ROW_5_R); // sequence2,step0
     ADCSequenceStepConfigure(ADC1_BASE, 2, 1, ROW_6_R); // sequence2,step1
     ADCSequenceStepConfigure(ADC1_BASE, 2, 2, ROW_7_R); // sequence2,step2
-    ADCSequenceStepConfigure(ADC1_BASE, 2, 3, ROW_8_R|  // sequence2,step3
-    ADC_CTL_IE|ADC_CTL_END);							// incl.interrupt
+    ADCSequenceStepConfigure(ADC1_BASE, 2, 3, ROW_8_R); //|  // sequence2,step3
+//                             ADC_CTL_IE|ADC_CTL_END);							// incl.interrupt
 
 
 
@@ -185,21 +185,18 @@ void ConfigureUART0(uint32_t SysClock)
 
     // Now both the uDMA UART TX and RX channels are primed to start a
     // transfer.  As soon as the channels are enabled, the peripheral will
-    // issue a transfer request and the data transfers will begin.
+    // issue a transfer request and the data transfers will begin. Also it
+    // will receive bytes
 //    uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
+    uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
 
 
     // Enable the UART DMA TX/RX interrupts.
     UARTIntRegister(UART0_BASE, UART0IntHandler);
-//    UARTIntEnable(UART0_BASE, UART_INT_RX);
+//  UARTIntEnable(UART0_BASE, UART_INT_RX);
     UARTIntEnable(UART0_BASE, UART_INT_DMARX);
 
     // Enable the UART peripheral interrupts.
-    while(UARTCharsAvail(UART0_BASE))
-    {
-        UARTCharGet(UART0_BASE);
-    }
-
     IntEnable(INT_UART0);
 }
 
@@ -229,9 +226,6 @@ void ConfigureUART2(uint32_t SysClock)
     UARTFIFOLevelSet(UART2_BASE, UART_FIFO_TX1_8, UART_FIFO_RX4_8);
     IntEnable(INT_UART2);
     UARTIntEnable(UART2_BASE, UART_INT_RX | UART_INT_RT); // | UART_INT_TX);
-
-
-
 }
 
 

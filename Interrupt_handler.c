@@ -12,23 +12,19 @@ extern int16_t DiffResults[2][8][8];
 char receive[8];
 
 bool relative = true;
-bool busy = false;
 uint16_t maxArrowSize = 32;
-uint16_t step = 0;
-
 uint32_t maximumAnalogValue;
+
 /***********************  TIMER 0 interrupt handler   ************************/
 /* Periodically measure the sensor Array values and draw them to the display */
 void Timer0IntHandler(void)
 {
-
     GPIO_PORTN_DATA_R ^= YELLOW;                  // for debugging: toggle debug output each time handler is called
     GPIO_PORTN_DATA_R |= BLUE;                    // for debugging: set high when handler is called
 
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
-//    IntTrigger(INT_ADC0SS0);
-
+    // start the first ADC read. The Rest will be triggered in the ADC handler
     ADCProcessorTrigger(ADC0_BASE, 0);
     ADCProcessorTrigger(ADC1_BASE, 1);
     ADCProcessorTrigger(ADC1_BASE, 2);
@@ -48,56 +44,51 @@ void Timer0IntHandler(void)
 }
 
 
-
-
+/*********************************************************************************************/
+/* capture the analog sensor array signals without busy waiting until ad-conversion is complete */
 void ADC0IntHandler(void)
 {
-    while(!ADCIntStatus(ADC0_BASE, 0, false));
-    while(!ADCIntStatus(ADC1_BASE, 1, false));
-    while(!ADCIntStatus(ADC1_BASE, 2, false));
-    ADCIntClear(ADC0_BASE, 0);
-    ADCIntClear(ADC1_BASE, 1);
-    ADCIntClear(ADC1_BASE, 2);
+    static uint16_t step = 0;
 
+    ADCIntClear(ADC0_BASE, 0);
+
+    // advance step count each time an AD-conversion is finished
+    step++;
+
+    // Port L is used to address the analog multiplexers on the TMR sensor array
     if(step == 8)
     {
         GPIO_PORTL_DATA_R &= ~GPIO_PIN_4;
     }
-
     GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
 
-    GetADCValues();
-    SysCtlDelay(8);
-    ReadArray(step);
+    // store the captured analog values into local buffers
+    ReadArray(step-1);
 
+    // make the appropriate computations
     (relative == true) ? compute_relative(maxArrowSize): compute_absolute(maxArrowSize);
 
-    if(step < 15)
+    // trigger the next ad-conversion (16 in total)
+    if(step <= 15)
     {
-        step++;
         ADCProcessorTrigger(ADC0_BASE, 0);
         ADCProcessorTrigger(ADC1_BASE, 1);
         ADCProcessorTrigger(ADC1_BASE, 2);
     }
+    // after 16 conversions simply prepare for the next cycle
     else
     {
         step = 0;
+        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
         GPIO_PORTL_DATA_R |= GPIO_PIN_4;
     }
 
-////    GPIO_PORTN_DATA_R ^= YELLOW;
-//    while(!ADCIntStatus(ADC0_BASE, 0, false));
-//    // Quit interrupt
-//
-//    while(!ADCIntStatus(ADC1_BASE, 1, false));
-//    // Quit interrupt
-//
-//    while(!ADCIntStatus(ADC1_BASE, 2, false));
-////     Quit interrupt
+//    GPIO_PORTN_DATA_R ^= YELLOW;
 }
 
 
 /*********************************************************************************************/
+/* communication via RS232 interface with the PC (sending sensor data to matlab, receiving commands etc) */
 void UART0IntHandler(void)
 {
     static char command[9] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -113,7 +104,7 @@ void UART0IntHandler(void)
 
 //    GPIO_PORTN_DATA_R ^= LED_D2;
 
-    if( ui32Status & UART_INT_DMARX) //  || UIstatus & UART_INT_RT)
+    if( ui32Status & UART_INT_DMARX)
     {
         // prepare uDMA for the next receive (8 bytes)
         uDMAChannelTransferSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT,
@@ -121,7 +112,7 @@ void UART0IntHandler(void)
                                    (void *)(UART0_BASE + UART_O_DR),
                                    receive, sizeof(receive));
         uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
-        printf("%s\n", receive);
+//        printf("%s %x%x%x%x \n", receive, receive[4], receive[5], receive[6], receive[7]);
 
         // now its time to see what we received:
         // '0': send Array Data (256 bytes) via serial interface to Matlab
@@ -194,6 +185,7 @@ void UART0IntHandler(void)
 
 
 /*********************************************************************************************/
+/* send commands to the stepper motor and receiving telemetry data from motor via RS485 */
 void UART2IntHandler(void)
 {
     int i = 0;
