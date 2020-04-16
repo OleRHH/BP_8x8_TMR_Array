@@ -13,26 +13,19 @@ int16_t DiffCosResults[8][8];
 int16_t DiffCosResultsDisp[8][8];
 int16_t DiffSinResultsDisp[8][8];
 
-int16_t negSinResults[8][8];
-int16_t posSinResults[8][8];
-
-int16_t negCosResults[8][8];
-int16_t posCosResults[8][8];
-
 int16_t SinOffset[8][8];
 int16_t CosOffset[8][8];
 
-uint32_t ADCValues_SS0[8];
-uint32_t ADCValues_SS1[4];
-uint32_t ADCValues_SS2[4];
+int16_t DiffResults[2][8][8];   // 256 bytes array for transmit via RS232
 
-int16_t DiffResults[2][8][8];
-
-
+int16_t v_length[8][8];
 /*********************************************************************************************/
 //Read whole Array
 void ReadArray(uint16_t step)
 {
+    uint32_t ADCValues_SS0[8];
+    uint32_t ADCValues_SS1[4];
+    uint32_t ADCValues_SS2[4];
 
     // Read the values from the ADC and store them in the arrays ADCValues_SSX
     ADCSequenceDataGet(ADC0_BASE, 0, ADCValues_SS0);
@@ -93,7 +86,13 @@ void ReadArray(uint16_t step)
 
 uint32_t compute_relative(uint16_t maxArrowSize)
 {
-    int32_t maxAnalogValue = 1, absolute;
+    int16_t negSinResults[8][8];
+    int16_t posSinResults[8][8];
+
+    int16_t negCosResults[8][8];
+    int16_t posCosResults[8][8];
+
+    int16_t maxAnalogValue = 1;
     uint16_t m, n;
 
     for(m = 0; m <= 7; m++)
@@ -112,24 +111,24 @@ uint32_t compute_relative(uint16_t maxArrowSize)
             SinOffset[m][n]      = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
 
             // berechne die Betragsquadrate:
-            absolute = DiffResults[1][m][n]*DiffResults[1][m][n] + DiffResults[0][m][n]*DiffResults[0][m][n];
+            v_length[m][n] = (uint16_t) sqrt(DiffResults[1][m][n]*DiffResults[1][m][n] +
+                                DiffResults[0][m][n]*DiffResults[0][m][n]);
 
             // finde den größten Betragsquadrat und speicher ihn
-            if(absolute > maxAnalogValue)
+            if(v_length[m][n] > maxAnalogValue)
             {
-                maxAnalogValue = absolute;
+                maxAnalogValue = v_length[m][n];
             }
         }
     }
-    maxAnalogValue = sqrt(maxAnalogValue);
 
     // normalisiere alle anderen Vektoren
     for(m = 0; m <= 7; m++)
     {
         for(n = 0; n <= 7; n++)
         {
-            DiffCosResults[m][n] = DiffResults[1][m][n] * maxArrowSize / (int16_t)maxAnalogValue;
-            DiffSinResults[m][n] = DiffResults[0][m][n] * maxArrowSize / (int16_t)maxAnalogValue;
+            DiffCosResults[m][n] = DiffResults[1][m][n] * maxArrowSize / maxAnalogValue;
+            DiffSinResults[m][n] = DiffResults[0][m][n] * maxArrowSize / maxAnalogValue;
         }
     }
     return maxAnalogValue;
@@ -139,6 +138,12 @@ uint32_t compute_relative(uint16_t maxArrowSize)
 /*********************************************************************************************/
 uint32_t compute_absolute(uint16_t maxArrowSize)
 {
+    int16_t negSinResults[8][8];
+    int16_t posSinResults[8][8];
+
+    int16_t negCosResults[8][8];
+    int16_t posCosResults[8][8];
+
     int32_t absolute, absoluteSquare, maxAnalogValue = 1;
     int32_t maxSquare = maxArrowSize * maxArrowSize;
     uint16_t m, n;

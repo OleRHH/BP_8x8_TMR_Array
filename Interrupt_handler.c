@@ -11,6 +11,7 @@
 extern int16_t DiffResults[2][8][8];
 char receive[8];
 
+bool busy = false;
 bool relative = true;
 uint16_t maxArrowSize = 32;
 uint32_t maximumAnalogValue;
@@ -21,7 +22,7 @@ void Timer0IntHandler(void)
 {
     GPIO_PORTN_DATA_R ^= YELLOW;                  // for debugging: toggle debug output each time handler is called
     GPIO_PORTN_DATA_R |= BLUE;                    // for debugging: set high when handler is called
-
+    busy = true;
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
     // start the first ADC read. The Rest will be triggered in the ADC handler
@@ -39,7 +40,7 @@ void Timer0IntHandler(void)
 //    {
 //        UARTCharPutNonBlocking(UART2_BASE, readCommand[i]);
 //    }
-
+    while(busy == true);
     GPIO_PORTN_DATA_R ^= BLUE;                   // for debugging: set low when handler is finished
 }
 
@@ -66,7 +67,6 @@ void ADC0IntHandler(void)
     ReadArray(step-1);
 
     // make the appropriate computations
-    (relative == true) ? compute_relative(maxArrowSize): compute_absolute(maxArrowSize);
 
     // trigger the next ad-conversion (16 in total)
     if(step <= 15)
@@ -78,7 +78,9 @@ void ADC0IntHandler(void)
     // after 16 conversions simply prepare for the next cycle
     else
     {
+        (relative == true) ? compute_relative(maxArrowSize): compute_absolute(maxArrowSize);
         step = 0;
+        busy = false;
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
         GPIO_PORTL_DATA_R |= GPIO_PIN_4;
     }
@@ -138,11 +140,13 @@ void UART0IntHandler(void)
         {
             if(receive[1] == '0')
             {
+                printf("abs\n");
                 relative = false;
             }
             else if(receive[1] == '1')
             {
                 relative = true;
+                printf("rel\n");
             }
             // restore the 32 bit integer what was send in four peaces
             maxArrowSize = receive[4] << 24 | receive[5] << 16 | receive[6] << 8 | receive[7];
