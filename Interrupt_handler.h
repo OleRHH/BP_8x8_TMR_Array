@@ -27,6 +27,8 @@
 
 
 /*****************************  # defines #   *****************************/
+#define LED_D1 0b0000001                            // Debug Output to oscilloscope
+#define LED_D2 0b0000010                            // Debug Output to oscilloscope
 #define YELLOW 0b0000100                            // Debug Output to oscilloscope
 #define BLUE   0b0001000                            // Debug Output to oscilloscope
 
@@ -35,6 +37,7 @@
 void Timer0IntHandler(void);
 void UART0IntHandler(void);
 void UART2IntHandler(void);
+void ADC0IntHandler(void);
 
 
 #endif /* INTERRUPT_HANDLER_H_ */

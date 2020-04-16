@@ -868,11 +868,11 @@ void ConfigureLCD5Inch(uint32_t SysClock) {
     value = 0;
     write_cmd_data(value >> 8);             // TFA high byte (TFA = 0)
     write_cmd_data(value);                  // TFA low byte
-    value = 544;
-    write_cmd_data(value >> 8);             // VSA high byte (VSA = 272)
+    value = 543;
+    write_cmd_data(value >> 8);             // VSA high byte (VSA = 543)
     write_cmd_data(value);                  // VSA low byte
     value = 0;
-    write_cmd_data(value >> 8);             // BFA high byte (BFA = 543)
+    write_cmd_data(value >> 8);             // BFA high byte (BFA = 0)
     write_cmd_data(value);                  // BFA low byte
 
     write_command(0x29);                    // Set display on

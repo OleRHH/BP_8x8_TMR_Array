@@ -12,33 +12,25 @@ extern int16_t DiffResults[2][8][8];
 char receive[8];
 
 bool relative = true;
-uint16_t maxArrowSize = 16;
-
+uint16_t maxArrowSize = 32;
+uint32_t maximumAnalogValue;
 
 /***********************  TIMER 0 interrupt handler   ************************/
 /* Periodically measure the sensor Array values and draw them to the display */
 void Timer0IntHandler(void)
 {
-    uint32_t maximumAnalogValue;
     GPIO_PORTN_DATA_R ^= YELLOW;                  // for debugging: toggle debug output each time handler is called
     GPIO_PORTN_DATA_R |= BLUE;                    // for debugging: set high when handler is called
 
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
-    ReadArray();
-
-    if(relative == true)
-    {
-        maximumAnalogValue = compute_relative(maxArrowSize);
-    }
-    else
-    {
-        maximumAnalogValue = compute_absolute(maxArrowSize);
-    }
-
-    write_Infos(relative, maxArrowSize, maximumAnalogValue);
+    // start the first ADC read. The Rest will be triggered in the ADC handler
+    ADCProcessorTrigger(ADC0_BASE, 0);
+    ADCProcessorTrigger(ADC1_BASE, 1);
+    ADCProcessorTrigger(ADC1_BASE, 2);
 
     drawDisplay5Inch();
+    write_Infos(relative, maxArrowSize, maximumAnalogValue);
 
 //    drawDisplay7Inch();
 
@@ -53,6 +45,50 @@ void Timer0IntHandler(void)
 
 
 /*********************************************************************************************/
+/* capture the analog sensor array signals without busy waiting until ad-conversion is complete */
+void ADC0IntHandler(void)
+{
+    static uint16_t step = 0;
+
+    ADCIntClear(ADC0_BASE, 0);
+
+    // advance step count each time an AD-conversion is finished
+    step++;
+
+    // Port L is used to address the analog multiplexers on the TMR sensor array
+    if(step == 8)
+    {
+        GPIO_PORTL_DATA_R &= ~GPIO_PIN_4;
+    }
+    GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
+
+    // store the captured analog values into local buffers
+    ReadArray(step-1);
+
+    // make the appropriate computations
+    (relative == true) ? compute_relative(maxArrowSize): compute_absolute(maxArrowSize);
+
+    // trigger the next ad-conversion (16 in total)
+    if(step <= 15)
+    {
+        ADCProcessorTrigger(ADC0_BASE, 0);
+        ADCProcessorTrigger(ADC1_BASE, 1);
+        ADCProcessorTrigger(ADC1_BASE, 2);
+    }
+    // after 16 conversions simply prepare for the next cycle
+    else
+    {
+        step = 0;
+        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
+        GPIO_PORTL_DATA_R |= GPIO_PIN_4;
+    }
+
+//    GPIO_PORTN_DATA_R ^= YELLOW;
+}
+
+
+/*********************************************************************************************/
+/* communication via RS232 interface with the PC (sending sensor data to matlab, receiving commands etc) */
 void UART0IntHandler(void)
 {
     static char command[9] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -66,7 +102,9 @@ void UART0IntHandler(void)
     // Clear any pending status. We are expecting a uDMA Receive Interrupt
     UARTIntClear(UART0_BASE, ui32Status);
 
-    if( ui32Status & UART_INT_DMARX) //  || UIstatus & UART_INT_RT)
+//    GPIO_PORTN_DATA_R ^= LED_D2;
+
+    if( ui32Status & UART_INT_DMARX)
     {
         // prepare uDMA for the next receive (8 bytes)
         uDMAChannelTransferSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT,
@@ -74,9 +112,11 @@ void UART0IntHandler(void)
                                    (void *)(UART0_BASE + UART_O_DR),
                                    receive, sizeof(receive));
         uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
+//        printf("%s %x%x%x%x \n", receive, receive[4], receive[5], receive[6], receive[7]);
 
         // now its time to see what we received:
         // '0': send Array Data (256 bytes) via serial interface to Matlab
+
         if(receive[0] == '0')
         {
             // Set up the transfer parameters for the uDMA UART TX channel.  This will
@@ -121,11 +161,31 @@ void UART0IntHandler(void)
                 UARTCharPutNonBlocking(UART2_BASE, command[i]);
             }
         }
+        // oversampling enabled/disabled
+        else if(receive[0] == '4')
+        {
+            if(receive[1] == '0')
+            {
+                GPIO_PORTN_DATA_R ^= LED_D1;
+                ADCHardwareOversampleConfigure(ADC0_BASE, 1);
+                ADCHardwareOversampleConfigure(ADC1_BASE, 1);
+                printf("Oversampling off\n");
+            }
+            else if(receive[1] == '1')
+            {
+                // set hardware oversampling for better resolution
+                ADCHardwareOversampleConfigure(ADC0_BASE, 64);
+                ADCHardwareOversampleConfigure(ADC1_BASE, 64);
+                printf("Oversampling on\n");
+
+            }
+        }
     }
 }
 
 
 /*********************************************************************************************/
+/* send commands to the stepper motor and receiving telemetry data from motor via RS485 */
 void UART2IntHandler(void)
 {
     int i = 0;

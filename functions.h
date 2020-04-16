@@ -25,8 +25,7 @@
 #define GPIO_PIN_3_DOWNTO_0 0x0000000F
 
 /**************************  # Prototypes #   ****************************/
-void ReadArray(void);
-void GetADCValues(void);
+void ReadArray(uint16_t);
 uint32_t compute_relative(uint16_t);
 uint32_t compute_absolute(uint16_t);
 

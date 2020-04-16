@@ -25,6 +25,10 @@ void ConfigureADC(void)
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0));
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC1));
 
+    // set hardware oversampling for better resolution
+    ADCHardwareOversampleConfigure(ADC0_BASE, 64);
+    ADCHardwareOversampleConfigure(ADC1_BASE, 64);
+
     // ADC, sample sequencer, trigger processor, priority
     ADCSequenceConfigure(ADC0_BASE,0, ADC_TRIGGER_PROCESSOR, 0);
     ADCSequenceConfigure(ADC1_BASE,1, ADC_TRIGGER_PROCESSOR, 1);
@@ -38,25 +42,37 @@ void ConfigureADC(void)
     ADCSequenceStepConfigure(ADC0_BASE, 0, 4, ROW_5_L); // sequence0,step4
     ADCSequenceStepConfigure(ADC0_BASE, 0, 5, ROW_6_L); // sequence0,step5
     ADCSequenceStepConfigure(ADC0_BASE, 0, 6, ROW_7_L); // sequence0,step6
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 7, ROW_8_L); // sequence0,step7
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 7, ROW_8_L|  // sequence0,step7
+                             ADC_CTL_IE|ADC_CTL_END);
 
     // Sample sequencer 1, upper right side of the array
     ADCSequenceStepConfigure(ADC1_BASE, 1, 0, ROW_1_R); // sequence1,step0
     ADCSequenceStepConfigure(ADC1_BASE, 1, 1, ROW_2_R); // sequence1,step1
     ADCSequenceStepConfigure(ADC1_BASE, 1, 2, ROW_3_R); // sequence1,step2
-    ADCSequenceStepConfigure(ADC1_BASE, 1, 3, ROW_4_R); // sequence1,step3
+    ADCSequenceStepConfigure(ADC1_BASE, 1, 3, ROW_4_R); //|  // sequence1,step3
+//                             ADC_CTL_IE|ADC_CTL_END);
 
-    // Sample sequencer 1, lower right side of the array
+    // Sample sequencer 2, lower right side of the array
     ADCSequenceStepConfigure(ADC1_BASE, 2, 0, ROW_5_R); // sequence2,step0
     ADCSequenceStepConfigure(ADC1_BASE, 2, 1, ROW_6_R); // sequence2,step1
     ADCSequenceStepConfigure(ADC1_BASE, 2, 2, ROW_7_R); // sequence2,step2
-    ADCSequenceStepConfigure(ADC1_BASE, 2, 3, ROW_8_R|  // sequence2,step3
-    ADC_CTL_IE|ADC_CTL_END);							// incl.interrupt
+    ADCSequenceStepConfigure(ADC1_BASE, 2, 3, ROW_8_R); //|  // sequence2,step3
+//                             ADC_CTL_IE|ADC_CTL_END);							// incl.interrupt
+
+
 
     // Enable ADC
     ADCSequenceEnable(ADC0_BASE, 0); // ADC0 for sample sequencer0
     ADCSequenceEnable(ADC1_BASE, 1); // ADC1 for sample sequencer1
     ADCSequenceEnable(ADC1_BASE, 2);  // ADC1 for sample sequencer2
+
+
+
+    IntPrioritySet(INT_ADC0SS0, HIGH_PRIORITY);             // set priority
+    ADCIntEnable(ADC0_BASE, 0);
+    IntEnable(INT_ADC0SS0);
+    ADCIntRegister(ADC0_BASE, 0, ADC0IntHandler);
+
 }
 
 
@@ -169,13 +185,15 @@ void ConfigureUART0(uint32_t SysClock)
 
     // Now both the uDMA UART TX and RX channels are primed to start a
     // transfer.  As soon as the channels are enabled, the peripheral will
-    // issue a transfer request and the data transfers will begin.
+    // issue a transfer request and the data transfers will begin. Also it
+    // will receive bytes
 //    uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
+    uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
 
 
     // Enable the UART DMA TX/RX interrupts.
     UARTIntRegister(UART0_BASE, UART0IntHandler);
-//    UARTIntEnable(UART0_BASE, UART_INT_RX);
+//  UARTIntEnable(UART0_BASE, UART_INT_RX);
     UARTIntEnable(UART0_BASE, UART_INT_DMARX);
 
     // Enable the UART peripheral interrupts.
@@ -208,9 +226,6 @@ void ConfigureUART2(uint32_t SysClock)
     UARTFIFOLevelSet(UART2_BASE, UART_FIFO_TX1_8, UART_FIFO_RX4_8);
     IntEnable(INT_UART2);
     UARTIntEnable(UART2_BASE, UART_INT_RX | UART_INT_RT); // | UART_INT_TX);
-
-
-
 }
 
 
@@ -251,7 +266,7 @@ void ConfigureTimer0(uint32_t SysClock)
     TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
     TimerLoadSet(TIMER0_BASE, TIMER_A, SysClock / 10);      // fires every 100 ms
     TimerEnable(TIMER0_BASE, TIMER_A);
-    IntPrioritySet(INT_TIMER0A, HIGH_PRIORITY);             // set priority
+    IntPrioritySet(INT_TIMER0A, LOW_PRIORITY);             // set priority
     TimerIntRegister(TIMER0_BASE, TIMER_A, Timer0IntHandler);
     IntEnable(INT_TIMER0A);
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
