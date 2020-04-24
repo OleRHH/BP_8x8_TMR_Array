@@ -65,7 +65,8 @@ enum
     GREEN   = 0x00FF00,
     YELLOW  = 0x00FFFF,
     BLUE    = 0xFF0000,
-    WHITE   = 0xFFFFFF
+    WHITE   = 0xFFFFFF,
+    GREY    = 0x505050
 };
 
 
@@ -80,10 +81,11 @@ void screen_write_nr(uint16_t);
 void print_string(char *, uint16_t, uint16_t, COLOR, COLOR);
 void write_screen_color5INCH(COLOR);
 void write_screen_color7INCH(COLOR);
-void drawDisplay5Inch(void);
+void drawDisplay5Inch(COLOR);
 void drawDisplay7Inch(void);
-void write_Infos(bool, uint16_t, uint32_t);
+void write_Infos(bool, bool, uint16_t, uint32_t);
 
+void write_line(short, short, short, short, COLOR, uint16_t);
 void enter_sleepmode(void);
 void exit_sleepmode(void);
 

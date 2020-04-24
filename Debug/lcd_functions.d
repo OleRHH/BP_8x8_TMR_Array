@@ -1,8 +1,8 @@
 # FIXED
 
 lcd_functions.obj: ../lcd_functions.c
-lcd_functions.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/lcd_functions.h
-lcd_functions.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h
+lcd_functions.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/lcd_functions.h
+lcd_functions.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h
 lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdint.h
 lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/_stdint40.h
 lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/sys/stdint.h
@@ -23,8 +23,8 @@ lcd_functions.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_
 lcd_functions.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/sysctl.h
 
 ../lcd_functions.c: 
-/home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/lcd_functions.h: 
-/home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
+/home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/lcd_functions.h: 
+/home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdint.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/_stdint40.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/sys/stdint.h: 

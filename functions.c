@@ -121,7 +121,6 @@ uint32_t compute_relative(uint16_t maxArrowSize)
             }
         }
     }
-
     // normalisiere alle anderen Vektoren
     for(m = 0; m <= 7; m++)
     {
@@ -133,8 +132,6 @@ uint32_t compute_relative(uint16_t maxArrowSize)
     }
     return maxAnalogValue;
 }
-
-
 /*********************************************************************************************/
 uint32_t compute_absolute(uint16_t maxArrowSize)
 {
@@ -144,8 +141,7 @@ uint32_t compute_absolute(uint16_t maxArrowSize)
     int16_t negCosResults[8][8];
     int16_t posCosResults[8][8];
 
-    int32_t absolute, absoluteSquare, maxAnalogValue = 1;
-    int32_t maxSquare = maxArrowSize * maxArrowSize;
+    int32_t maxAnalogValue = 1;
     uint16_t m, n;
 
     for(m = 0; m <= 7; m++)
@@ -164,20 +160,20 @@ uint32_t compute_absolute(uint16_t maxArrowSize)
             SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
 
             // berechne die Betragsquadrate:
-            absoluteSquare = DiffResults[1][m][n]*DiffResults[1][m][n] + DiffResults[0][m][n]*DiffResults[0][m][n];
+            v_length[m][n] = (uint16_t) sqrt(DiffResults[1][m][n]*DiffResults[1][m][n] +
+                                DiffResults[0][m][n]*DiffResults[0][m][n]);
 
-            if(absoluteSquare > maxAnalogValue)
+            if(v_length[m][n] > maxAnalogValue)
             {
-                maxAnalogValue = absoluteSquare;
+                maxAnalogValue = v_length[m][n];
             }
             // limit the maximum arrow length to the max allowed value (maxArrowSize)
-            if(absoluteSquare > maxSquare)
+            if(v_length[m][n] > maxArrowSize)
             {
-                absolute = sqrt(absoluteSquare);
                 DiffResults[1][m][n] *= maxArrowSize;
-                DiffResults[1][m][n] /= absolute;
+                DiffResults[1][m][n] /= v_length[m][n];
                 DiffResults[0][m][n] *= maxArrowSize;
-                DiffResults[0][m][n] /= absolute;
+                DiffResults[0][m][n] /= v_length[m][n];
             }
         }
     }
@@ -190,5 +186,5 @@ uint32_t compute_absolute(uint16_t maxArrowSize)
             DiffSinResults[m][n] = DiffResults[0][m][n];
         }
     }
-    return sqrt(maxAnalogValue);
+    return maxAnalogValue;
 }

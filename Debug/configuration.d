@@ -1,7 +1,7 @@
 # FIXED
 
 configuration.obj: ../configuration.c
-configuration.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/configuration.h
+configuration.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/configuration.h
 configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdbool.h
 configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdint.h
 configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/_stdint40.h
@@ -15,7 +15,7 @@ configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_
 configuration.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/sys/_stdint.h
 configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/sysctl.h
 configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/adc.h
-configuration.obj: /home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h
+configuration.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h
 configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/gpio.h
 configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/uart.h
 configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h
@@ -26,7 +26,7 @@ configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/dr
 configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/udma.h
 
 ../configuration.c: 
-/home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/configuration.h: 
+/home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/configuration.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdbool.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/stdint.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/_stdint40.h: 
@@ -40,7 +40,7 @@ configuration.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/dr
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/sys/_stdint.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/sysctl.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/adc.h: 
-/home/ole/CodeComposerStudio10/workspace/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
+/home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/gpio.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/uart.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h: 
