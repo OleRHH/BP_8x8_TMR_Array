@@ -42,7 +42,8 @@
 #define ROW_2_R ADC_CTL_CH0         // PE3
 #define ROW_1_R ADC_CTL_CH1         // PE2
 
-// Interrupt priority
+// Interrupt priority. Lower numbers = higher priority.
+// Valid numbers: 0x00, 0x20, 0x40, 0x60, 0x80, 0xA0, 0xC0, 0xE0
 #define HIGH_PRIORITY 0x00
 #define LOW_PRIORITY  0x80
 

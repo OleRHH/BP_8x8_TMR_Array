@@ -10,8 +10,8 @@ void write_command(unsigned char);
 void write_cmd_data(unsigned char);
 void write_data(COLOR);
 void write_position(uint16_t, uint16_t, uint16_t, uint16_t);
-
-void write_line(short, short, short, short, COLOR, uint16_t);
+void generate_colors(void);
+//void write_line(short, short, short, short, COLOR, uint16_t);
 void write_line_0_degree  (short, short, short, short, COLOR);
 void write_line_90_degree (short, short, short, short, COLOR);
 void write_line_180_degree(short, short, short, short, COLOR);
@@ -32,22 +32,24 @@ uint16_t offset = 0;
 
 int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
+COLOR color[768];
 
 extern int16_t DiffCosResults[8][8];
 extern int16_t DiffSinResults[8][8];
+extern int16_t v_length[8][8];
 
 extern const char font_12_16[256][32];
-
 
 /***************************  write_Infos()   *******************************/
 // writes some info as text on the display.                                 //
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
 /****************************************************************************/
-void write_Infos(bool relative, uint16_t maxArrowSize, uint32_t maximumAnalogValue)
+void write_Infos(bool relative, bool oversampling, uint16_t maxArrowSize, uint32_t maximumAnalogValue)
 {
     char charValue[100];
     static bool old = true;
+//    COLOR col = (COLOR) color[100];
 
     if(old != relative)
     {
@@ -83,6 +85,14 @@ void write_Infos(bool relative, uint16_t maxArrowSize, uint32_t maximumAnalogVal
             print_string("Clipping!", 100, 300, (COLOR)WHITE, (COLOR)WHITE);
         }
     }
+    if(oversampling == false)
+    {
+        print_string("Oversampling off", 250, 280, (COLOR)BLACK, (COLOR)WHITE);
+    }
+    else
+    {
+        print_string("Oversampling on ", 250, 280, (COLOR)BLACK, (COLOR)WHITE);
+    }
 }
 
 
@@ -101,14 +111,54 @@ void screen_show_nr(uint16_t nr)
 }
 
 
-/***************************  screen_show_nr()   *****************************/
+/***************************  screen_show_nr()   ****************************/
 // the display dimensions are 480*272 pixels => 130560 pixels               //
 // the lcd memory is much bigger, so three display screens can be saved     //
-// simultaneously there. screen_write_nr() to which is written.   //
+// simultaneously there. screen_write_nr() to which is written.             //
 /****************************************************************************/
 void screen_write_nr(uint16_t nr)
 {
     offset = nr * 272;
+}
+
+
+/****************************************************************************/
+void generate_colors(void)
+{
+    int i, val = 100, red, green, blue;
+
+    for(i = 0; i < 768; i++)
+    {
+        if(val < 256){
+            red = 0;
+            blue = 0;
+            blue = val;
+        }
+        else if(val < 512)
+        {
+            if(val > 250 && val < 400) val++;
+            red = 0;
+            green = val - 256;
+            blue = 511 - val;
+        }
+        else if(val < 768)
+        {
+            if(val < 680) val++;
+            red = val - 512;
+            green = 255;
+            blue = 0;
+        }
+        else if(val < 1024)
+        {
+            red = 255;
+            green = 1023 - val;
+            blue = 0;
+        }
+        color[i].red = red;
+        color[i].green = green;
+        color[i].blue = blue;
+        val++;
+    }
 }
 
 
@@ -182,6 +232,8 @@ void write_screen_color5INCH(COLOR color)
 {
     uint32_t count = 0;
 
+    generate_colors();
+
     write_position(0, 0, 479, 271);
     write_command(0x2C);
 
@@ -230,7 +282,7 @@ void write_screen_color7INCH(COLOR color)
 /**************************  drawDisplay5Inch()   ***************************/
 // draws all arrows to the 5 inch LC-Display.                               //
 /****************************************************************************/
-void drawDisplay5Inch(void)
+void drawDisplay5Inch(COLOR backColor)
 {
     int16_t m = 0, n = 0, xGrid, yGrid;
 
@@ -239,7 +291,7 @@ void drawDisplay5Inch(void)
     {
         for(yGrid = 272 - GRID_OFFSET_Y_5_INCH; yGrid > GRID_OFFSET_Y_5_INCH; yGrid -= 32)
         {
-            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid - oldDiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
+            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid - oldDiffSinResults[m][n], backColor, WITH_ARROW);
             m++;
         }
         m = 0;
@@ -252,9 +304,9 @@ void drawDisplay5Inch(void)
     {
         for(yGrid = 272 - GRID_OFFSET_Y_5_INCH; yGrid > GRID_OFFSET_Y_5_INCH; yGrid -= 32)
         {
-            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000ff, NO_ARROW);        // draw a small cross..
-            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000ff, NO_ARROW);        // ..as as grid indicator
-            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], (COLOR)0xff0000, WITH_ARROW);
+            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, color[v_length[m][n]], NO_ARROW);        // draw a small cross..
+            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, color[v_length[m][n]], NO_ARROW);        // ..as as grid indicator
+            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], color[v_length[m][n]], WITH_ARROW);
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
             m++;

@@ -9,12 +9,15 @@
 /*****************************  # global variables #   ****************************/
 // Array holding the sin and cos values
 extern int16_t DiffResults[2][8][8];
+extern COLOR color[768];
+
 char receive[8];
 
-bool relative = true;
+bool busy = false, relative = true, oversampling = false;
 uint16_t maxArrowSize = 32;
 uint32_t maximumAnalogValue;
-
+COLOR backColor = (COLOR)WHITE;
+int val = 0;
 /***********************  TIMER 0 interrupt handler   ************************/
 /* Periodically measure the sensor Array values and draw them to the display */
 void Timer0IntHandler(void)
@@ -22,6 +25,7 @@ void Timer0IntHandler(void)
     GPIO_PORTN_DATA_R ^= YELLOW;                  // for debugging: toggle debug output each time handler is called
     GPIO_PORTN_DATA_R |= BLUE;                    // for debugging: set high when handler is called
 
+    busy = true;
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
     // start the first ADC read. The Rest will be triggered in the ADC handler
@@ -29,8 +33,8 @@ void Timer0IntHandler(void)
     ADCProcessorTrigger(ADC1_BASE, 1);
     ADCProcessorTrigger(ADC1_BASE, 2);
 
-    drawDisplay5Inch();
-    write_Infos(relative, maxArrowSize, maximumAnalogValue);
+    drawDisplay5Inch(backColor);
+    write_Infos(relative, oversampling, maxArrowSize, maximumAnalogValue);
 
 //    drawDisplay7Inch();
 
@@ -39,7 +43,7 @@ void Timer0IntHandler(void)
 //    {
 //        UARTCharPutNonBlocking(UART2_BASE, readCommand[i]);
 //    }
-
+    while(busy == true);
     GPIO_PORTN_DATA_R ^= BLUE;                   // for debugging: set low when handler is finished
 }
 
@@ -66,7 +70,6 @@ void ADC0IntHandler(void)
     ReadArray(step-1);
 
     // make the appropriate computations
-    (relative == true) ? compute_relative(maxArrowSize): compute_absolute(maxArrowSize);
 
     // trigger the next ad-conversion (16 in total)
     if(step <= 15)
@@ -78,7 +81,9 @@ void ADC0IntHandler(void)
     // after 16 conversions simply prepare for the next cycle
     else
     {
+        maximumAnalogValue = (relative == true) ? compute_relative(maxArrowSize): compute_absolute(maxArrowSize);
         step = 0;
+        busy = false;
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
         GPIO_PORTL_DATA_R |= GPIO_PIN_4;
     }
@@ -138,11 +143,13 @@ void UART0IntHandler(void)
         {
             if(receive[1] == '0')
             {
+                printf("abs\n");
                 relative = false;
             }
             else if(receive[1] == '1')
             {
                 relative = true;
+                printf("rel\n");
             }
             // restore the 32 bit integer what was send in four peaces
             maxArrowSize = receive[4] << 24 | receive[5] << 16 | receive[6] << 8 | receive[7];
@@ -169,15 +176,33 @@ void UART0IntHandler(void)
                 GPIO_PORTN_DATA_R ^= LED_D1;
                 ADCHardwareOversampleConfigure(ADC0_BASE, 1);
                 ADCHardwareOversampleConfigure(ADC1_BASE, 1);
-                printf("Oversampling off\n");
+                oversampling = false;
             }
             else if(receive[1] == '1')
             {
                 // set hardware oversampling for better resolution
                 ADCHardwareOversampleConfigure(ADC0_BASE, 64);
                 ADCHardwareOversampleConfigure(ADC1_BASE, 64);
-                printf("Oversampling on\n");
-
+                oversampling = true;
+            }
+        }
+        // change background color
+        else if(receive[0] == '5')
+        {
+            if(receive[1] == '0')
+            {
+                backColor = (COLOR)WHITE;
+                write_screen_color5INCH(backColor);
+            }
+            else if(receive[1] == '1')
+            {
+                backColor = (COLOR)BLACK;
+                write_screen_color5INCH(backColor);
+            }
+            else if(receive[1] == '2')
+            {
+                backColor = (COLOR)GREY;
+                write_screen_color5INCH(backColor);
             }
         }
     }

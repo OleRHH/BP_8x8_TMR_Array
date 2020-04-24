@@ -9,6 +9,7 @@ int main(void)
     // disable all interrupts during setup
     IntMasterDisable();
 
+
     // Initialize the UART, GPIO, ADC and Timer peripherie
     ConfigureGPIO();
     ConfigureADC();

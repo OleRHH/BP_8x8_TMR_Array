@@ -69,9 +69,9 @@ void ConfigureADC(void)
 
 
     IntPrioritySet(INT_ADC0SS0, HIGH_PRIORITY);             // set priority
+    ADCIntRegister(ADC0_BASE, 0, ADC0IntHandler);
     ADCIntEnable(ADC0_BASE, 0);
     IntEnable(INT_ADC0SS0);
-    ADCIntRegister(ADC0_BASE, 0, ADC0IntHandler);
 
 }
 
