@@ -4,11 +4,13 @@
  *  Created on: 13.02.2020
  */
 #include <Interrupt_handler.h>
-
+#include <math.h>
 
 /*****************************  # global variables #   ****************************/
 // Array holding the sin and cos values
 extern int16_t DiffResults[2][8][8];
+extern int16_t DiffCosResults[8][8];
+extern int16_t DiffSinResults[8][8];
 
 char UART0receive[8];
 
@@ -17,23 +19,41 @@ uint16_t maxArrowSize = 32;
 uint32_t maximumAnalogValue;
 COLOR backColor = (COLOR)WHITE;
 
+#define _2PI ( 6.28318530718 )
+//uint16_t a = 0, A = 400;
+
 /***********************  TIMER 0 interrupt handler   ************************/
 /* Periodically measure the sensor Array values and draw them to the display */
 void Timer0IntHandler(void)
 {
-    GPIO_PORTN_DATA_R ^= YELLOW;                  // for debugging: toggle debug output each time handler is called
-    GPIO_PORTN_DATA_R |= BLUE;                    // for debugging: set high when handler is called
+//    uint16_t m, n;
+
+    GPIO_PORTN_DATA_R ^= YELLOW;       // for debugging: toggle debug output each time handler is called
 
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
+//    for(m = 0; m <= 7; m++)
+//    {
+//        for(n = 0; n <= 7; n++)
+//        {
+//            DiffCosResults[m][n] = 32 * cos(_2PI * a/A);
+//            DiffSinResults[m][n] = 32 * sin(_2PI * a/A);
+//        }
+//    }
+//    if(++a == 400) a = 0;
+
+    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
+
     // start the first of 16 ADC read. The others will be triggered in the ADC handler
-    ADCProcessorTrigger(ADC0_BASE, 0);
-    ADCProcessorTrigger(ADC1_BASE, 1);
-    ADCProcessorTrigger(ADC1_BASE, 2);
+//    ADCProcessorTrigger(ADC0_BASE, 0);
+//    ADCProcessorTrigger(ADC1_BASE, 1);
+//    ADCProcessorTrigger(ADC1_BASE, 2);
+
+    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
 
     drawDisplay5Inch(backColor);
 //    drawDisplay7Inch();
-    write_Infos(relative, oversampling, maxArrowSize, maximumAnalogValue);
+//    write_Infos(relative, oversampling, maxArrowSize, maximumAnalogValue);
 
 
     // send command to stepper-motor to send back position data (absolute)

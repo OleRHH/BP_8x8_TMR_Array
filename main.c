@@ -1,7 +1,13 @@
 #include <main.h>
+#include <math.h>
+
+extern int16_t DiffCosResults[8][8];
+extern int16_t DiffSinResults[8][8];
+
 
 int main(void)
 {
+
     // set the clock frequency to CLOCK_FREQ (120 MHz)
     uint32_t SysClock = SysCtlClockFreqSet( (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN
                 | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), CLOCK_FREQ);
@@ -9,6 +15,18 @@ int main(void)
     // disable all interrupts during setup
     IntMasterDisable();
 
+    double _2pi = 6.28318530718;
+    uint16_t a = 350, A = 400;
+    uint16_t m, n;
+
+    for(m = 0; m <= 7; m++)
+    {
+        for(n = 0; n <= 7; n++)
+        {
+            DiffCosResults[m][n] = 32 * cos(_2pi * a/A);
+            DiffSinResults[m][n] = 32 * sin(_2pi * a/A);
+        }
+    }
 
     // Initialize the UART, GPIO, ADC and Timer peripherie
     ConfigureGPIO();

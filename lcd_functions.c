@@ -412,7 +412,7 @@ void write_position(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uin
 
 
 /******************************  LCD WRITE LINE  *************************************************/
-//draws a line from startpoint x to stoppoint y directly to the display
+//draws a line from point (stop_x,start_y) to point (stop_x,stop_y) directly to the display
 void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR color, uint16_t arrowOption)
 {
     int16_t delta_x = stop_x - start_x;
