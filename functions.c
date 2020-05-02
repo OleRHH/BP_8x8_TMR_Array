@@ -110,18 +110,20 @@ uint32_t compute_relative(uint16_t maxArrowSize)
             DiffResults[0][m][n] = negSinResults[m][n] - posSinResults[m][n];
             SinOffset[m][n]      = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
 
-            // berechne die Betragsquadrate:
+            // calculate arrow length
             v_length[m][n] = (uint16_t) sqrt(DiffResults[1][m][n]*DiffResults[1][m][n] +
                                 DiffResults[0][m][n]*DiffResults[0][m][n]);
 
-            // finde den größten Betragsquadrat und speicher ihn
+            // store length of longest arrow
             if(v_length[m][n] > maxAnalogValue)
             {
                 maxAnalogValue = v_length[m][n];
             }
         }
     }
-    // normalisiere alle anderen Vektoren
+    // DiffResults is used to transfer the data via UART0.
+    // DiffCosResults and DiffSinResults are needed to display the arrows.
+    // They are being normalized in this function
     for(m = 0; m <= 7; m++)
     {
         for(n = 0; n <= 7; n++)
@@ -150,19 +152,20 @@ uint32_t compute_absolute(uint16_t maxArrowSize)
         {
             //shiftleft1: multiplication by 2
             //differential: 0-1, 2-3, ... , 14-15
-            negCosResults[m][n] = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
-            posCosResults[m][n] = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
+            negCosResults[m][n]  = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
+            posCosResults[m][n]  = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
             DiffResults[1][m][n] = negCosResults[m][n] - posCosResults[m][n];
-            CosOffset[m][n] = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
-            negSinResults[m][n] = SinResults[m][(n << 1)];
-            posSinResults[m][n] = SinResults[m][(n << 1) + 1];
+            CosOffset[m][n]      = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
+            negSinResults[m][n]  = SinResults[m][(n << 1)];
+            posSinResults[m][n]  = SinResults[m][(n << 1) + 1];
             DiffResults[0][m][n] = negSinResults[m][n] - posSinResults[m][n];
-            SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
+            SinOffset[m][n]      = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
 
-            // berechne die Betragsquadrate:
+            // calculate arrow length
             v_length[m][n] = (uint16_t) sqrt(DiffResults[1][m][n]*DiffResults[1][m][n] +
                                 DiffResults[0][m][n]*DiffResults[0][m][n]);
 
+            // store length of longest arrow
             if(v_length[m][n] > maxAnalogValue)
             {
                 maxAnalogValue = v_length[m][n];
@@ -177,7 +180,8 @@ uint32_t compute_absolute(uint16_t maxArrowSize)
             }
         }
     }
-
+    // DiffResults is used to transfer the data via UART0.
+    // DiffCosResults and DiffSinResults are needed to display the arrows
     for(m = 0; m <= 7; m++)
     {
         for(n = 0; n <= 7; n++)

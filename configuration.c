@@ -10,7 +10,7 @@ uint8_t pui8ControlTable[1024];
 //*****************************************************************************
 // The transmit buffer used for the UART transfer.
 extern int16_t DiffResults[2][8][8];
-extern char receive[100];
+extern char UART0receive[8];
 
 /******************************************************************************************************/
 /* The sensor array has 64 TMR-Sensors with four analog singals each (sin+, sin-, cos+, cos-).
@@ -153,7 +153,7 @@ void ConfigureUART0(uint32_t SysClock)
       uDMAChannelTransferSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT,
                              UDMA_MODE_BASIC,
                                  (void *)(UART0_BASE + UART_O_DR),
-                                 receive, 8);
+                                 UART0receive, 8);
 
 
     // uDMA Tx:

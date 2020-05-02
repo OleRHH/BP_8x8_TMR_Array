@@ -304,8 +304,8 @@ void drawDisplay5Inch(COLOR backColor)
     {
         for(yGrid = 272 - GRID_OFFSET_Y_5_INCH; yGrid > GRID_OFFSET_Y_5_INCH; yGrid -= 32)
         {
-            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, color[v_length[m][n]], NO_ARROW);        // draw a small cross..
-            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, color[v_length[m][n]], NO_ARROW);        // ..as as grid indicator
+            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)BLACK, NO_ARROW);        // draw a small cross..
+            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)BLACK, NO_ARROW);        // ..as as grid indicator
             write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], color[v_length[m][n]], WITH_ARROW);
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
