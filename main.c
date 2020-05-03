@@ -14,10 +14,10 @@ int main(void)
 
     // disable all interrupts during setup
     IntMasterDisable();
-
     double _2pi = 6.28318530718;
     uint16_t a = 350, A = 400;
     uint16_t m, n;
+
 
     for(m = 0; m <= 7; m++)
     {
@@ -38,7 +38,10 @@ int main(void)
     ConfigureUART2(SysClock);
 
     // set the display background color
+
+
     write_screen_color5INCH((COLOR)WHITE);
+//    init_grid();
 
     // write the frame for the Array Display
 //    write_line(80, 10, 720, 10, (COLOR)YELLOW, 0);

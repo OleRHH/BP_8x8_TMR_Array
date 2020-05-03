@@ -1,29 +1,6 @@
+
+
 #include <lcd_functions.h>
-
-// defines
-#define RST 0x10
-#define INITIAL_STATE (0x1F)
-#define SOFTWARE_RESET (0x01)
-#define SET_PLL_MN (0xE2)
-#define START_PLL (0xE0)
-#define SET_LSHIFT (0xE6)
-#define SET_LCD_MODE (0xB0)
-#define SET_HORI_PERIOD (0xB4)
-#define SET_VERT_PERIOD (0xB6)
-#define SET_ADRESS_MODE (0x36)
-#define SET_PIXEL_DATA_FORMAT (0xF0)
-#define SET_DISPLAY_ON (0x29)
-
-#define FONT_WIDTH_BIG 12
-#define FONT_HIGHT_BIG 16
-#define NO_ARROW        0
-#define WITH_ARROW      1
-#define ARROW_ANGLE     0.5236          // RAD = 30°
-#define ARROW_LENGTH    5
-#define GRID_OFFSET_X_5_INCH ( 30 )
-#define GRID_OFFSET_Y_5_INCH ( 20 )
-#define GRID_OFFSET_X_7_INCH ( 200 )
-#define GRID_OFFSET_Y_7_INCH ( 50 )
 
 // intern prototypes
 void write_char(uint16_t, COLOR, COLOR);
@@ -53,8 +30,8 @@ void write_line_quadrant_4_II(short, short, short, short, double, COLOR);  // 27
 
 uint16_t offset = 0;
 
-volatile int16_t oldDiffSinResults[8][8];
-volatile int16_t oldDiffCosResults[8][8];
+int16_t oldDiffSinResults[8][8];
+int16_t oldDiffCosResults[8][8];
 COLOR color[768];
 
 extern int16_t DiffCosResults[8][8];
@@ -63,45 +40,11 @@ extern int16_t v_length[8][8];
 
 extern const char font_12_16[256][32];
 
-draws gridCorss[8][8];
 /***************************  write_Infos()   *******************************/
 // writes some info as text on the display.                                 //
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
 /****************************************************************************/
-
-void init_grid(void)
-{
-    uint16_t m,n;
-    int16_t xGrid, yGrid;
-    point start, stop;
-
-
-    for(m = 0; m <= 7; m++)
-    {
-        for(n = 0; n <= 7; n++)
-        {
-            start.x = m * 32 + GRID_OFFSET_X_5_INCH - 2;
-            stop.x  = m * 32 + GRID_OFFSET_X_5_INCH + 2;
-            start.y = n * 32 + GRID_OFFSET_Y_5_INCH;
-            stop.y = n * 32 + GRID_OFFSET_Y_5_INCH;
-            write_line(start.x, start.y, stop.x, stop.y, (COLOR)BLACK, NO_ARROW);        // draw a small cross..
-
-            start.x = m * 32 + GRID_OFFSET_X_5_INCH;
-            stop.x  = m * 32 + GRID_OFFSET_X_5_INCH;
-            start.y = n * 32 + GRID_OFFSET_Y_5_INCH - 2;
-            stop.y = n * 32 + GRID_OFFSET_Y_5_INCH + 2;
-            write_line(start.x, start.y, stop.x, stop.y, (COLOR)BLACK, NO_ARROW);        // draw a small cross..
-        }
-    }
-}
-
-
-
-
-
-
-
 void write_Infos(bool relative, bool oversampling, uint16_t maxArrowSize, uint32_t maximumAnalogValue)
 {
     char charValue[100];
@@ -341,45 +284,37 @@ void write_screen_color7INCH(COLOR color)
 /****************************************************************************/
 void drawDisplay5Inch(COLOR backColor)
 {
-    GPIO_PORTN_DATA_R |= 0b1000;        // for debugging: set high when handler is called
+    int16_t m = 0, n = 0, xGrid, yGrid;
 
-    int16_t m = 0, n = 0;               // m = row , n = column
-    point start, stop;
-
-    // write the arrows
-    for(m = 0; m <= 7; m++)
+    // delete the old arrows
+    for(xGrid = GRID_OFFSET_X_5_INCH; xGrid < ( 256 + GRID_OFFSET_X_5_INCH); xGrid += 32)
     {
-        for(n = 0; n <= 7; n++)
+        for(yGrid = 272 - GRID_OFFSET_Y_5_INCH; yGrid > GRID_OFFSET_Y_5_INCH; yGrid -= 32)
         {
-//            init_grid();
+            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid - oldDiffSinResults[m][n], backColor, WITH_ARROW);
+            m++;
+        }
+        m = 0;
+        n++;
+    }
 
-            // I. delete old arrows
-            start.x = n * 32 + GRID_OFFSET_X_5_INCH;
-            start.y = m * 32 + GRID_OFFSET_Y_5_INCH;
-            stop.x  = start.x + oldDiffCosResults[m][n];
-            stop.y  = start.y + oldDiffSinResults[m][n];
-
-            write_line(start.x, start.y, stop.x, stop.y, backColor, WITH_ARROW);
-
-            // II. write grid cross
-            stop.x  = start.x;
-            stop.y  = start.y;
-
-            write_line(start.x - 2, start.y, stop.x + 2, stop.y, (COLOR)BLACK, NO_ARROW);        // draw a small cross..
-            write_line(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);        // ..as as grid indicator
-
-            // III. write new arrows
-            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + DiffCosResults[m][n];
-            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + DiffSinResults[m][n];
-
-            write_line(start.x, start.y, stop.x, stop.y, color[v_length[m][n]], WITH_ARROW);
+    // write the new arrows
+    n = 0;
+    for(xGrid = GRID_OFFSET_X_5_INCH; xGrid < ( 256 + GRID_OFFSET_X_5_INCH); xGrid += 32)
+    {
+        for(yGrid = 272 - GRID_OFFSET_Y_5_INCH; yGrid > GRID_OFFSET_Y_5_INCH; yGrid -= 32)
+        {
+            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, color[v_length[m][n]], NO_ARROW);        // draw a small cross..
+            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, color[v_length[m][n]], NO_ARROW);        // ..as as grid indicator
+            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], color[v_length[m][n]], WITH_ARROW);
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
+            m++;
         }
+        m = 0;
+        n++;
     }
-    GPIO_PORTN_DATA_R ^= 0b1000;
 }
-
 
 
 /**************************  drawDisplay7Inch()   ***************************/
@@ -972,8 +907,25 @@ void ConfigureLCD5Inch(uint32_t SysClock) {
     write_command(0xF0);                    // Set LCD color data format
     write_cmd_data(0x00);                   // Set pixel data format = 8 bit
 
-//    write_command(SET_ADRESS_MODE);         // Set address mode
-//    write_cmd_data(0b00000001);             // flip vertical
+    write_command(0x30);                    // Set partial area
+    write_cmd_data(0);                      // Start row High
+    write_cmd_data(0);                      // Start row Low
+    value = 543;
+    write_cmd_data(value >> 8);             // Stop row High
+    write_cmd_data(value);                  // Stop row Low
+
+    write_command(0x12);                    // enter partial mode
+
+    write_command(0x33);                    // Set scroll area
+    value = 0;
+    write_cmd_data(value >> 8);             // TFA high byte (TFA = 0)
+    write_cmd_data(value);                  // TFA low byte
+    value = 543;
+    write_cmd_data(value >> 8);             // VSA high byte (VSA = 543)
+    write_cmd_data(value);                  // VSA low byte
+    value = 0;
+    write_cmd_data(value >> 8);             // BFA high byte (BFA = 0)
+    write_cmd_data(value);                  // BFA low byte
 
     write_command(0x29);                    // Set display on
 }

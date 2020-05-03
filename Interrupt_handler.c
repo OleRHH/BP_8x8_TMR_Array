@@ -20,13 +20,13 @@ uint32_t maximumAnalogValue;
 COLOR backColor = (COLOR)WHITE;
 
 #define _2PI ( 6.28318530718 )
-//uint16_t a = 0, A = 400;
+uint16_t a = 0, A = 400;
 
 /***********************  TIMER 0 interrupt handler   ************************/
 /* Periodically measure the sensor Array values and draw them to the display */
 void Timer0IntHandler(void)
 {
-//    uint16_t m, n;
+    uint16_t m, n;
 
     GPIO_PORTN_DATA_R ^= YELLOW;       // for debugging: toggle debug output each time handler is called
 
@@ -42,18 +42,18 @@ void Timer0IntHandler(void)
 //    }
 //    if(++a == 400) a = 0;
 
-    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
-
-    // start the first of 16 ADC read. The others will be triggered in the ADC handler
-//    ADCProcessorTrigger(ADC0_BASE, 0);
-//    ADCProcessorTrigger(ADC1_BASE, 1);
-//    ADCProcessorTrigger(ADC1_BASE, 2);
-
-    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
+//    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
 
     drawDisplay5Inch(backColor);
+    // start the first of 16 ADC read. The others will be triggered in the ADC handler
+    ADCProcessorTrigger(ADC0_BASE, 0);
+    ADCProcessorTrigger(ADC1_BASE, 1);
+    ADCProcessorTrigger(ADC1_BASE, 2);
+
+//    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
+
 //    drawDisplay7Inch();
-//    write_Infos(relative, oversampling, maxArrowSize, maximumAnalogValue);
+    write_Infos(relative, oversampling, maxArrowSize, maximumAnalogValue);
 
 
     // send command to stepper-motor to send back position data (absolute)
@@ -61,7 +61,7 @@ void Timer0IntHandler(void)
 //    {
 //        UARTCharPutNonBlocking(UART2_BASE, readCommand[i]);
 //    }
-    GPIO_PORTN_DATA_R ^= BLUE;                   // for debugging: set low when handler is finished
+//    GPIO_PORTN_DATA_R ^= BLUE;                   // for debugging: set low when handler is finished
 }
 
 
