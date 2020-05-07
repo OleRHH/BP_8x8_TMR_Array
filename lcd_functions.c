@@ -20,6 +20,7 @@
 #define WITH_ARROW      1
 #define ARROW_ANGLE     0.7
 #define ARROW_LENGTH    5
+#define MIN_LENGTH_FOR_ARROW  1
 #define GRID_OFFSET_X_5_INCH ( 30 )
 #define GRID_OFFSET_Y_5_INCH ( 20 )
 #define GRID_OFFSET_X_7_INCH ( 200 )
@@ -547,7 +548,8 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 {
                     gain = (double)delta_y / delta_x;
                     write_line_quadrant_1_I(start_x, start_y, stop_x, stop_y, gain, color);
-                    if(arrowOption == WITH_ARROW && delta_x > 1)
+
+                    if(arrowOption == WITH_ARROW & delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = atan2(delta_y, delta_x);
@@ -563,14 +565,15 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 {
                     gain = (double)delta_x / delta_y;
                     write_line_quadrant_1_II(start_x, start_y, stop_x, stop_y, gain, color);
-                    if(arrowOption == WITH_ARROW && delta_x > 1)
+
+                    if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = atan2(delta_y, delta_x);
-                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
-                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y - 10*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
+                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
+                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower
                     }
                 }
             }
@@ -581,7 +584,8 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 {
                     gain = (double)-delta_y / delta_x;       // start_y -> stop_y  ;  y--
                     write_line_quadrant_4_I(start_x, start_y, stop_x, stop_y, gain, color);
-                    if(arrowOption == WITH_ARROW)
+
+                    if(arrowOption == WITH_ARROW && delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = atan(gain);
@@ -595,7 +599,8 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 {
                     gain = (double)delta_x / -delta_y;
                     write_line_quadrant_4_II(start_x, start_y, stop_x, stop_y, gain, color);
-                    if(arrowOption == WITH_ARROW)
+
+                    if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = 1.571 - atan(gain);
@@ -616,7 +621,8 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 {
                     gain = (double)delta_y / -delta_x;
                     write_line_quadrant_2_I(start_x, start_y, stop_x, stop_y, gain, color);
-                    if(arrowOption == WITH_ARROW)
+
+                    if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = atan(gain);
@@ -630,7 +636,8 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 {
                     gain = (double)-delta_x / delta_y;
                     write_line_quadrant_2_II(start_x, start_y, stop_x, stop_y, gain, color);
-                    if(arrowOption == WITH_ARROW)
+
+                    if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = 1.571 - atan(gain);
@@ -647,7 +654,8 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 {
                     gain = (double)delta_y / delta_x;
                     write_line_quadrant_3_I(start_x, start_y, stop_x, stop_y, gain, color);
-                    if(arrowOption == WITH_ARROW)
+
+                    if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = atan(gain);
@@ -661,7 +669,8 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 {
                     gain = (double)delta_x / delta_y;
                     write_line_quadrant_3_II(start_x, start_y, stop_x, stop_y, gain, color);
-                    if(arrowOption == WITH_ARROW)
+
+                    if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = 1.571 - atan(gain);
