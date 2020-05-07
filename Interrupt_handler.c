@@ -20,7 +20,7 @@ uint32_t maximumAnalogValue;
 COLOR backColor = (COLOR)WHITE;
 
 #define _2PI ( 6.28318530718 )
-uint16_t a = 0, A = 400;
+uint16_t a = 0, A = 360;
 
 /***********************  TIMER 0 interrupt handler   ************************/
 /* Periodically measure the sensor Array values and draw them to the display */
@@ -36,11 +36,11 @@ void Timer0IntHandler(void)
 //    {
 //        for(n = 0; n <= 7; n++)
 //        {
-//            DiffCosResults[m][n] = 32 * cos(_2PI * a/A);
-//            DiffSinResults[m][n] = 32 * sin(_2PI * a/A);
+//            DiffCosResults[m][n] = maxArrowSize * cos(_2PI * a/A);
+//            DiffSinResults[m][n] = maxArrowSize * sin(_2PI * a/A);
 //        }
 //    }
-//    if(++a == 400) a = 0;
+//    if(++a == 360) a = 0;
 
 //    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
 
@@ -138,7 +138,7 @@ void UART0IntHandler(void)
             // Set up the transfer parameters for the uDMA UART TX channel.  This will
             // configure the transfer source and destination and the transfer size.
             // Basic mode is used because the peripheral is making the uDMA transfer
-            // request.  The source is the TX buffer and the destination is the UART
+            // request.  The source is the DiffResults array and the destination is the UART
             // data register.
             uDMAChannelTransferSet(UDMA_CHANNEL_UART0TX | UDMA_PRI_SELECT,
                                        UDMA_MODE_BASIC, (char *)DiffResults,
@@ -213,6 +213,12 @@ void UART0IntHandler(void)
                 backColor = (COLOR)GREY;
                 write_screen_color5INCH(backColor);
             }
+        }
+        // change the arrow direction (used only for debugging!)
+        else if(UART0receive[0] == '6')
+        {
+           // restore the 32 bit integer what was send in four peaces
+            a = UART0receive[4] << 24 | UART0receive[5] << 16 | UART0receive[6] << 8 | UART0receive[7];
         }
     }
 }

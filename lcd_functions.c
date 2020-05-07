@@ -18,7 +18,7 @@
 #define FONT_HIGHT_BIG 16
 #define NO_ARROW        0
 #define WITH_ARROW      1
-#define ARROW_ANGLE     0.5236          // RAD = 30°
+#define ARROW_ANGLE     0.7
 #define ARROW_LENGTH    5
 #define GRID_OFFSET_X_5_INCH ( 30 )
 #define GRID_OFFSET_Y_5_INCH ( 20 )
@@ -550,11 +550,13 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                     if(arrowOption == WITH_ARROW && delta_x > 1)
                     {
                         // TODO: arrows
-                        angle = atan(gain);
-                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
-                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
+                        angle = atan2(delta_y, delta_x);
+//                        printf("%lf\n", angle);
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
+                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper
+
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
+                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower
                     }
                 }
                 else                            // Quadrant I  2. (Steigung >= 1)
@@ -563,9 +565,8 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                     write_line_quadrant_1_II(start_x, start_y, stop_x, stop_y, gain, color);
                     if(arrowOption == WITH_ARROW && delta_x > 1)
                     {
-                        angle = atan(gain);
                         // TODO: arrows
-                        angle = 1.571 - atan(gain);
+                        angle = atan2(delta_y, delta_x);
                         write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
                         write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
@@ -735,7 +736,7 @@ void write_line_270_degree(short start_x, short start_y, short stop_x, short sto
 /****************************************************************************/
 void write_line_quadrant_1_I(short start_x, short start_y, short stop_x, short stop_y, double gain,COLOR color)
 {
-    double gain2 = 0;
+    double gain2 = 0.5;
 
     while(start_y <= stop_y)
     {
@@ -745,18 +746,24 @@ void write_line_quadrant_1_I(short start_x, short start_y, short stop_x, short s
         {
             write_data(color);
             gain2 += gain;
-            if( start_x < stop_x) start_x++;
+            if(start_x < stop_x)
+                start_x++;
+            else
+                gain2 = 1;
         }
         gain2 -= 1;
         start_y++;
     }
+//    write_position(start_x, start_y, stop_x, start_y);
+//    write_command(0x2C);
+//    write_data(color);
 }
 
 
 /****************************************************************************/
 void write_line_quadrant_1_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
-    double gain2 = 0;
+    double gain2 = 0.5;
 
     while(start_x <= stop_x)
     {
@@ -766,7 +773,10 @@ void write_line_quadrant_1_II(short start_x, short start_y, short stop_x, short 
         {
             write_data(color);
             gain2 += gain;
-            if( start_y < stop_y) start_y++;
+            if( start_y < stop_y)
+                start_y++;
+            else
+                gain2 = 1;
         }
         gain2 -= 1;
         start_x++;
@@ -777,7 +787,7 @@ void write_line_quadrant_1_II(short start_x, short start_y, short stop_x, short 
 /****************************************************************************/
 void write_line_quadrant_2_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
-    double gain2 = 0;
+    double gain2 = 0.5;
 
     while(stop_y >= start_y)
     {
@@ -787,7 +797,10 @@ void write_line_quadrant_2_I(short start_x, short start_y, short stop_x, short s
         {
             write_data(color);
             gain2 += gain;
-            if( stop_x < start_x) stop_x++;
+            if( stop_x < start_x)
+                stop_x++;
+            else
+                gain2 = 1;
         }
         gain2 -= 1;
         stop_y--;
@@ -798,7 +811,7 @@ void write_line_quadrant_2_I(short start_x, short start_y, short stop_x, short s
 /****************************************************************************/
 void write_line_quadrant_2_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
-    double gain2 = 0;
+    double gain2 = 0.5;
 
     while(start_x >= stop_x)
     {
@@ -808,7 +821,10 @@ void write_line_quadrant_2_II(short start_x, short start_y, short stop_x, short 
         {
             write_data(color);
             gain2 += gain;
-            if( start_y < stop_y) start_y++;
+            if( start_y < stop_y)
+                start_y++;
+            else
+                gain2 = 1;
         }
         gain2 -= 1;
         start_x--;
@@ -819,7 +835,7 @@ void write_line_quadrant_2_II(short start_x, short start_y, short stop_x, short 
 /****************************************************************************/
 void write_line_quadrant_3_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
-    double gain2 = 0;
+    double gain2 = 0.5;
 
     while(stop_y <= start_y)
     {
@@ -829,7 +845,10 @@ void write_line_quadrant_3_I(short start_x, short start_y, short stop_x, short s
         {
             write_data(color);
             gain2 += gain;
-            if( stop_x < start_x) stop_x++;
+            if( stop_x < start_x)
+                stop_x++;
+            else
+                gain2 = 1;
         }
         gain2 -= 1;
         stop_y++;
@@ -840,7 +859,7 @@ void write_line_quadrant_3_I(short start_x, short start_y, short stop_x, short s
 /****************************************************************************/
 void write_line_quadrant_3_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
-    double gain2 = 0;
+    double gain2 = 0.5;
 
     while(stop_x <= start_x)
     {
@@ -850,7 +869,10 @@ void write_line_quadrant_3_II(short start_x, short start_y, short stop_x, short 
         {
             write_data(color);
             gain2 += gain;
-            if( stop_y < start_y) stop_y++;
+            if( stop_y < start_y)
+                stop_y++;
+            else
+                gain2 = 1;
         }
         gain2 -= 1;
         stop_x++;
@@ -861,7 +883,7 @@ void write_line_quadrant_3_II(short start_x, short start_y, short stop_x, short 
 /****************************************************************************/
 void write_line_quadrant_4_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
-    double gain2 = 0;
+    double gain2 = 0.5;
 
     while(start_y >= stop_y)
     {
@@ -871,7 +893,10 @@ void write_line_quadrant_4_I(short start_x, short start_y, short stop_x, short s
         {
             write_data(color);
             gain2 += gain;
-            if( start_x < stop_x) start_x++;
+            if( start_x < stop_x)
+                start_x++;
+            else
+                gain2 = 1;
         }
         gain2 -= 1;
         start_y--;
@@ -882,7 +907,7 @@ void write_line_quadrant_4_I(short start_x, short start_y, short stop_x, short s
 /****************************************************************************/
 void write_line_quadrant_4_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
-    double gain2 = 0;
+    double gain2 = 0.5;
 
     while(stop_x >= start_x)
     {
@@ -892,7 +917,10 @@ void write_line_quadrant_4_II(short start_x, short start_y, short stop_x, short 
         {
             write_data(color);
             gain2 += gain;
-            if( stop_y < start_y) stop_y++;
+            if( stop_y < start_y)
+                stop_y++;
+            else
+                gain2 = 1;
         }
         gain2 -= 1;
         stop_x--;

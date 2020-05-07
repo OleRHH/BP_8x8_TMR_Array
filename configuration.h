@@ -50,7 +50,7 @@
 /**************************  # Prototypes #   ****************************/
 void ConfigureUART0(uint32_t);
 void ConfigureUART2(uint32_t);
-void ConfigureUDMA(void);
+void configureUDMA(void);
 void ConfigureGPIO(void);
 void ConfigureADC(void);
 void ConfigureTimer0(uint32_t);

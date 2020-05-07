@@ -19,14 +19,14 @@ int main(void)
     uint16_t m, n;
 
 
-    for(m = 0; m <= 7; m++)
-    {
-        for(n = 0; n <= 7; n++)
-        {
-            DiffCosResults[m][n] = 32 * cos(_2pi * a/A);
-            DiffSinResults[m][n] = 32 * sin(_2pi * a/A);
-        }
-    }
+//    for(m = 4; m <= 4; m++)
+//    {
+//        for(n = 4; n <= 4; n++)
+//        {
+//            DiffCosResults[m][n] = 32 * cos(_2pi * a/A);
+//            DiffSinResults[m][n] = 32 * sin(_2pi * a/A);
+//        }
+//    }
 
     // Initialize the UART, GPIO, ADC and Timer peripherie
     ConfigureGPIO();
@@ -34,6 +34,7 @@ int main(void)
     ConfigureTimer0(SysClock);
     ConfigureLCD5Inch(SysClock);
 //    ConfigureLCD7Inch(SysClock);
+    configureUDMA();
     ConfigureUART0(SysClock);
     ConfigureUART2(SysClock);
 
