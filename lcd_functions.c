@@ -65,16 +65,9 @@ extern int16_t v_length[8][8];
 extern const char font_12_16[256][32];
 
 draws gridCorss[8][8];
-/***************************  write_Infos()   *******************************/
-// writes some info as text on the display.                                 //
-// Infos are: absolute or relative arrow mode, maximum measured analog,     //
-// arrow max length.                                                        //
-/****************************************************************************/
-
 void init_grid(void)
 {
     uint16_t m,n;
-    int16_t xGrid, yGrid;
     point start, stop;
 
 
@@ -85,13 +78,13 @@ void init_grid(void)
             start.x = m * 32 + GRID_OFFSET_X_5_INCH - 2;
             stop.x  = m * 32 + GRID_OFFSET_X_5_INCH + 2;
             start.y = n * 32 + GRID_OFFSET_Y_5_INCH;
-            stop.y = n * 32 + GRID_OFFSET_Y_5_INCH;
+            stop.y  = n * 32 + GRID_OFFSET_Y_5_INCH;
             write_line(start.x, start.y, stop.x, stop.y, (COLOR)BLACK, NO_ARROW);        // draw a small cross..
 
             start.x = m * 32 + GRID_OFFSET_X_5_INCH;
             stop.x  = m * 32 + GRID_OFFSET_X_5_INCH;
             start.y = n * 32 + GRID_OFFSET_Y_5_INCH - 2;
-            stop.y = n * 32 + GRID_OFFSET_Y_5_INCH + 2;
+            stop.y  = n * 32 + GRID_OFFSET_Y_5_INCH + 2;
             write_line(start.x, start.y, stop.x, stop.y, (COLOR)BLACK, NO_ARROW);        // draw a small cross..
         }
     }
@@ -99,15 +92,15 @@ void init_grid(void)
 
 
 
-
-
-
-
+/***************************  write_Infos()   *******************************/
+// writes some info as text on the display.                                 //
+// Infos are: absolute or relative arrow mode, maximum measured analog,     //
+// arrow max length.                                                        //
+/****************************************************************************/
 void write_Infos(bool relative, bool oversampling, uint16_t maxArrowSize, uint32_t maximumAnalogValue)
 {
     char charValue[100];
     static bool old = true;
-//    COLOR col = (COLOR) color[100];
 
     if(old != relative)
     {
@@ -180,6 +173,11 @@ void screen_write_nr(uint16_t nr)
 }
 
 
+
+/**************************  generate_colors()   ****************************/
+// if option activated, the arrows have different colors in relation        //
+// to their length. The color goes from dark blue for small arrows to       //
+// red for long arrows.                                                     //
 /****************************************************************************/
 void generate_colors(void)
 {
@@ -366,8 +364,8 @@ void drawDisplay5Inch(COLOR backColor)
             stop.x  = start.x;
             stop.y  = start.y;
 
-            write_line(start.x - 2, start.y, stop.x + 2, stop.y, (COLOR)BLACK, NO_ARROW);        // draw a small cross..
-            write_line(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);        // ..as as grid indicator
+            write_line(start.x - 2, start.y, stop.x + 2, stop.y, (COLOR)BLACK, NO_ARROW);    // draw a small cross..
+            write_line(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
 
             // III. write new arrows
             stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + DiffCosResults[m][n];
@@ -395,7 +393,8 @@ void drawDisplay7Inch(void)
     {
         for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
         {
-            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n], yGrid - oldDiffSinResults[m][n], (COLOR)0x000000, WITH_ARROW);
+            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n],
+                       yGrid - oldDiffSinResults[m][n], (COLOR)0x000000, WITH_ARROW);
             m++;
         }
         m = 0;
@@ -408,9 +407,10 @@ void drawDisplay7Inch(void)
     {
         for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
         {
-            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n], yGrid - DiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
-            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000FF, NO_ARROW);        // draw a small cross..
-            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000FF, NO_ARROW);        // ..as as grid indicator
+            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n],
+                       yGrid - DiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
+            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000FF, NO_ARROW);    // draw a small cross..
+            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000FF, NO_ARROW);    // ..as as grid indicator
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
             m++;
@@ -478,7 +478,7 @@ void write_position(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uin
 
 
 /******************************  LCD WRITE LINE  *************************************************/
-//draws a line from startpoint x to stoppoint y directly to the display
+//draws a line from start point x to stop point y directly to the display
 void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR color, uint16_t arrowOption)
 {
     int16_t delta_x = stop_x - start_x;
@@ -487,10 +487,11 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
     // 90° or 270° line
     if (start_x == stop_x)
     {
-        if (start_y > stop_y)
+        if (start_y > stop_y)       // 270° line
         {
             write_line_270_degree(start_x, start_y, stop_x, stop_y, color);
-            if(arrowOption == WITH_ARROW && delta_y < 1)
+
+            if(arrowOption == WITH_ARROW && -delta_y > 1)
             {
                 write_line(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
@@ -498,9 +499,10 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
-        else
+        else                        // 90° line
         {
             write_line_90_degree(start_x, start_y, stop_x, stop_y, color);
+
             if(arrowOption == WITH_ARROW && delta_y > 1)
             {
                 write_line(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
@@ -513,10 +515,11 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
     // 0° or 180° line
     else if (start_y == stop_y)
     {
-        if (start_x > stop_x)
+        if (start_x > stop_x)   // 180° line
         {
             write_line_180_degree(start_x, start_y, stop_x, stop_y, color);
-            if(arrowOption == WITH_ARROW && delta_x < 1)
+
+            if(arrowOption == WITH_ARROW && -delta_x > 1)
             {
                 write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
@@ -524,9 +527,10 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
-        else
+        else                    // 0° line
         {
             write_line_0_degree(start_x, start_y, stop_x, stop_y, color);
+
             if(arrowOption == WITH_ARROW && delta_x > 1)
             {
                 write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
@@ -551,14 +555,12 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
 
                     if(arrowOption == WITH_ARROW & delta_x > MIN_LENGTH_FOR_ARROW)
                     {
-                        // TODO: arrows
                         angle = atan2(delta_y, delta_x);
-//                        printf("%lf\n", angle);
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);    // upper
+                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);    // upper arrow line
 
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);    // lower
+                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);    // lower arrow line
                     }
                 }
                 else                            // quadrant I  2. (gain >= 1)
@@ -568,12 +570,11 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
 
                     if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
-                        // TODO: arrows
                         angle = atan2(delta_y, delta_x);
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper
+                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper arrow line
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower
+                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower arrow line
                     }
                 }
             }
@@ -588,11 +589,12 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                     if(arrowOption == WITH_ARROW && delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
-                        angle = atan(gain);
-                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
-                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
+                        angle = atan2(delta_y, delta_x);
+                        //                        printf("%lf\n", angle);
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
+                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper arrow line
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
+                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower arrow line
                     }
                 }
                 else                            // quadrant IV  2. (gain >= 1)
@@ -605,9 +607,9 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                         // TODO: arrows
                         angle = 1.571 - atan(gain);
                         write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
                         write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
             }
@@ -627,9 +629,9 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                         // TODO: arrows
                         angle = atan(gain);
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE - angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE - angle), color, NO_ARROW);// upper
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE - angle), color, NO_ARROW);// upper arrow line
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE + angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE + angle), color, NO_ARROW);// lower
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE + angle), color, NO_ARROW);// lower arrow line
                     }
                 }
                 else                            // quadrant II  2. (gain >= 1)
@@ -642,9 +644,9 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                         // TODO: arrows
                         angle = 1.571 - atan(gain);
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
             }
@@ -660,9 +662,9 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                         // TODO: arrows
                         angle = atan(gain);
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
                 else                                // quadrant III 1.
@@ -675,9 +677,9 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                         // TODO: arrows
                         angle = 1.571 - atan(gain);
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
             }
