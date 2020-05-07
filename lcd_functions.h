@@ -19,30 +19,7 @@
 
 
 /*****************************  # defines #   *****************************/
-// defines for LCD init
-#define RST 0x10
-#define INITIAL_STATE (0x1F)
-#define SOFTWARE_RESET (0x01)
-#define SET_PLL_MN (0xE2)
-#define START_PLL (0xE0)
-#define SET_LSHIFT (0xE6)
-#define SET_LCD_MODE (0xB0)
-#define SET_HORI_PERIOD (0xB4)
-#define SET_VERT_PERIOD (0xB6)
-#define SET_ADRESS_MODE (0x36)
-#define SET_PIXEL_DATA_FORMAT (0xF0)
-#define SET_DISPLAY_ON (0x29)
 
-#define FONT_WIDTH_BIG 12
-#define FONT_HIGHT_BIG 16
-#define NO_ARROW        0
-#define WITH_ARROW      1
-#define ARROW_ANGLE     0.5236          // RAD = 30°
-#define ARROW_LENGTH    5
-#define GRID_OFFSET_X_5_INCH ( 30 )
-#define GRID_OFFSET_Y_5_INCH ( 20 )
-#define GRID_OFFSET_X_7_INCH ( 200 )
-#define GRID_OFFSET_Y_7_INCH ( 50 )
 
 
 /*****************************  # typedefs #   *****************************/
@@ -69,8 +46,17 @@ enum
     GREY    = 0x505050
 };
 
+typedef struct
+{
+    uint16_t x;
+    uint16_t y;
+} point;
 
-
+typedef struct
+{
+    point points[100];
+    uint16_t length;
+}draws;
 /**************************  # Prototypes #   ****************************/
 
 void ConfigureLCD5Inch(uint32_t);
@@ -86,8 +72,7 @@ void drawDisplay7Inch(void);
 void write_Infos(bool, bool, uint16_t, uint32_t);
 
 void write_line(short, short, short, short, COLOR, uint16_t);
-void enter_sleepmode(void);
-void exit_sleepmode(void);
+void init_grid(void);
 
 
 

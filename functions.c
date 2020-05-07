@@ -7,8 +7,8 @@
 int16_t SinResults[8][16];
 int16_t CosResults[8][16];
 
-int16_t DiffSinResults[8][8];
-int16_t DiffCosResults[8][8];
+volatile int16_t DiffSinResults[8][8];
+volatile int16_t DiffCosResults[8][8];
 
 int16_t DiffCosResultsDisp[8][8];
 int16_t DiffSinResultsDisp[8][8];
@@ -16,11 +16,11 @@ int16_t DiffSinResultsDisp[8][8];
 int16_t SinOffset[8][8];
 int16_t CosOffset[8][8];
 
-int16_t DiffResults[2][8][8];   // 256 bytes array for transmit via RS232
+volatile int16_t DiffResults[2][8][8];   // 256 bytes array for transmit via RS232
 
 int16_t v_length[8][8];
 /*********************************************************************************************/
-//Read whole Array
+//Read TMR sensor array
 void ReadArray(uint16_t step)
 {
     uint32_t ADCValues_SS0[8];
@@ -128,8 +128,8 @@ uint32_t compute_relative(uint16_t maxArrowSize)
     {
         for(n = 0; n <= 7; n++)
         {
-            DiffCosResults[m][n] = DiffResults[1][m][n] * maxArrowSize / maxAnalogValue;
-            DiffSinResults[m][n] = DiffResults[0][m][n] * maxArrowSize / maxAnalogValue;
+            DiffCosResults[m][n] = DiffResults[1][7-m][n] * maxArrowSize / maxAnalogValue;
+            DiffSinResults[m][n] = -DiffResults[0][7-m][n] * maxArrowSize / maxAnalogValue;
         }
     }
     return maxAnalogValue;
@@ -186,8 +186,8 @@ uint32_t compute_absolute(uint16_t maxArrowSize)
     {
         for(n = 0; n <= 7; n++)
         {
-            DiffCosResults[m][n] = DiffResults[1][m][n];
-            DiffSinResults[m][n] = DiffResults[0][m][n];
+            DiffCosResults[m][n] = DiffResults[1][7-m][n];
+            DiffSinResults[m][n] = -DiffResults[0][7-m][n];
         }
     }
     return maxAnalogValue;
