@@ -540,11 +540,11 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
     else
     {
         double gain, angle;
-        if(start_x < stop_x)                    // Quadrant I oder IV (rechts von y-Achse)
+        if(start_x < stop_x)                    // quadrant I or IV
         {
-            if(start_y < stop_y)                // Quadrant I   (oberhalb von x-Achse)
+            if(start_y < stop_y)                // quadrant I
             {
-                if(delta_x > delta_y)           // Quadrant I  1. (Steigung < 1)
+                if(delta_x > delta_y)           // quadrant I  1. (gain < 1)
                 {
                     gain = (double)delta_y / delta_x;
                     write_line_quadrant_1_I(start_x, start_y, stop_x, stop_y, gain, color);
@@ -555,13 +555,13 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                         angle = atan2(delta_y, delta_x);
 //                        printf("%lf\n", angle);
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper
+                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);    // upper
 
                         write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower
+                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);    // lower
                     }
                 }
-                else                            // Quadrant I  2. (Steigung >= 1)
+                else                            // quadrant I  2. (gain >= 1)
                 {
                     gain = (double)delta_x / delta_y;
                     write_line_quadrant_1_II(start_x, start_y, stop_x, stop_y, gain, color);
@@ -578,9 +578,9 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 }
             }
 
-            else                                // Quadrant IV   (unterhalb von x-Achse)
+            else                                // quadrant IV
             {
-                if(delta_x > -delta_y)          // Quadrant IV  1. (Steigung < 1)
+                if(delta_x > -delta_y)          // quadrant IV  1. (gain < 1)
                 {
                     gain = (double)-delta_y / delta_x;       // start_y -> stop_y  ;  y--
                     write_line_quadrant_4_I(start_x, start_y, stop_x, stop_y, gain, color);
@@ -595,7 +595,7 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
-                else                            // Quadrant IV  2. (Steigung >= 1)
+                else                            // quadrant IV  2. (gain >= 1)
                 {
                     gain = (double)delta_x / -delta_y;
                     write_line_quadrant_4_II(start_x, start_y, stop_x, stop_y, gain, color);
@@ -613,11 +613,11 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
             }
         }
 /////////////////////////////////////////////////////////////////////////////////////////
-        else     // x < 0                       // Quadrant II oder III (links von y-Achse)
+        else     // x < 0                       // quadrant II or III
         {
-            if(start_y < stop_y)                // Quadrant II (oberhalb von x-Achse)
+            if(start_y < stop_y)                // quadrant II
             {
-                if(-delta_x > delta_y)          // Quadrant II 1. (Steigung < 1)
+                if(-delta_x > delta_y)          // quadrant II 1. (gain < 1)
                 {
                     gain = (double)delta_y / -delta_x;
                     write_line_quadrant_2_I(start_x, start_y, stop_x, stop_y, gain, color);
@@ -626,13 +626,13 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                     {
                         // TODO: arrows
                         angle = atan(gain);
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE - angle),
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE - angle), color, NO_ARROW);// upper
+                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE + angle),
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE + angle), color, NO_ARROW);// lower
                     }
                 }
-                else                            // Quadrant II  2. (Steigung >= 1)
+                else                            // quadrant II  2. (gain >= 1)
                 {
                     gain = (double)-delta_x / delta_y;
                     write_line_quadrant_2_II(start_x, start_y, stop_x, stop_y, gain, color);
@@ -648,7 +648,7 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                     }
                 }
             }
-            else                                // Quadrant III  (unterhalb von x-Achse)
+            else                                // quadrant III 2.
             {
                 if(delta_x < delta_y)       // gain < -1 (delta_x < 0 and delta_y < 0 !)
                 {
@@ -665,7 +665,7 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower
                     }
                 }
-                else
+                else                                // quadrant III 1.
                 {
                     gain = (double)delta_x / delta_y;
                     write_line_quadrant_3_II(start_x, start_y, stop_x, stop_y, gain, color);
@@ -763,9 +763,6 @@ void write_line_quadrant_1_I(short start_x, short start_y, short stop_x, short s
         gain2 -= 1;
         start_y++;
     }
-//    write_position(start_x, start_y, stop_x, start_y);
-//    write_command(0x2C);
-//    write_data(color);
 }
 
 
