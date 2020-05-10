@@ -1,24 +1,13 @@
-#include <functions.h>
-#include <lcd_functions.h>
+#include <adc_functions.h>
 
 
 /*****************************  # global variables #   ****************************/
-//All ADC-Values as int16
-int16_t SinResults[8][16];
-int16_t CosResults[8][16];
+// All ADC-Values used only temporary to transport values from readArray() to compute_..()
+// This is for historic reasons.
+static int16_t SinResults[8][16];
+static int16_t CosResults[8][16];
 
-volatile int16_t DiffSinResults[8][8];
-volatile int16_t DiffCosResults[8][8];
 
-int16_t DiffCosResultsDisp[8][8];
-int16_t DiffSinResultsDisp[8][8];
-
-int16_t SinOffset[8][8];
-int16_t CosOffset[8][8];
-
-volatile int16_t DiffResults[2][8][8];   // 256 bytes array for transmit via RS232
-
-int16_t v_length[8][8];
 /*********************************************************************************************/
 //Read TMR sensor array
 void ReadArray(uint16_t step)
@@ -32,7 +21,7 @@ void ReadArray(uint16_t step)
     ADCSequenceDataGet(ADC1_BASE, 1, ADCValues_SS1);
     ADCSequenceDataGet(ADC1_BASE, 2, ADCValues_SS2);
 
-    if (step < 8)                                 // read Cos-Values(= first 8 cycles)
+    if (step < 8)                               // read Cos-Values(= first 8 cycles)
     {
         //left half
         CosResults[0][7 - step] = (int16_t) ADCValues_SS0[0];
@@ -56,7 +45,7 @@ void ReadArray(uint16_t step)
         CosResults[7][15 - step] = (int16_t) ADCValues_SS2[3];
     }
 
-    else                                //read Sin-Values(=second 8 cycles)
+    else                                        //read Sin-Values(=second 8 cycles)
     {
          // left half
         SinResults[0][step - 8] = (int16_t) ADCValues_SS0[0]; // assign Values to result
@@ -84,7 +73,7 @@ void ReadArray(uint16_t step)
 /*********************************************************************************************/
 //Compute differential signal
 
-uint32_t compute_relative(uint16_t maxArrowSize)
+uint32_t computeRelative(uint16_t maxArrowLength)
 {
     int16_t negSinResults[8][8];
     int16_t posSinResults[8][8];
@@ -111,31 +100,34 @@ uint32_t compute_relative(uint16_t maxArrowSize)
             SinOffset[m][n]      = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
 
             // calculate arrow length
-            v_length[m][n] = (uint16_t) sqrt(DiffResults[1][m][n]*DiffResults[1][m][n] +
-                                DiffResults[0][m][n]*DiffResults[0][m][n]);
+            arrowLength[m][n] = (uint16_t) sqrt(DiffResults[1][m][n]*DiffResults[1][m][n] +
+                                             DiffResults[0][m][n]*DiffResults[0][m][n]);
 
             // store length of longest arrow
-            if(v_length[m][n] > maxAnalogValue)
+            if(arrowLength[m][n] > maxAnalogValue)
             {
-                maxAnalogValue = v_length[m][n];
+                maxAnalogValue = arrowLength[m][n];
             }
         }
     }
-    // DiffResults is used to transfer the data via UART0.
+
     // DiffCosResults and DiffSinResults are needed to display the arrows.
-    // They are being normalized in this function
+    // They are being normalized in this function to the maximum arrow length.
+    // todo:
+    // DiffSinResults has the (-)sign because the LC-Display is flipped upside down.
+    // (this is just for historic reasons and should be improved in the future)
     for(m = 0; m <= 7; m++)
     {
         for(n = 0; n <= 7; n++)
         {
-            DiffCosResults[m][n] = DiffResults[1][7-m][n] * maxArrowSize / maxAnalogValue;
-            DiffSinResults[m][n] = -DiffResults[0][7-m][n] * maxArrowSize / maxAnalogValue;
+            DiffCosResults[m][n] =  DiffResults[1][7-m][n] * maxArrowLength / maxAnalogValue;
+            DiffSinResults[m][n] = -DiffResults[0][7-m][n] * maxArrowLength / maxAnalogValue;
         }
     }
     return maxAnalogValue;
 }
 /*********************************************************************************************/
-uint32_t compute_absolute(uint16_t maxArrowSize)
+uint32_t computeAbsolute(uint16_t maxArrowLength)
 {
     int16_t negSinResults[8][8];
     int16_t posSinResults[8][8];
@@ -162,26 +154,29 @@ uint32_t compute_absolute(uint16_t maxArrowSize)
             SinOffset[m][n]      = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
 
             // calculate arrow length
-            v_length[m][n] = (uint16_t) sqrt(DiffResults[1][m][n]*DiffResults[1][m][n] +
+            arrowLength[m][n] = (uint16_t) sqrt(DiffResults[1][m][n]*DiffResults[1][m][n] +
                                 DiffResults[0][m][n]*DiffResults[0][m][n]);
 
             // store length of longest arrow
-            if(v_length[m][n] > maxAnalogValue)
+            if(arrowLength[m][n] > maxAnalogValue)
             {
-                maxAnalogValue = v_length[m][n];
+                maxAnalogValue = arrowLength[m][n];
             }
-            // limit the maximum arrow length to the max allowed value (maxArrowSize)
-            if(v_length[m][n] > maxArrowSize)
+            // limit the maximum arrow length to the max allowed value (maxArrowLength)
+            if(arrowLength[m][n] > maxArrowLength)
             {
-                DiffResults[1][m][n] *= maxArrowSize;
-                DiffResults[1][m][n] /= v_length[m][n];
-                DiffResults[0][m][n] *= maxArrowSize;
-                DiffResults[0][m][n] /= v_length[m][n];
+                DiffResults[1][m][n] *= maxArrowLength;
+                DiffResults[1][m][n] /= arrowLength[m][n];
+                DiffResults[0][m][n] *= maxArrowLength;
+                DiffResults[0][m][n] /= arrowLength[m][n];
             }
         }
     }
     // DiffResults is used to transfer the data via UART0.
-    // DiffCosResults and DiffSinResults are needed to display the arrows
+    // DiffCosResults and DiffSinResults are needed to display the arrows.
+    // todo:
+    // DiffSinResults has the (-)sign because the LC-Display is flipped upside down.
+    // (this is just for historic reasons and should be improved in the future)
     for(m = 0; m <= 7; m++)
     {
         for(n = 0; n <= 7; n++)
@@ -192,3 +187,68 @@ uint32_t compute_absolute(uint16_t maxArrowSize)
     }
     return maxAnalogValue;
 }
+
+
+/******************************************************************************************************/
+/* The sensor array has 64 TMR-Sensors with four analog singals each (sin+, sin-, cos+, cos-).
+ * This makes in total 256 analog signals to be measured. They are multiplexed to 16 analog inputs.
+ * So there are 16 analog inputs to be measured simultaneously */
+void ConfigureADC(void)
+{
+    // enable clock for peripheries
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC1);
+
+    // Wait for the ADC0 module to be ready
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0));
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC1));
+
+    // set hardware oversampling for better resolution
+    ADCHardwareOversampleConfigure(ADC0_BASE, 64);
+    ADCHardwareOversampleConfigure(ADC1_BASE, 64);
+
+    // ADC, sample sequencer, trigger processor, priority
+    ADCSequenceConfigure(ADC0_BASE,0, ADC_TRIGGER_PROCESSOR, 0);
+    ADCSequenceConfigure(ADC1_BASE,1, ADC_TRIGGER_PROCESSOR, 1);
+    ADCSequenceConfigure(ADC1_BASE,2, ADC_TRIGGER_PROCESSOR, 2);
+
+    // Samplesequencer0, left side of array
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 0, ROW_1_L); // sequence0,step0
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 1, ROW_2_L); // sequence0,step1
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 2, ROW_3_L); // sequence0,step2
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 3, ROW_4_L); // sequence0,step3
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 4, ROW_5_L); // sequence0,step4
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 5, ROW_6_L); // sequence0,step5
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 6, ROW_7_L); // sequence0,step6
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 7, ROW_8_L|  // sequence0,step7
+                             ADC_CTL_IE|ADC_CTL_END);
+
+    // Sample sequencer 1, upper right side of the array
+    ADCSequenceStepConfigure(ADC1_BASE, 1, 0, ROW_1_R); // sequence1,step0
+    ADCSequenceStepConfigure(ADC1_BASE, 1, 1, ROW_2_R); // sequence1,step1
+    ADCSequenceStepConfigure(ADC1_BASE, 1, 2, ROW_3_R); // sequence1,step2
+    ADCSequenceStepConfigure(ADC1_BASE, 1, 3, ROW_4_R); //|  // sequence1,step3
+//                             ADC_CTL_IE|ADC_CTL_END);
+
+    // Sample sequencer 2, lower right side of the array
+    ADCSequenceStepConfigure(ADC1_BASE, 2, 0, ROW_5_R); // sequence2,step0
+    ADCSequenceStepConfigure(ADC1_BASE, 2, 1, ROW_6_R); // sequence2,step1
+    ADCSequenceStepConfigure(ADC1_BASE, 2, 2, ROW_7_R); // sequence2,step2
+    ADCSequenceStepConfigure(ADC1_BASE, 2, 3, ROW_8_R); //|  // sequence2,step3
+//                             ADC_CTL_IE|ADC_CTL_END);                         // incl.interrupt
+
+
+    // Enable ADC
+    ADCSequenceEnable(ADC0_BASE, 0); // ADC0 for sample sequencer0
+    ADCSequenceEnable(ADC1_BASE, 1); // ADC1 for sample sequencer1
+    ADCSequenceEnable(ADC1_BASE, 2);  // ADC1 for sample sequencer2
+
+
+    IntPrioritySet(INT_ADC0SS0, HIGH_PRIORITY);             // set priority
+    ADCIntRegister(ADC0_BASE, 0, ADC0IntHandler);
+    ADCIntEnable(ADC0_BASE, 0);
+    IntEnable(INT_ADC0SS0);
+
+}
+
+

@@ -35,19 +35,19 @@ void write_cmd_data(unsigned char);
 void write_data(COLOR);
 void write_position(uint16_t, uint16_t, uint16_t, uint16_t);
 void generate_colors(void);
-//void write_line(short, short, short, short, COLOR, uint16_t);
-void write_line_0_degree  (short, short, short, short, COLOR);
-void write_line_90_degree (short, short, short, short, COLOR);
-void write_line_180_degree(short, short, short, short, COLOR);
-void write_line_270_degree(short, short, short, short, COLOR);
-void write_line_quadrant_1_I (short, short, short, short, double, COLOR);  //   0° < degree < 90°
-void write_line_quadrant_1_II(short, short, short, short, double, COLOR);  //   0° < degree < 90°
-void write_line_quadrant_2_I (short, short, short, short, double, COLOR);  //  90° < degree < 180°
-void write_line_quadrant_2_II(short, short, short, short, double, COLOR);  //  90° < degree < 180°
-void write_line_quadrant_3_I (short, short, short, short, double, COLOR);  // 180° < degree < 270°
-void write_line_quadrant_3_II(short, short, short, short, double, COLOR);  // 180° < degree < 270°
-void write_line_quadrant_4_I (short, short, short, short, double, COLOR);  // 270° < degree < 360°
-void write_line_quadrant_4_II(short, short, short, short, double, COLOR);  // 270° < degree < 360°
+//void writeLine(short, short, short, short, COLOR, uint16_t);
+void writeLine_0_degree  (short, short, short, short, COLOR);
+void writeLine_90_degree (short, short, short, short, COLOR);
+void writeLine_180_degree(short, short, short, short, COLOR);
+void writeLine_270_degree(short, short, short, short, COLOR);
+void writeLine_quadrant_1_I (short, short, short, short, double, COLOR);  //   0° < degree < 90°
+void writeLine_quadrant_1_II(short, short, short, short, double, COLOR);  //   0° < degree < 90°
+void writeLine_quadrant_2_I (short, short, short, short, double, COLOR);  //  90° < degree < 180°
+void writeLine_quadrant_2_II(short, short, short, short, double, COLOR);  //  90° < degree < 180°
+void writeLine_quadrant_3_I (short, short, short, short, double, COLOR);  // 180° < degree < 270°
+void writeLine_quadrant_3_II(short, short, short, short, double, COLOR);  // 180° < degree < 270°
+void writeLine_quadrant_4_I (short, short, short, short, double, COLOR);  // 270° < degree < 360°
+void writeLine_quadrant_4_II(short, short, short, short, double, COLOR);  // 270° < degree < 360°
 
 
 
@@ -60,35 +60,9 @@ COLOR color[768];
 
 extern int16_t DiffCosResults[8][8];
 extern int16_t DiffSinResults[8][8];
-extern int16_t v_length[8][8];
+extern int16_t arrowLength[8][8];
 
 extern const char font_12_16[256][32];
-
-draws gridCorss[8][8];
-void init_grid(void)
-{
-    uint16_t m,n;
-    point start, stop;
-
-
-    for(m = 0; m <= 7; m++)
-    {
-        for(n = 0; n <= 7; n++)
-        {
-            start.x = m * 32 + GRID_OFFSET_X_5_INCH - 2;
-            stop.x  = m * 32 + GRID_OFFSET_X_5_INCH + 2;
-            start.y = n * 32 + GRID_OFFSET_Y_5_INCH;
-            stop.y  = n * 32 + GRID_OFFSET_Y_5_INCH;
-            write_line(start.x, start.y, stop.x, stop.y, (COLOR)BLACK, NO_ARROW);        // draw a small cross..
-
-            start.x = m * 32 + GRID_OFFSET_X_5_INCH;
-            stop.x  = m * 32 + GRID_OFFSET_X_5_INCH;
-            start.y = n * 32 + GRID_OFFSET_Y_5_INCH - 2;
-            stop.y  = n * 32 + GRID_OFFSET_Y_5_INCH + 2;
-            write_line(start.x, start.y, stop.x, stop.y, (COLOR)BLACK, NO_ARROW);        // draw a small cross..
-        }
-    }
-}
 
 
 
@@ -97,7 +71,7 @@ void init_grid(void)
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
 /****************************************************************************/
-void write_Infos(bool relative, bool oversampling, uint16_t maxArrowSize, uint32_t maximumAnalogValue)
+void write_Infos(bool relative, bool oversampling, uint16_t maxArrowLength, uint32_t maximumAnalogValue)
 {
     char charValue[100];
     static bool old = true;
@@ -105,13 +79,13 @@ void write_Infos(bool relative, bool oversampling, uint16_t maxArrowSize, uint32
     if(old != relative)
     {
         old = relative;
-        write_screen_color5INCH((COLOR)WHITE);
+        writeScreenColor5INCH((COLOR)WHITE);
     }
     if(relative == true)
     {
         print_string("relative:  true", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
 
-        sprintf(charValue, "length: %.3d", maxArrowSize);
+        sprintf(charValue, "length: %.3d", maxArrowLength);
         print_string(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
 
         sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
@@ -121,13 +95,13 @@ void write_Infos(bool relative, bool oversampling, uint16_t maxArrowSize, uint32
     {
         print_string("relative: false", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
 
-        sprintf(charValue, "length: %.3d", maxArrowSize);
+        sprintf(charValue, "length: %.3d", maxArrowLength);
         print_string(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
 
         sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
         print_string(charValue, 70, 300, (COLOR)BLACK, (COLOR)WHITE);
 
-        if(maximumAnalogValue > maxArrowSize)
+        if(maximumAnalogValue > maxArrowLength)
         {
             print_string("Clipping!", 100, 300, (COLOR)BLACK, (COLOR)WHITE);
         }
@@ -145,33 +119,6 @@ void write_Infos(bool relative, bool oversampling, uint16_t maxArrowSize, uint32
         print_string("Oversampling on ", 250, 280, (COLOR)BLACK, (COLOR)WHITE);
     }
 }
-
-
-/***************************  screen_show_nr()   ****************************/
-// the display dimensions are 480*272 pixels => 130560 pixels               //
-// the lcd memory is much bigger, so three display screens can be saved     //
-// simultaneously there. screen_show_nr() switches between those screens.   //
-/****************************************************************************/
-void screen_show_nr(uint16_t nr)
-{
-    uint16_t value = nr * 272;
-
-    write_command(0x37);                     // Set scroll area
-    write_cmd_data(value >> 8);              // TFA high byte
-    write_cmd_data(value);                   // TFA low byte
-}
-
-
-/***************************  screen_show_nr()   ****************************/
-// the display dimensions are 480*272 pixels => 130560 pixels               //
-// the lcd memory is much bigger, so three display screens can be saved     //
-// simultaneously there. screen_write_nr() to which is written.             //
-/****************************************************************************/
-void screen_write_nr(uint16_t nr)
-{
-    offset = nr * 272;
-}
-
 
 
 /**************************  generate_colors()   ****************************/
@@ -281,10 +228,10 @@ void write_char(uint16_t letter, COLOR color, COLOR backcolor)
 }
 
 
-/***********************  write_screen_color5INCH()   ***********************/
+/***********************  writeScreenColor5INCH()   ***********************/
 // Writes the hole screen in one color                                      //
 /****************************************************************************/
-void write_screen_color5INCH(COLOR color)
+void writeScreenColor5INCH(COLOR color)
 {
     uint32_t count = 0;
 
@@ -358,20 +305,20 @@ void drawDisplay5Inch(COLOR backColor)
             stop.x  = start.x + oldDiffCosResults[m][n];
             stop.y  = start.y + oldDiffSinResults[m][n];
 
-            write_line(start.x, start.y, stop.x, stop.y, backColor, WITH_ARROW);
+            writeLine(start.x, start.y, stop.x, stop.y, backColor, WITH_ARROW);
 
             // II. write grid cross
             stop.x  = start.x;
             stop.y  = start.y;
 
-            write_line(start.x - 2, start.y, stop.x + 2, stop.y, (COLOR)BLACK, NO_ARROW);    // draw a small cross..
-            write_line(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
+            writeLine(start.x - 2, start.y, stop.x + 2, stop.y, (COLOR)BLACK, NO_ARROW);    // draw a small cross..
+            writeLine(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
 
             // III. write new arrows
             stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + DiffCosResults[m][n];
             stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + DiffSinResults[m][n];
 
-            write_line(start.x, start.y, stop.x, stop.y, color[v_length[m][n]], WITH_ARROW);
+            writeLine(start.x, start.y, stop.x, stop.y, color[arrowLength[m][n]], WITH_ARROW);
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
         }
@@ -393,7 +340,7 @@ void drawDisplay7Inch(void)
     {
         for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
         {
-            write_line(xGrid, yGrid, xGrid + oldDiffCosResults[m][n],
+            writeLine(xGrid, yGrid, xGrid + oldDiffCosResults[m][n],
                        yGrid - oldDiffSinResults[m][n], (COLOR)0x000000, WITH_ARROW);
             m++;
         }
@@ -407,10 +354,10 @@ void drawDisplay7Inch(void)
     {
         for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
         {
-            write_line(xGrid, yGrid, xGrid + DiffCosResults[m][n],
+            writeLine(xGrid, yGrid, xGrid + DiffCosResults[m][n],
                        yGrid - DiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
-            write_line(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000FF, NO_ARROW);    // draw a small cross..
-            write_line(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000FF, NO_ARROW);    // ..as as grid indicator
+            writeLine(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000FF, NO_ARROW);    // draw a small cross..
+            writeLine(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000FF, NO_ARROW);    // ..as as grid indicator
             oldDiffCosResults[m][n] = DiffCosResults[m][n];
             oldDiffSinResults[m][n] = DiffSinResults[m][n];
             m++;
@@ -479,7 +426,7 @@ void write_position(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uin
 
 /******************************  LCD WRITE LINE  *************************************************/
 //draws a line from start point x to stop point y directly to the display
-void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR color, uint16_t arrowOption)
+void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR color, uint16_t arrowOption)
 {
     int16_t delta_x = stop_x - start_x;
     int16_t delta_y = stop_y - start_y;
@@ -489,25 +436,25 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
     {
         if (start_y > stop_y)       // 270° line
         {
-            write_line_270_degree(start_x, start_y, stop_x, stop_y, color);
+            writeLine_270_degree(start_x, start_y, stop_x, stop_y, color);
 
             if(arrowOption == WITH_ARROW && -delta_y > 1)
             {
-                write_line(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                writeLine(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
-                write_line(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                writeLine(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
         else                        // 90° line
         {
-            write_line_90_degree(start_x, start_y, stop_x, stop_y, color);
+            writeLine_90_degree(start_x, start_y, stop_x, stop_y, color);
 
             if(arrowOption == WITH_ARROW && delta_y > 1)
             {
-                write_line(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                writeLine(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
-                write_line(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                writeLine(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
@@ -517,25 +464,25 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
     {
         if (start_x > stop_x)   // 180° line
         {
-            write_line_180_degree(start_x, start_y, stop_x, stop_y, color);
+            writeLine_180_degree(start_x, start_y, stop_x, stop_y, color);
 
             if(arrowOption == WITH_ARROW && -delta_x > 1)
             {
-                write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
-                write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
         else                    // 0° line
         {
-            write_line_0_degree(start_x, start_y, stop_x, stop_y, color);
+            writeLine_0_degree(start_x, start_y, stop_x, stop_y, color);
 
             if(arrowOption == WITH_ARROW && delta_x > 1)
             {
-                write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                writeLine(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
-                write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                writeLine(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
@@ -551,29 +498,29 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 if(delta_x > delta_y)           // quadrant I  1. (gain < 1)
                 {
                     gain = (double)delta_y / delta_x;
-                    write_line_quadrant_1_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLine_quadrant_1_I(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW & delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         angle = atan2(delta_y, delta_x);
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);    // upper arrow line
 
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);    // lower arrow line
                     }
                 }
                 else                            // quadrant I  2. (gain >= 1)
                 {
                     gain = (double)delta_x / delta_y;
-                    write_line_quadrant_1_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLine_quadrant_1_II(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         angle = atan2(delta_y, delta_x);
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper arrow line
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -584,31 +531,31 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 if(delta_x > -delta_y)          // quadrant IV  1. (gain < 1)
                 {
                     gain = (double)-delta_y / delta_x;       // start_y -> stop_y  ;  y--
-                    write_line_quadrant_4_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLine_quadrant_4_I(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = atan2(delta_y, delta_x);
                         //                        printf("%lf\n", angle);
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper arrow line
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower arrow line
                     }
                 }
                 else                            // quadrant IV  2. (gain >= 1)
                 {
                     gain = (double)delta_x / -delta_y;
-                    write_line_quadrant_4_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLine_quadrant_4_II(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = 1.571 - atan(gain);
-                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                        writeLine(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
-                        write_line(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                        writeLine(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -622,30 +569,30 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 if(-delta_x > delta_y)          // quadrant II 1. (gain < 1)
                 {
                     gain = (double)delta_y / -delta_x;
-                    write_line_quadrant_2_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLine_quadrant_2_I(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = atan(gain);
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE - angle),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE - angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE - angle), color, NO_ARROW);// upper arrow line
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE + angle),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE + angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE + angle), color, NO_ARROW);// lower arrow line
                     }
                 }
                 else                            // quadrant II  2. (gain >= 1)
                 {
                     gain = (double)-delta_x / delta_y;
-                    write_line_quadrant_2_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLine_quadrant_2_II(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = 1.571 - atan(gain);
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -655,30 +602,30 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
                 if(delta_x < delta_y)       // gain < -1 (delta_x < 0 and delta_y < 0 !)
                 {
                     gain = (double)delta_y / delta_x;
-                    write_line_quadrant_3_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLine_quadrant_3_I(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = atan(gain);
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
                 else                                // quadrant III 1.
                 {
                     gain = (double)delta_x / delta_y;
-                    write_line_quadrant_3_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLine_quadrant_3_II(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         // TODO: arrows
                         angle = 1.571 - atan(gain);
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
-                        write_line(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -689,7 +636,7 @@ void write_line(short start_x, short start_y, short stop_x, short stop_y, COLOR 
 
 
 /****************************************************************************/
-void write_line_0_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine_0_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
 {
     int16_t x;
 
@@ -703,7 +650,7 @@ void write_line_0_degree(short start_x, short start_y, short stop_x, short stop_
 
 
 /****************************************************************************/
-void write_line_90_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine_90_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
 {
     int16_t y;
 
@@ -717,7 +664,7 @@ void write_line_90_degree(short start_x, short start_y, short stop_x, short stop
 
 
 /****************************************************************************/
-void write_line_180_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine_180_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
 {
     int16_t x;
 
@@ -731,7 +678,7 @@ void write_line_180_degree(short start_x, short start_y, short stop_x, short sto
 
 
 /****************************************************************************/
-void write_line_270_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine_270_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
 {
     int16_t y;
 
@@ -745,7 +692,7 @@ void write_line_270_degree(short start_x, short start_y, short stop_x, short sto
 
 
 /****************************************************************************/
-void write_line_quadrant_1_I(short start_x, short start_y, short stop_x, short stop_y, double gain,COLOR color)
+void writeLine_quadrant_1_I(short start_x, short start_y, short stop_x, short stop_y, double gain,COLOR color)
 {
     double gain2 = 0.5;
 
@@ -769,7 +716,7 @@ void write_line_quadrant_1_I(short start_x, short start_y, short stop_x, short s
 
 
 /****************************************************************************/
-void write_line_quadrant_1_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLine_quadrant_1_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
@@ -793,7 +740,7 @@ void write_line_quadrant_1_II(short start_x, short start_y, short stop_x, short 
 
 
 /****************************************************************************/
-void write_line_quadrant_2_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLine_quadrant_2_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
@@ -817,7 +764,7 @@ void write_line_quadrant_2_I(short start_x, short start_y, short stop_x, short s
 
 
 /****************************************************************************/
-void write_line_quadrant_2_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLine_quadrant_2_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
@@ -841,7 +788,7 @@ void write_line_quadrant_2_II(short start_x, short start_y, short stop_x, short 
 
 
 /****************************************************************************/
-void write_line_quadrant_3_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLine_quadrant_3_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
@@ -865,7 +812,7 @@ void write_line_quadrant_3_I(short start_x, short start_y, short stop_x, short s
 
 
 /****************************************************************************/
-void write_line_quadrant_3_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLine_quadrant_3_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
@@ -889,7 +836,7 @@ void write_line_quadrant_3_II(short start_x, short start_y, short stop_x, short 
 
 
 /****************************************************************************/
-void write_line_quadrant_4_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLine_quadrant_4_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
@@ -913,7 +860,7 @@ void write_line_quadrant_4_I(short start_x, short start_y, short stop_x, short s
 
 
 /****************************************************************************/
-void write_line_quadrant_4_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLine_quadrant_4_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 

@@ -4,64 +4,42 @@
  *  Created on: 13.02.2020
  */
 #include <Interrupt_handler.h>
-#include <math.h>
+
 
 /*****************************  # global variables #   ****************************/
-// Array holding the sin and cos values
-extern int16_t DiffResults[2][8][8];
-extern int16_t DiffCosResults[8][8];
-extern int16_t DiffSinResults[8][8];
 
-char UART0receive[8];
+static bool relative = true, oversampling = true;
+static uint16_t maxArrowLength = 32;
+static uint32_t maximumAnalogValue;
+static COLOR backColor = (COLOR)WHITE;
 
-bool relative = true, oversampling = false;
-uint16_t maxArrowSize = 32;
-uint32_t maximumAnalogValue;
-COLOR backColor = (COLOR)WHITE;
-
-#define _2PI ( 6.28318530718 )
-uint16_t a = 0, A = 360;
 
 /***********************  TIMER 0 interrupt handler   ************************/
 /* Periodically measure the sensor Array values and draw them to the display */
 void Timer0IntHandler(void)
 {
-    uint16_t m, n;
-
     GPIO_PORTN_DATA_R ^= YELLOW;       // for debugging: toggle debug output each time handler is called
+    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
 
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
-//    for(m = 0; m <= 7; m++)
-//    {
-//        for(n = 0; n <= 7; n++)
-//        {
-//            DiffCosResults[m][n] = maxArrowSize * cos(_2PI * a/A);
-//            DiffSinResults[m][n] = maxArrowSize * sin(_2PI * a/A);
-//        }
-//    }
-//    if(++a == 360) a = 0;
-
-//    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
-
     drawDisplay5Inch(backColor);
+
+//    drawDisplay7Inch();
+    write_Infos(relative, oversampling, maxArrowLength, maximumAnalogValue);
+
     // start the first of 16 ADC read. The others will be triggered in the ADC handler
     ADCProcessorTrigger(ADC0_BASE, 0);
     ADCProcessorTrigger(ADC1_BASE, 1);
     ADCProcessorTrigger(ADC1_BASE, 2);
-
-//    GPIO_PORTN_DATA_R |= BLUE;         // for debugging: set high when handler is called
-
-//    drawDisplay7Inch();
-    write_Infos(relative, oversampling, maxArrowSize, maximumAnalogValue);
-
 
     // send command to stepper-motor to send back position data (absolute)
 //    for(i = 0; i < 9; i++)
 //    {
 //        UARTCharPutNonBlocking(UART2_BASE, readCommand[i]);
 //    }
-//    GPIO_PORTN_DATA_R ^= BLUE;                   // for debugging: set low when handler is finished
+
+    GPIO_PORTN_DATA_R ^= BLUE;                   // for debugging: set low when handler is finished
 }
 
 
@@ -97,7 +75,7 @@ void ADC0IntHandler(void)
     // after 16 conversions process analog data and prepare for next ADC cycle
     else
     {
-        maximumAnalogValue = (relative == true) ? compute_relative(maxArrowSize): compute_absolute(maxArrowSize);
+        maximumAnalogValue = (relative == true) ? computeRelative(maxArrowLength): computeAbsolute(maxArrowLength);
         step = 0;
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
         GPIO_PORTL_DATA_R |= GPIO_PIN_4;
@@ -122,34 +100,17 @@ void UART0IntHandler(void)
 
     if( ui32Status & UART_INT_DMARX)
     {
-        // prepare uDMA for the next UART0receive (8 bytes)
-        uDMAChannelTransferSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT,
-                               UDMA_MODE_BASIC,
-                                   (void *)(UART0_BASE + UART_O_DR),
-                                   UART0receive, sizeof(UART0receive));
-        uDMAChannelEnable(UDMA_CHANNEL_UART0RX);
-//        printf("%s %x%x%x%x \n", UART0receive, UART0receive[4], UART0receive[5], UART0receive[6], UART0receive[7]);
+        prepareReceiveDMA();
 
-        // now its time to see what we UART0received:
+        // receive[] contains commands from another device. The commands depend on
+        // the value of the first byte:
         // '0': send Array Data (256 bytes) via serial interface to Matlab
-
         if(UART0receive[0] == '0')
         {
-            // Set up the transfer parameters for the uDMA UART TX channel.  This will
-            // configure the transfer source and destination and the transfer size.
-            // Basic mode is used because the peripheral is making the uDMA transfer
-            // request.  The source is the DiffResults array and the destination is the UART
-            // data register.
-            uDMAChannelTransferSet(UDMA_CHANNEL_UART0TX | UDMA_PRI_SELECT,
-                                       UDMA_MODE_BASIC, (char *)DiffResults,
-                                       (void *)(UART0_BASE + UART_O_DR),
-                                       sizeof(DiffResults));
-            // The uDMA TX channel must be enabled to send a data burst.
-            // It starts immediately because the Tx FIFO is empty (or should be)
-            uDMAChannelEnable(UDMA_CHANNEL_UART0TX);
+            sendUARTDMA();
         }
 
-        // '1': set arrow relative/absolute and arrow size
+        // '1': set arrow relative/absolute and arrow size.
         else if(UART0receive[0] == '1')
         {
             if(UART0receive[1] == '0')
@@ -160,10 +121,10 @@ void UART0IntHandler(void)
             {
                 relative = true;
             }
-            // restore the 32 bit integer what was send in four peaces
-            maxArrowSize = UART0receive[4] << 24 | UART0receive[5] << 16 | UART0receive[6] << 8 | UART0receive[7];
+            // the value was transmitted as char coded number.
+            maxArrowLength = UART0receive[4] << 24 | UART0receive[5] << 16 | UART0receive[6] << 8 | UART0receive[7];
         }
-        // '2': commands for the stepper motor
+        // '2': commands past forwarded to the stepper-motor by UART2.
         else if(UART0receive[0] == '2')
         {
             for(i = 1; i < 8; i++)
@@ -201,31 +162,30 @@ void UART0IntHandler(void)
             if(UART0receive[1] == '0')
             {
                 backColor = (COLOR)WHITE;
-                write_screen_color5INCH(backColor);
+                writeScreenColor5INCH(backColor);
             }
             else if(UART0receive[1] == '1')
             {
                 backColor = (COLOR)BLACK;
-                write_screen_color5INCH(backColor);
+                writeScreenColor5INCH(backColor);
             }
             else if(UART0receive[1] == '2')
             {
                 backColor = (COLOR)GREY;
-                write_screen_color5INCH(backColor);
+                writeScreenColor5INCH(backColor);
             }
         }
-        // change the arrow direction (used only for debugging!)
+        // more commands.
         else if(UART0receive[0] == '6')
         {
-           // restore the 32 bit integer what was send in four peaces
-            a = UART0receive[4] << 24 | UART0receive[5] << 16 | UART0receive[6] << 8 | UART0receive[7];
+           // todo: additional commands from UART here
         }
     }
 }
 
 
-/*********************************************************************************************/
-/* send commands to the stepper motor and receiving telemetry data from motor via RS485 */
+/******************************************************************************************/
+/* send commands to stepper-motor and receive telemetry data from stepper-motor via RS485 */
 void UART2IntHandler(void)
 {
     int i = 0;

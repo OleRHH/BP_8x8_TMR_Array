@@ -52,27 +52,20 @@ typedef struct
     uint16_t y;
 } point;
 
-typedef struct
-{
-    point points[100];
-    uint16_t length;
-}draws;
+
 /**************************  # Prototypes #   ****************************/
 
 void ConfigureLCD5Inch(uint32_t);
 void ConfigureLCD7Inch(uint32_t SysClock);
 
-void screen_show_nr(uint16_t);
-void screen_write_nr(uint16_t);
 void print_string(char *, uint16_t, uint16_t, COLOR, COLOR);
-void write_screen_color5INCH(COLOR);
+void writeScreenColor5INCH(COLOR);
 void write_screen_color7INCH(COLOR);
 void drawDisplay5Inch(COLOR);
 void drawDisplay7Inch(void);
 void write_Infos(bool, bool, uint16_t, uint32_t);
 
-void write_line(short, short, short, short, COLOR, uint16_t);
-void init_grid(void);
+void writeLine(short, short, short, short, COLOR, uint16_t);
 
 
 

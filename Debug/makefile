@@ -9,12 +9,13 @@ GEN_CMDS__FLAG :=
 
 ORDERED_OBJS += \
 "./Interrupt_handler.obj" \
+"./adc_functions.obj" \
 "./configuration.obj" \
 "./fonts.obj" \
-"./functions.obj" \
 "./lcd_functions.obj" \
 "./main.obj" \
 "./tm4c1294ncpdt_startup_ccs.obj" \
+"./uartDMA.obj" \
 "../tm4c1294ncpdt.cmd" \
 $(GEN_CMDS__FLAG) \
 -llibc.a \
@@ -159,8 +160,8 @@ BP_TMR_sensor_array.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "Interrupt_handler.obj" "configuration.obj" "fonts.obj" "functions.obj" "lcd_functions.obj" "main.obj" "tm4c1294ncpdt_startup_ccs.obj" 
-	-$(RM) "Interrupt_handler.d" "configuration.d" "fonts.d" "functions.d" "lcd_functions.d" "main.d" "tm4c1294ncpdt_startup_ccs.d" 
+	-$(RM) "Interrupt_handler.obj" "adc_functions.obj" "configuration.obj" "fonts.obj" "lcd_functions.obj" "main.obj" "tm4c1294ncpdt_startup_ccs.obj" "uartDMA.obj" 
+	-$(RM) "Interrupt_handler.d" "adc_functions.d" "configuration.d" "fonts.d" "lcd_functions.d" "main.d" "tm4c1294ncpdt_startup_ccs.d" "uartDMA.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
