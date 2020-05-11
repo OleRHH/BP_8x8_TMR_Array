@@ -11,10 +11,18 @@
 #pragma DATA_ALIGN(pui8ControlTable, 1024)
 uint8_t pui8ControlTable[1024];
 
+// The transmit buffer used for the UART transfer.
+static char UART0receive[8];
+
 
 //*****************************************************************************
+char * getDataFromPc(void)
+{
+    return UART0receive;
+}
 
 
+//*****************************************************************************
 void prepareReceiveDMA(void)
 {
     // prepare uDMA for the next UART0receive (8 bytes)
@@ -41,6 +49,18 @@ void sendUARTDMA(void)
     // The uDMA TX channel must be enabled to send a data burst.
     // It starts immediately because the Tx FIFO is empty (or should be)
     uDMAChannelEnable(UDMA_CHANNEL_UART0TX);
+}
+
+
+//*****************************************************************************
+void sendCommandToMotor(char * data, uint16_t size)
+{
+    uint16_t i;
+    // send command to stepper-motor to send back position data (absolute)
+    for(i = 0; i < size; i++)
+    {
+        UARTCharPutNonBlocking(UART2_BASE, data[i]);
+    }
 }
 
 

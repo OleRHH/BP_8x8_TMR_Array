@@ -1,77 +1,46 @@
 #include <lcd_functions.h>
 
-// defines
-#define RST 0x10
-#define INITIAL_STATE (0x1F)
-#define SOFTWARE_RESET (0x01)
-#define SET_PLL_MN (0xE2)
-#define START_PLL (0xE0)
-#define SET_LSHIFT (0xE6)
-#define SET_LCD_MODE (0xB0)
-#define SET_HORI_PERIOD (0xB4)
-#define SET_VERT_PERIOD (0xB6)
-#define SET_ADRESS_MODE (0x36)
-#define SET_PIXEL_DATA_FORMAT (0xF0)
-#define SET_DISPLAY_ON (0x29)
 
-#define FONT_WIDTH_BIG 12
-#define FONT_HIGHT_BIG 16
-#define NO_ARROW        0
-#define WITH_ARROW      1
-#define ARROW_ANGLE     0.7
-#define ARROW_LENGTH    5
-#define MIN_LENGTH_FOR_ARROW  1
-#define GRID_OFFSET_X_5_INCH ( 30 )
-#define GRID_OFFSET_Y_5_INCH ( 20 )
-#define GRID_OFFSET_X_7_INCH ( 200 )
-#define GRID_OFFSET_Y_7_INCH ( 50 )
+/**********************  # intern Prototypes #   **********************/
+void writeChar(uint16_t, COLOR, COLOR);
 
-// intern prototypes
-void write_char(uint16_t, COLOR, COLOR);
-void draw_arrow(short, short, short, short, COLOR);
-
-void write_command(unsigned char);
-void write_cmd_data(unsigned char);
-void write_data(COLOR);
-void write_position(uint16_t, uint16_t, uint16_t, uint16_t);
-void generate_colors(void);
-//void writeLine(short, short, short, short, COLOR, uint16_t);
-void writeLine_0_degree  (short, short, short, short, COLOR);
-void writeLine_90_degree (short, short, short, short, COLOR);
-void writeLine_180_degree(short, short, short, short, COLOR);
-void writeLine_270_degree(short, short, short, short, COLOR);
-void writeLine_quadrant_1_I (short, short, short, short, double, COLOR);  //   0° < degree < 90°
-void writeLine_quadrant_1_II(short, short, short, short, double, COLOR);  //   0° < degree < 90°
-void writeLine_quadrant_2_I (short, short, short, short, double, COLOR);  //  90° < degree < 180°
-void writeLine_quadrant_2_II(short, short, short, short, double, COLOR);  //  90° < degree < 180°
-void writeLine_quadrant_3_I (short, short, short, short, double, COLOR);  // 180° < degree < 270°
-void writeLine_quadrant_3_II(short, short, short, short, double, COLOR);  // 180° < degree < 270°
-void writeLine_quadrant_4_I (short, short, short, short, double, COLOR);  // 270° < degree < 360°
-void writeLine_quadrant_4_II(short, short, short, short, double, COLOR);  // 270° < degree < 360°
+void writeCommand(unsigned char);
+void writeCmdData(unsigned char);
+void writeData(COLOR);
+void writePosition(uint16_t, uint16_t, uint16_t, uint16_t);
+void generateColors(void);
+void writeLine(short, short, short, short, COLOR, uint16_t);
+void writeLine0Degree  (short, short, short, short, COLOR);
+void writeLine90Degree (short, short, short, short, COLOR);
+void writeLine180Degree(short, short, short, short, COLOR);
+void writeLine270Degree(short, short, short, short, COLOR);
+void writeLineQuadrant1_I (short, short, short, short, double, COLOR);  //   0° < degree < 90°
+void writeLineQuadrant1_II(short, short, short, short, double, COLOR);  //   0° < degree < 90°
+void writeLineQuadrant2_I (short, short, short, short, double, COLOR);  //  90° < degree < 180°
+void writeLineQuadrant2_II(short, short, short, short, double, COLOR);  //  90° < degree < 180°
+void writeLineQuadrant3_I (short, short, short, short, double, COLOR);  // 180° < degree < 270°
+void writeLineQuadrant3_II(short, short, short, short, double, COLOR);  // 180° < degree < 270°
+void writeLineQuadrant4_I (short, short, short, short, double, COLOR);  // 270° < degree < 360°
+void writeLineQuadrant4_II(short, short, short, short, double, COLOR);  // 270° < degree < 360°
 
 
 
 
 uint16_t offset = 0;
 
-volatile int16_t oldDiffSinResults[8][8];
-volatile int16_t oldDiffCosResults[8][8];
-COLOR color[768];
-
-extern int16_t DiffCosResults[8][8];
-extern int16_t DiffSinResults[8][8];
-extern int16_t arrowLength[8][8];
-
-extern const char font_12_16[256][32];
+int16_t oldDiffSinResults[8][8];
+int16_t oldDiffCosResults[8][8];
+static COLOR color[768];
 
 
 
-/***************************  write_Infos()   *******************************/
+
+/***************************  writeInfos()   *******************************/
 // writes some info as text on the display.                                 //
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
 /****************************************************************************/
-void write_Infos(bool relative, bool oversampling, uint16_t maxArrowLength, uint32_t maximumAnalogValue)
+void writeInfos(bool relative, bool oversampling, uint16_t maxArrowLength, uint32_t maximumAnalogValue)
 {
     char charValue[100];
     static bool old = true;
@@ -83,50 +52,50 @@ void write_Infos(bool relative, bool oversampling, uint16_t maxArrowLength, uint
     }
     if(relative == true)
     {
-        print_string("relative:  true", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString("relative:  true", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
 
         sprintf(charValue, "length: %.3d", maxArrowLength);
-        print_string(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
 
         sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
-        print_string(charValue, 70, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString(charValue, 70, 300, (COLOR)BLACK, (COLOR)WHITE);
     }
     else
     {
-        print_string("relative: false", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString("relative: false", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
 
         sprintf(charValue, "length: %.3d", maxArrowLength);
-        print_string(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
 
         sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
-        print_string(charValue, 70, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString(charValue, 70, 300, (COLOR)BLACK, (COLOR)WHITE);
 
         if(maximumAnalogValue > maxArrowLength)
         {
-            print_string("Clipping!", 100, 300, (COLOR)BLACK, (COLOR)WHITE);
+            printString("Clipping!", 100, 300, (COLOR)BLACK, (COLOR)WHITE);
         }
         else
         {
-            print_string("Clipping!", 100, 300, (COLOR)WHITE, (COLOR)WHITE);
+            printString("Clipping!", 100, 300, (COLOR)WHITE, (COLOR)WHITE);
         }
     }
     if(oversampling == false)
     {
-        print_string("Oversampling off", 250, 280, (COLOR)BLACK, (COLOR)WHITE);
+        printString("Oversampling off", 250, 280, (COLOR)BLACK, (COLOR)WHITE);
     }
     else
     {
-        print_string("Oversampling on ", 250, 280, (COLOR)BLACK, (COLOR)WHITE);
+        printString("Oversampling on ", 250, 280, (COLOR)BLACK, (COLOR)WHITE);
     }
 }
 
 
-/**************************  generate_colors()   ****************************/
+/**************************  generateColors()   ****************************/
 // if option activated, the arrows have different colors in relation        //
 // to their length. The color goes from dark blue for small arrows to       //
 // red for long arrows.                                                     //
 /****************************************************************************/
-void generate_colors(void)
+void generateColors(void)
 {
     int i, val = 100, red, green, blue;
 
@@ -165,10 +134,10 @@ void generate_colors(void)
 }
 
 
-/****************************  print_string()   *****************************/
+/****************************  printString()   *****************************/
 // writes a string to the given position on the LD-Display                  //
 /****************************************************************************/
-void print_string(char *text, uint16_t row, uint16_t column, COLOR color, COLOR backcolor)
+void printString(char *text, uint16_t row, uint16_t column, COLOR color, COLOR backcolor)
 {
     uint16_t letter, numLetter, lv;
     uint16_t length = strlen(text);
@@ -179,13 +148,13 @@ void print_string(char *text, uint16_t row, uint16_t column, COLOR color, COLOR 
 
     for (numLetter = 0; numLetter < length; numLetter++)
     {
-        write_position(columnStart, rowStart, columnStop, rowStop);
-        write_command(0x2C);
+        writePosition(columnStart, rowStart, columnStop, rowStop);
+        writeCommand(0x2C);
         for (lv = 0; lv < 32; lv += 2)
         {
             letter = (font_12_16[text[numLetter]][lv + 1] << 4)
                     | (font_12_16[text[numLetter]][lv] >> 4);
-            write_char(letter, color, backcolor);
+            writeChar(letter, color, backcolor);
         }
         columnStart += FONT_WIDTH_BIG;
         columnStop  += FONT_WIDTH_BIG;
@@ -193,11 +162,11 @@ void print_string(char *text, uint16_t row, uint16_t column, COLOR color, COLOR 
 }
 
 
-/****************************  write_char()   *******************************/
-// helper function for print_string():                                      //
+/****************************  writeChar()   *******************************/
+// helper function for printString():                                      //
 // writes a single letter with height 12 pixel                              //
 /****************************************************************************/
-void write_char(uint16_t letter, COLOR color, COLOR backcolor)
+void writeChar(uint16_t letter, COLOR color, COLOR backcolor)
 {
     uint16_t lv;
 
@@ -235,10 +204,10 @@ void writeScreenColor5INCH(COLOR color)
 {
     uint32_t count = 0;
 
-    generate_colors();
+    generateColors();
 
-    write_position(0, 0, 479, 271);
-    write_command(0x2C);
+    writePosition(0, 0, 479, 271);
+    writeCommand(0x2C);
 
     while (count++ < 130560) {
         GPIO_PORTM_DATA_R = color.red;       // Write data byte
@@ -256,15 +225,28 @@ void writeScreenColor5INCH(COLOR color)
 }
 
 
-/***********************  write_screen_color7INCH()   ***********************/
+/***********************  writeRectangle()   ********************************/
+// Writes a rectangle as frame for the arrow field on the display.          //
+/****************************************************************************/
+void writeRecangle(void)
+{
+    // write the frame for the Array Display
+    writeLine(80, 10, 720, 10, (COLOR)YELLOW, 0);
+    writeLine(80, 470, 720, 470, (COLOR)YELLOW, 0);
+    writeLine(80, 10, 80, 470, (COLOR)YELLOW, 0);
+    writeLine(720, 10, 720, 470, (COLOR)YELLOW, 0);
+}
+
+
+/***********************  writeScreenColor7INCH()   *************************/
 // Writes the hole screen in one color                                      //
 /****************************************************************************/
-void write_screen_color7INCH(COLOR color)
+void writeScreenColor7INCH(COLOR color)
 {
     uint32_t count = 0;
 
-    write_position(0, 0, 799, 479);
-    write_command(0x2C);
+    writePosition(0, 0, 799, 479);
+    writeCommand(0x2C);
 
     while (count++ < 384000) {
         GPIO_PORTM_DATA_R = color.red;       // Write data byte
@@ -369,7 +351,7 @@ void drawDisplay7Inch(void)
 
 
 /******************************************************************************************************/
-void write_command(unsigned char command)
+void writeCommand(unsigned char command)
 {
     GPIO_PORTM_DATA_R = command;        // Write command byte
     GPIO_PORTQ_DATA_R = 0x11;           // Chip select = 0, Command mode select = 0, Write state = 0
@@ -378,7 +360,7 @@ void write_command(unsigned char command)
 
 
 /******************************************************************************************************/
-void write_cmd_data(unsigned char data)
+void writeCmdData(unsigned char data)
 {
     GPIO_PORTM_DATA_R = data;           // Write data byte
     GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
@@ -387,7 +369,7 @@ void write_cmd_data(unsigned char data)
 
 
 /******************************************************************************************************/
-void write_data(COLOR color)
+void writeData(COLOR color)
 {
     GPIO_PORTM_DATA_R = color.red;      // Write data byte
     GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
@@ -404,23 +386,23 @@ void write_data(COLOR color)
 
 
 /******************************************************************************************************/
-void write_position(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uint16_t point2_y)
+void writePosition(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uint16_t point2_y)
 {
 	// offset: 1x272 or 2x272 or 3x272 => points to screen 1 or 2 or 3
     point1_y += offset;
     point2_y += offset;
 
-    write_command(0x2A);                // Set page address (x-axis)
-    write_cmd_data(point1_x >> 8);      // Set start page address                HB
-    write_cmd_data(point1_x);           //                                       LB
-    write_cmd_data(point2_x >> 8);      // Set display_stop page address         HB
-    write_cmd_data(point2_x);           //                                       LB
+    writeCommand(0x2A);                // Set page address (x-axis)
+    writeCmdData(point1_x >> 8);      // Set start page address                HB
+    writeCmdData(point1_x);           //                                       LB
+    writeCmdData(point2_x >> 8);      // Set display_stop page address         HB
+    writeCmdData(point2_x);           //                                       LB
 
-    write_command(0x2B);                // Set column address (y-axis)
-    write_cmd_data(point1_y >> 8);      // Set start column address              HB
-    write_cmd_data(point1_y);           //                                       LB
-    write_cmd_data(point2_y >> 8);      // Set display_stop column address       HB
-    write_cmd_data(point2_y);           //                                       LB
+    writeCommand(0x2B);                // Set column address (y-axis)
+    writeCmdData(point1_y >> 8);      // Set start column address              HB
+    writeCmdData(point1_y);           //                                       LB
+    writeCmdData(point2_y >> 8);      // Set display_stop column address       HB
+    writeCmdData(point2_y);           //                                       LB
 }
 
 
@@ -436,7 +418,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
     {
         if (start_y > stop_y)       // 270° line
         {
-            writeLine_270_degree(start_x, start_y, stop_x, stop_y, color);
+            writeLine270Degree(start_x, start_y, stop_x, stop_y, color);
 
             if(arrowOption == WITH_ARROW && -delta_y > 1)
             {
@@ -448,7 +430,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
         }
         else                        // 90° line
         {
-            writeLine_90_degree(start_x, start_y, stop_x, stop_y, color);
+            writeLine90Degree(start_x, start_y, stop_x, stop_y, color);
 
             if(arrowOption == WITH_ARROW && delta_y > 1)
             {
@@ -464,7 +446,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
     {
         if (start_x > stop_x)   // 180° line
         {
-            writeLine_180_degree(start_x, start_y, stop_x, stop_y, color);
+            writeLine180Degree(start_x, start_y, stop_x, stop_y, color);
 
             if(arrowOption == WITH_ARROW && -delta_x > 1)
             {
@@ -476,7 +458,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
         }
         else                    // 0° line
         {
-            writeLine_0_degree(start_x, start_y, stop_x, stop_y, color);
+            writeLine0Degree(start_x, start_y, stop_x, stop_y, color);
 
             if(arrowOption == WITH_ARROW && delta_x > 1)
             {
@@ -498,7 +480,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                 if(delta_x > delta_y)           // quadrant I  1. (gain < 1)
                 {
                     gain = (double)delta_y / delta_x;
-                    writeLine_quadrant_1_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLineQuadrant1_I(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW & delta_x > MIN_LENGTH_FOR_ARROW)
                     {
@@ -513,7 +495,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                 else                            // quadrant I  2. (gain >= 1)
                 {
                     gain = (double)delta_x / delta_y;
-                    writeLine_quadrant_1_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLineQuadrant1_II(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
@@ -531,7 +513,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                 if(delta_x > -delta_y)          // quadrant IV  1. (gain < 1)
                 {
                     gain = (double)-delta_y / delta_x;       // start_y -> stop_y  ;  y--
-                    writeLine_quadrant_4_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLineQuadrant4_I(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && delta_x > MIN_LENGTH_FOR_ARROW)
                     {
@@ -547,7 +529,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                 else                            // quadrant IV  2. (gain >= 1)
                 {
                     gain = (double)delta_x / -delta_y;
-                    writeLine_quadrant_4_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLineQuadrant4_II(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
@@ -569,7 +551,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                 if(-delta_x > delta_y)          // quadrant II 1. (gain < 1)
                 {
                     gain = (double)delta_y / -delta_x;
-                    writeLine_quadrant_2_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLineQuadrant2_I(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
@@ -584,7 +566,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                 else                            // quadrant II  2. (gain >= 1)
                 {
                     gain = (double)-delta_x / delta_y;
-                    writeLine_quadrant_2_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLineQuadrant2_II(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
@@ -602,7 +584,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                 if(delta_x < delta_y)       // gain < -1 (delta_x < 0 and delta_y < 0 !)
                 {
                     gain = (double)delta_y / delta_x;
-                    writeLine_quadrant_3_I(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLineQuadrant3_I(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
@@ -617,7 +599,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                 else                                // quadrant III 1.
                 {
                     gain = (double)delta_x / delta_y;
-                    writeLine_quadrant_3_II(start_x, start_y, stop_x, stop_y, gain, color);
+                    writeLineQuadrant3_II(start_x, start_y, stop_x, stop_y, gain, color);
 
                     if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
@@ -636,73 +618,73 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
 
 /****************************************************************************/
-void writeLine_0_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine0Degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
 {
     int16_t x;
 
-    write_position(start_x, start_y, stop_x, start_y);
-    write_command(0x2C);
+    writePosition(start_x, start_y, stop_x, start_y);
+    writeCommand(0x2C);
     for (x = start_x; x <= stop_x; x++)
     {
-        write_data(color);
+        writeData(color);
     }
 }
 
 
 /****************************************************************************/
-void writeLine_90_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine90Degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
 {
     int16_t y;
 
-    write_position(start_x, start_y, start_x, stop_y);
-    write_command(0x2C);
+    writePosition(start_x, start_y, start_x, stop_y);
+    writeCommand(0x2C);
     for (y = start_y; y <= stop_y; y++)
     {
-        write_data(color);
+        writeData(color);
     }
 }
 
 
 /****************************************************************************/
-void writeLine_180_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine180Degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
 {
     int16_t x;
 
-    write_position(stop_x, start_y, start_x, start_y);
-    write_command(0x2C);
+    writePosition(stop_x, start_y, start_x, start_y);
+    writeCommand(0x2C);
     for (x = stop_x; x <= start_x; x++)
     {
-        write_data(color);
+        writeData(color);
     }
 }
 
 
 /****************************************************************************/
-void writeLine_270_degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine270Degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
 {
     int16_t y;
 
-    write_position(start_x, stop_y, start_x, start_y);
-    write_command(0x2C);
+    writePosition(start_x, stop_y, start_x, start_y);
+    writeCommand(0x2C);
     for (y = stop_y; y <= start_y; y++)
     {
-        write_data(color);
+        writeData(color);
     }
 }
 
 
 /****************************************************************************/
-void writeLine_quadrant_1_I(short start_x, short start_y, short stop_x, short stop_y, double gain,COLOR color)
+void writeLineQuadrant1_I(short start_x, short start_y, short stop_x, short stop_y, double gain,COLOR color)
 {
     double gain2 = 0.5;
 
     while(start_y <= stop_y)
     {
-        write_position(start_x, start_y, stop_x, start_y);
-        write_command(0x2C);
+        writePosition(start_x, start_y, stop_x, start_y);
+        writeCommand(0x2C);
         while(gain2 < 1)
         {
-            write_data(color);
+            writeData(color);
             gain2 += gain;
             if(start_x < stop_x)
                 start_x++;
@@ -716,17 +698,17 @@ void writeLine_quadrant_1_I(short start_x, short start_y, short stop_x, short st
 
 
 /****************************************************************************/
-void writeLine_quadrant_1_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant1_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
     while(start_x <= stop_x)
     {
-        write_position(start_x, start_y, start_x, stop_y);
-        write_command(0x2C);
+        writePosition(start_x, start_y, start_x, stop_y);
+        writeCommand(0x2C);
         while(gain2 < 1)
         {
-            write_data(color);
+            writeData(color);
             gain2 += gain;
             if( start_y < stop_y)
                 start_y++;
@@ -740,17 +722,17 @@ void writeLine_quadrant_1_II(short start_x, short start_y, short stop_x, short s
 
 
 /****************************************************************************/
-void writeLine_quadrant_2_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant2_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
     while(stop_y >= start_y)
     {
-        write_position(stop_x, stop_y, start_x, stop_y);
-        write_command(0x2C);
+        writePosition(stop_x, stop_y, start_x, stop_y);
+        writeCommand(0x2C);
         while(gain2 < 1)
         {
-            write_data(color);
+            writeData(color);
             gain2 += gain;
             if( stop_x < start_x)
                 stop_x++;
@@ -764,17 +746,17 @@ void writeLine_quadrant_2_I(short start_x, short start_y, short stop_x, short st
 
 
 /****************************************************************************/
-void writeLine_quadrant_2_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant2_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
     while(start_x >= stop_x)
     {
-        write_position(start_x, start_y, start_x, stop_y);
-        write_command(0x2C);
+        writePosition(start_x, start_y, start_x, stop_y);
+        writeCommand(0x2C);
         while(gain2 < 1)
         {
-            write_data(color);
+            writeData(color);
             gain2 += gain;
             if( start_y < stop_y)
                 start_y++;
@@ -788,17 +770,17 @@ void writeLine_quadrant_2_II(short start_x, short start_y, short stop_x, short s
 
 
 /****************************************************************************/
-void writeLine_quadrant_3_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant3_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
     while(stop_y <= start_y)
     {
-        write_position(stop_x, stop_y, start_x, stop_y);
-        write_command(0x2C);
+        writePosition(stop_x, stop_y, start_x, stop_y);
+        writeCommand(0x2C);
         while(gain2 < 1)
         {
-            write_data(color);
+            writeData(color);
             gain2 += gain;
             if( stop_x < start_x)
                 stop_x++;
@@ -812,17 +794,17 @@ void writeLine_quadrant_3_I(short start_x, short start_y, short stop_x, short st
 
 
 /****************************************************************************/
-void writeLine_quadrant_3_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant3_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
     while(stop_x <= start_x)
     {
-        write_position(stop_x, stop_y, stop_x, start_y);
-        write_command(0x2C);
+        writePosition(stop_x, stop_y, stop_x, start_y);
+        writeCommand(0x2C);
         while(gain2 < 1)
         {
-            write_data(color);
+            writeData(color);
             gain2 += gain;
             if( stop_y < start_y)
                 stop_y++;
@@ -836,17 +818,17 @@ void writeLine_quadrant_3_II(short start_x, short start_y, short stop_x, short s
 
 
 /****************************************************************************/
-void writeLine_quadrant_4_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant4_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
     while(start_y >= stop_y)
     {
-        write_position(start_x, start_y, stop_x, start_y);
-        write_command(0x2C);
+        writePosition(start_x, start_y, stop_x, start_y);
+        writeCommand(0x2C);
         while(gain2 < 1)
         {
-            write_data(color);
+            writeData(color);
             gain2 += gain;
             if( start_x < stop_x)
                 start_x++;
@@ -860,17 +842,17 @@ void writeLine_quadrant_4_I(short start_x, short start_y, short stop_x, short st
 
 
 /****************************************************************************/
-void writeLine_quadrant_4_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant4_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
 {
     double gain2 = 0.5;
 
     while(stop_x >= start_x)
     {
-        write_position(stop_x, stop_y, stop_x, start_y);
-        write_command(0x2C);
+        writePosition(stop_x, stop_y, stop_x, start_y);
+        writeCommand(0x2C);
         while(gain2 < 1)
         {
-            write_data(color);
+            writeData(color);
             gain2 += gain;
             if( stop_y < start_y)
                 stop_y++;
@@ -895,70 +877,70 @@ void ConfigureLCD5Inch(uint32_t SysClock) {
     GPIO_PORTQ_DATA_R |= RST;               //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    write_command(SOFTWARE_RESET);          // Software reset
+    writeCommand(SOFTWARE_RESET);          // Software reset
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
-    write_command(SET_PLL_MN);              // Set PLL Freq to 120 MHz
-    write_cmd_data(0x24);                   //
-    write_cmd_data(0x02);                   //
-    write_cmd_data(0x04);                   //
+    writeCommand(SET_PLL_MN);              // Set PLL Freq to 120 MHz
+    writeCmdData(0x24);                   //
+    writeCmdData(0x02);                   //
+    writeCmdData(0x04);                   //
 
-    write_command(START_PLL);               // Start PLL
-    write_cmd_data(0x01);                   //
+    writeCommand(START_PLL);               // Start PLL
+    writeCmdData(0x01);                   //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    write_command(START_PLL);               // Lock PLL
-    write_cmd_data(0x03);                   //
+    writeCommand(START_PLL);               // Lock PLL
+    writeCmdData(0x03);                   //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    write_command(SOFTWARE_RESET);          // Software reset
+    writeCommand(SOFTWARE_RESET);          // Software reset
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
 /*************************************************************************/
     value = 0x01EFFF;
-    write_command(SET_LSHIFT);              // Set LCD Pixel Clock 12.7 Mhz (0x01EFFF)
-    write_cmd_data(value>>16);              //
-    write_cmd_data(value>>8);               //
-    write_cmd_data(value);                  //
-    write_command(SET_LCD_MODE);            // Set LCD Panel mode to:
-    write_cmd_data(0x20);                   // ..TFT panel 24bit
-    write_cmd_data(0x00);                   // ..TFT mode
-    write_cmd_data(0x01);                   // Horizontal size 480-1 (aka 479 ;)    HB
-    write_cmd_data(0xDF);                   // Horizontal size 480-1                LB
-    write_cmd_data(0x01);                   // Vertical size 272-1   (aka 271 ;)    HB
-    write_cmd_data(0x0F);                   // Vertical size 272-1                  LB
-    write_cmd_data(0x00);                   // even/odd line RGB
+    writeCommand(SET_LSHIFT);              // Set LCD Pixel Clock 12.7 Mhz (0x01EFFF)
+    writeCmdData(value>>16);              //
+    writeCmdData(value>>8);               //
+    writeCmdData(value);                  //
+    writeCommand(SET_LCD_MODE);            // Set LCD Panel mode to:
+    writeCmdData(0x20);                   // ..TFT panel 24bit
+    writeCmdData(0x00);                   // ..TFT mode
+    writeCmdData(0x01);                   // Horizontal size 480-1 (aka 479 ;)    HB
+    writeCmdData(0xDF);                   // Horizontal size 480-1                LB
+    writeCmdData(0x01);                   // Vertical size 272-1   (aka 271 ;)    HB
+    writeCmdData(0x0F);                   // Vertical size 272-1                  LB
+    writeCmdData(0x00);                   // even/odd line RGB
 
-    write_command(SET_HORI_PERIOD);         // Set Horizontal period
-    write_cmd_data(0x02);                   // Set HT total pixel=531               HB
-    write_cmd_data(0x13);                   // Set HT total pixel=531               LB
-    write_cmd_data(0x00);                   // Set Horiz.sync pulse start pos = 43  HB
-    write_cmd_data(0x2B);                   // Set Horiz.sync pulse start pos = 43  LB
-    write_cmd_data(0x0A);                   // Set horiz.sync pulse with = 10
-    write_cmd_data(0x00);                   // Set horiz.Sync pulse start pos= 8    HB
-    write_cmd_data(0x08);                   // Set horiz.Sync pulse start pos= 8    LB
-    write_cmd_data(0x00);                   //
+    writeCommand(SET_HORI_PERIOD);         // Set Horizontal period
+    writeCmdData(0x02);                   // Set HT total pixel=531               HB
+    writeCmdData(0x13);                   // Set HT total pixel=531               LB
+    writeCmdData(0x00);                   // Set Horiz.sync pulse start pos = 43  HB
+    writeCmdData(0x2B);                   // Set Horiz.sync pulse start pos = 43  LB
+    writeCmdData(0x0A);                   // Set horiz.sync pulse with = 10
+    writeCmdData(0x00);                   // Set horiz.Sync pulse start pos= 8    HB
+    writeCmdData(0x08);                   // Set horiz.Sync pulse start pos= 8    LB
+    writeCmdData(0x00);                   //
 
-    write_command(SET_VERT_PERIOD);         // Set Vertical Period
-    write_cmd_data(0x01);                   // Set VT lines = 288                   HB
-    write_cmd_data(0x20);                   // Set VT lines = 288                   LB
-    write_cmd_data(0x00);                   // Set VPS = 12                         HB
-    write_cmd_data(0x0C);                   // Set VPS = 12                         LB
-    write_cmd_data(0x0A);                   // Set vert.sync pulse with = 10
-    write_cmd_data(0x00);                   // Set vert.Sync pulse start pos= 8    HB
-    write_cmd_data(0x00);                   // Set vert.Sync pulse start pos= 8    LB
-    write_cmd_data(0x04);                   //
+    writeCommand(SET_VERT_PERIOD);         // Set Vertical Period
+    writeCmdData(0x01);                   // Set VT lines = 288                   HB
+    writeCmdData(0x20);                   // Set VT lines = 288                   LB
+    writeCmdData(0x00);                   // Set VPS = 12                         HB
+    writeCmdData(0x0C);                   // Set VPS = 12                         LB
+    writeCmdData(0x0A);                   // Set vert.sync pulse with = 10
+    writeCmdData(0x00);                   // Set vert.Sync pulse start pos= 8    HB
+    writeCmdData(0x00);                   // Set vert.Sync pulse start pos= 8    LB
+    writeCmdData(0x04);                   //
 
-    write_command(0xF0);                    // Set LCD color data format
-    write_cmd_data(0x00);                   // Set pixel data format = 8 bit
+    writeCommand(0xF0);                    // Set LCD color data format
+    writeCmdData(0x00);                   // Set pixel data format = 8 bit
 
-//    write_command(SET_ADRESS_MODE);         // Set address mode
-//    write_cmd_data(0b00000001);             // flip vertical
+//    writeCommand(SET_ADRESS_MODE);         // Set address mode
+//    writeCmdData(0b00000001);             // flip vertical
 
-    write_command(0x29);                    // Set display on
+    writeCommand(0x29);                    // Set display on
 }
 
 
@@ -975,7 +957,7 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     GPIO_PORTQ_DATA_R |= RST;               //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    write_command(SOFTWARE_RESET);          // Software reset
+    writeCommand(SOFTWARE_RESET);          // Software reset
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
@@ -986,81 +968,81 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     GPIO_PORTQ_DATA_R |= RST;               //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    write_command(SOFTWARE_RESET);          // Software reset
+    writeCommand(SOFTWARE_RESET);          // Software reset
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
-    write_command(SET_PLL_MN);              // Set PLL Freq to 120 MHz
-    write_cmd_data(0x24);                   //
-    write_cmd_data(0x02);                   //
-    write_cmd_data(0x04);                   //
+    writeCommand(SET_PLL_MN);              // Set PLL Freq to 120 MHz
+    writeCmdData(0x24);                   //
+    writeCmdData(0x02);                   //
+    writeCmdData(0x04);                   //
 
-    write_command(START_PLL);               // Start PLL
-    write_cmd_data(0x01);                   //
+    writeCommand(START_PLL);               // Start PLL
+    writeCmdData(0x01);                   //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    write_command(START_PLL);               // Lock PLL
-    write_cmd_data(0x03);                   //
+    writeCommand(START_PLL);               // Lock PLL
+    writeCmdData(0x03);                   //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    write_command(SOFTWARE_RESET);          // Software reset
+    writeCommand(SOFTWARE_RESET);          // Software reset
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
 /*************************************************************************/
-    write_command(0xe6);       // pixel clock frequency
-    write_cmd_data(0x04); // LCD_FPR = 290985 = 33.300 Mhz Result for 7" Display
-    write_cmd_data(0x70);   //
-    write_cmd_data(0xA9);   //
+    writeCommand(0xe6);       // pixel clock frequency
+    writeCmdData(0x04); // LCD_FPR = 290985 = 33.300 Mhz Result for 7" Display
+    writeCmdData(0x70);   //
+    writeCmdData(0xA9);   //
 
-    write_command(0xB0);          //SET LCD MODE   SIZE !!
-    write_cmd_data(0x19); //19 TFT panel data width - Enable FRC or dithering for color depth enhancement 8 18  1f- 38
-    write_cmd_data(0x20); //SET TFT MODE & hsync+Vsync+DEN MODE   20  or 00
-    write_cmd_data(0x03); //SET horizontal size=800+1 HightByte   !!!!!!!!!!!!
-    write_cmd_data(0x1F);      //SET horizontal size=800+1 LowByte
-    write_cmd_data(0x01);      //SET vertical size=480+1 HightByte
-    write_cmd_data(0xDF);      //SET vertical size=480+1 LowByte
-    write_cmd_data(0x00); //Even line RGB sequence / Odd line RGB sequence RGB
+    writeCommand(0xB0);          //SET LCD MODE   SIZE !!
+    writeCmdData(0x19); //19 TFT panel data width - Enable FRC or dithering for color depth enhancement 8 18  1f- 38
+    writeCmdData(0x20); //SET TFT MODE & hsync+Vsync+DEN MODE   20  or 00
+    writeCmdData(0x03); //SET horizontal size=800+1 HightByte   !!!!!!!!!!!!
+    writeCmdData(0x1F);      //SET horizontal size=800+1 LowByte
+    writeCmdData(0x01);      //SET vertical size=480+1 HightByte
+    writeCmdData(0xDF);      //SET vertical size=480+1 LowByte
+    writeCmdData(0x00); //Even line RGB sequence / Odd line RGB sequence RGB
 
-    write_command(0xB4);            // Set Horizontal Period
-    write_cmd_data(0x03); //03 High byte of horizontal total period (display + non-display)
-    write_cmd_data(0x5E); //51 Low byte of the horizontal total period (display + non-display)
-    write_cmd_data(0x00); //High byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data.
-    write_cmd_data(0x46); //**   // 46 Low byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data
-    write_cmd_data(0x09);       // Set the vertical sync
-//    write_cmd_data(0x00);       //SET Hsync pulse start
-//    write_cmd_data(0x00);                                       //00
-//    write_cmd_data(0x00); //SET Hsync pulse subpixel start position  //00
-    write_cmd_data(0x00);             // Set horiz.Sync pulse start pos= 8    HB
-    write_cmd_data(0x08);             // Set horiz.Sync pulse start pos= 8    LB
-    write_cmd_data(0x00);                   //
+    writeCommand(0xB4);            // Set Horizontal Period
+    writeCmdData(0x03); //03 High byte of horizontal total period (display + non-display)
+    writeCmdData(0x5E); //51 Low byte of the horizontal total period (display + non-display)
+    writeCmdData(0x00); //High byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data.
+    writeCmdData(0x46); //**   // 46 Low byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data
+    writeCmdData(0x09);       // Set the vertical sync
+//    writeCmdData(0x00);       //SET Hsync pulse start
+//    writeCmdData(0x00);                                       //00
+//    writeCmdData(0x00); //SET Hsync pulse subpixel start position  //00
+    writeCmdData(0x00);             // Set horiz.Sync pulse start pos= 8    HB
+    writeCmdData(0x08);             // Set horiz.Sync pulse start pos= 8    LB
+    writeCmdData(0x00);                   //
     //   ** too small will give you half a PICTURE !!
 
-    write_command(0xB6);          //Set Vertical Period
-    write_cmd_data(0x01); //01 High byte of the vertical total (display + non-display)
-    write_cmd_data(0xFE); //F4 Low byte F5 INCREASES SYNC TIME AND BACK PORCH
-    write_cmd_data(0x00);      // 00
-    write_cmd_data(0x0C); //0C =12 The non-display period in lines between the start of the frame and the first display data in line.
-//    write_cmd_data(0x00); //Set the vertical sync pulse width (LFRAME) in lines.
-//    write_cmd_data(0x00);      //SET Vsync pulse start position
-//    write_cmd_data(0x00);
-    write_cmd_data(0x00);              // Set vert.Sync pulse start pos= 8    HB
-    write_cmd_data(0x00);              // Set vert.Sync pulse start pos= 8    LB
-    write_cmd_data(0x04);                   //
+    writeCommand(0xB6);          //Set Vertical Period
+    writeCmdData(0x01); //01 High byte of the vertical total (display + non-display)
+    writeCmdData(0xFE); //F4 Low byte F5 INCREASES SYNC TIME AND BACK PORCH
+    writeCmdData(0x00);      // 00
+    writeCmdData(0x0C); //0C =12 The non-display period in lines between the start of the frame and the first display data in line.
+//    writeCmdData(0x00); //Set the vertical sync pulse width (LFRAME) in lines.
+//    writeCmdData(0x00);      //SET Vsync pulse start position
+//    writeCmdData(0x00);
+    writeCmdData(0x00);              // Set vert.Sync pulse start pos= 8    HB
+    writeCmdData(0x00);              // Set vert.Sync pulse start pos= 8    LB
+    writeCmdData(0x04);                   //
 
-    write_command(0x36);
-    write_cmd_data(0x01);
+    writeCommand(0x36);
+    writeCmdData(0x01);
 
     // PWM signal frequency = PLL clock
-    write_command(0xBE);
-    write_cmd_data(0x08);
-    write_cmd_data(0x80);
-    write_cmd_data(0x01);
+    writeCommand(0xBE);
+    writeCmdData(0x08);
+    writeCmdData(0x80);
+    writeCmdData(0x01);
 
-    write_command(0x0A);
-    write_cmd_data(0x1C);         //Power Mode
+    writeCommand(0x0A);
+    writeCmdData(0x1C);         //Power Mode
 
-    write_command(0xF0); //set pixel data format 8bit
-    write_cmd_data(0x00);
+    writeCommand(0xF0); //set pixel data format 8bit
+    writeCmdData(0x00);
 
-    write_command(0x29);                    // Set display on
+    writeCommand(0x29);                    // Set display on
 
 }

@@ -15,7 +15,6 @@ Interrupt_handler.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/sys/_stdint.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/gpio.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h
-Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/timer.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/lcd_functions.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/string.h
@@ -30,12 +29,16 @@ Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.17
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/Interrupt_handler.h
+Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/fonts.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/uartDMA.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/uart.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_uart.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/pin_map.h
 Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/udma.h
+Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/timer_functions.h
+Interrupt_handler.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h
+Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/timer.h
 
 ../Interrupt_handler.c: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/Interrupt_handler.h: 
@@ -52,7 +55,6 @@ Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.17
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/sys/_stdint.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/gpio.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
-/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/timer.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/lcd_functions.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/string.h: 
@@ -67,9 +69,13 @@ Interrupt_handler.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.17
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/Interrupt_handler.h: 
+/home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/fonts.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/uartDMA.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/uart.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/inc/hw_uart.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/pin_map.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/udma.h: 
+/home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/timer_functions.h: 
+/home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/tm4c1294ncpdt.h: 
+/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/timer.h: 

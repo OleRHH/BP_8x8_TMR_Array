@@ -45,9 +45,11 @@
 
 /*********************  # public Prototypes #   ****************************/
 void ReadArray(uint16_t);
-uint32_t computeRelative(uint16_t);
-uint32_t computeAbsolute(uint16_t);
+uint32_t computeArrows(bool, uint16_t);
 void ConfigureADC(void);
+void startAdcConversion(void);
+void adcIntClear(void);
+
 
 
 /*********************  # public global variables #   **********************/

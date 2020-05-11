@@ -4,8 +4,8 @@
  *  Created on: 13.02.2020
  */
 
-#ifndef CONFIGURATION_H_
-#define CONFIGURATION_H_
+#ifndef TIMER_FUNCTIONS_H_
+#define TIMER_FUNCTIONS_H_
 
 /*****************************  # Includes #   ****************************/
 #include <stdbool.h>
@@ -26,7 +26,8 @@
 
 void ConfigureGPIO(void);
 void ConfigureTimer0(uint32_t);
+void timer0IntClear(void);
 
 
 
-#endif /* CONFIGURATION_H_ */
+#endif /* TIMER_FUNCTIONS_H_ */
