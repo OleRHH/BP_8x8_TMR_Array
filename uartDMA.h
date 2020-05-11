@@ -25,4 +25,10 @@ void ConfigureUART2(uint32_t);
 void configureUDMA(void);
 void prepareReceiveDMA(void);
 void sendUARTDMA(void);
+void sendCommandToMotor(char *, uint16_t);
+char * getDataFromPc(void);
+
+
+/*********************  # public global variables #   **********************/
+
 

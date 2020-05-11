@@ -21,12 +21,7 @@ int main(void)
 
     // set the display background color
     writeScreenColor5INCH((COLOR)WHITE);
-
-//    write the frame for the Array Display
-//    writeLine(80, 10, 720, 10, (COLOR)YELLOW, 0);
-//    writeLine(80, 470, 720, 470, (COLOR)YELLOW, 0);
-//    writeLine(80, 10, 80, 470, (COLOR)YELLOW, 0);
-//    writeLine(720, 10, 720, 470, (COLOR)YELLOW, 0);
+//    writeRecangle();
 
     IntMasterEnable();
 

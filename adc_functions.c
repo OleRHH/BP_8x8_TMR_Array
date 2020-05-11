@@ -8,6 +8,21 @@ static int16_t SinResults[8][16];
 static int16_t CosResults[8][16];
 
 
+void startAdcConversion(void)
+{
+    ADCProcessorTrigger(ADC0_BASE, 0);
+    ADCProcessorTrigger(ADC1_BASE, 1);
+    ADCProcessorTrigger(ADC1_BASE, 2);
+}
+
+
+/*********************************************************************************************/
+void adcIntClear(void)
+{
+    ADCIntClear(ADC0_BASE, 0);
+}
+
+
 /*********************************************************************************************/
 //Read TMR sensor array
 void ReadArray(uint16_t step)
@@ -73,7 +88,7 @@ void ReadArray(uint16_t step)
 /*********************************************************************************************/
 //Compute differential signal
 
-uint32_t computeRelative(uint16_t maxArrowLength)
+uint32_t computeArrows(bool relative, uint16_t maxArrowLength)
 {
     int16_t negSinResults[8][8];
     int16_t posSinResults[8][8];
@@ -111,6 +126,8 @@ uint32_t computeRelative(uint16_t maxArrowLength)
         }
     }
 
+    if(relative == true)
+    {
     // DiffCosResults and DiffSinResults are needed to display the arrows.
     // They are being normalized in this function to the maximum arrow length.
     // todo:
@@ -124,67 +141,28 @@ uint32_t computeRelative(uint16_t maxArrowLength)
             DiffSinResults[m][n] = -DiffResults[0][7-m][n] * maxArrowLength / maxAnalogValue;
         }
     }
-    return maxAnalogValue;
-}
-/*********************************************************************************************/
-uint32_t computeAbsolute(uint16_t maxArrowLength)
-{
-    int16_t negSinResults[8][8];
-    int16_t posSinResults[8][8];
-
-    int16_t negCosResults[8][8];
-    int16_t posCosResults[8][8];
-
-    int32_t maxAnalogValue = 1;
-    uint16_t m, n;
-
-    for(m = 0; m <= 7; m++)
+    }
+    else
     {
-        for(n = 0; n <= 7; n++)
+        for(m = 0; m <= 7; m++)
         {
-            //shiftleft1: multiplication by 2
-            //differential: 0-1, 2-3, ... , 14-15
-            negCosResults[m][n]  = CosResults[m][(n << 1)];                     // 0, 2, 4, ..., 14
-            posCosResults[m][n]  = CosResults[m][(n << 1) + 1];                 // 1, 3, 5, ..., 15
-            DiffResults[1][m][n] = negCosResults[m][n] - posCosResults[m][n];
-            CosOffset[m][n]      = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
-            negSinResults[m][n]  = SinResults[m][(n << 1)];
-            posSinResults[m][n]  = SinResults[m][(n << 1) + 1];
-            DiffResults[0][m][n] = negSinResults[m][n] - posSinResults[m][n];
-            SinOffset[m][n]      = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
-
-            // calculate arrow length
-            arrowLength[m][n] = (uint16_t) sqrt(DiffResults[1][m][n]*DiffResults[1][m][n] +
-                                DiffResults[0][m][n]*DiffResults[0][m][n]);
-
-            // store length of longest arrow
-            if(arrowLength[m][n] > maxAnalogValue)
+            for(n = 0; n <= 7; n++)
             {
-                maxAnalogValue = arrowLength[m][n];
-            }
-            // limit the maximum arrow length to the max allowed value (maxArrowLength)
-            if(arrowLength[m][n] > maxArrowLength)
-            {
-                DiffResults[1][m][n] *= maxArrowLength;
-                DiffResults[1][m][n] /= arrowLength[m][n];
-                DiffResults[0][m][n] *= maxArrowLength;
-                DiffResults[0][m][n] /= arrowLength[m][n];
+                // limit the maximum arrow length to the max allowed value (maxArrowLength)
+                if(arrowLength[7-m][n] > maxArrowLength)
+                {
+                    DiffCosResults[m][n] = DiffResults[1][7-m][n] * maxArrowLength / arrowLength[7-m][n];
+                    DiffSinResults[m][n] = -DiffResults[0][7-m][n] * maxArrowLength / arrowLength[7-m][n];
+                }
+                else
+                {
+                    DiffCosResults[m][n] = DiffResults[1][7-m][n];
+                    DiffSinResults[m][n] = -DiffResults[0][7-m][n];
+                }
             }
         }
     }
-    // DiffResults is used to transfer the data via UART0.
-    // DiffCosResults and DiffSinResults are needed to display the arrows.
-    // todo:
-    // DiffSinResults has the (-)sign because the LC-Display is flipped upside down.
-    // (this is just for historic reasons and should be improved in the future)
-    for(m = 0; m <= 7; m++)
-    {
-        for(n = 0; n <= 7; n++)
-        {
-            DiffCosResults[m][n] = DiffResults[1][7-m][n];
-            DiffSinResults[m][n] = -DiffResults[0][7-m][n];
-        }
-    }
+
     return maxAnalogValue;
 }
 

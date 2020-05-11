@@ -13,7 +13,8 @@
 #include <stdint.h>
 #include "driverlib/sysctl.h"
 
-#include <configuration.h>
+#include <adc_functions.h>
+#include <timer_functions.h>
 #include <lcd_functions.h>
 #include <uartDMA.h>
 
