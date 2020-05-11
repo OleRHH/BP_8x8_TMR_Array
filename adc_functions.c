@@ -128,19 +128,19 @@ uint32_t computeArrows(bool relative, uint16_t maxArrowLength)
 
     if(relative == true)
     {
-    // DiffCosResults and DiffSinResults are needed to display the arrows.
-    // They are being normalized in this function to the maximum arrow length.
-    // todo:
-    // DiffSinResults has the (-)sign because the LC-Display is flipped upside down.
-    // (this is just for historic reasons and should be improved in the future)
-    for(m = 0; m <= 7; m++)
-    {
-        for(n = 0; n <= 7; n++)
+        // DiffCosResults and DiffSinResults are needed to display the arrows.
+        // They are being normalized in this function to the maximum arrow length.
+        // todo:
+        // DiffSinResults has the (-)sign because the LC-Display is flipped upside down.
+        // (this is just for historic reasons and should be improved in the future)
+        for(m = 0; m <= 7; m++)
         {
-            DiffCosResults[m][n] =  DiffResults[1][7-m][n] * maxArrowLength / maxAnalogValue;
-            DiffSinResults[m][n] = -DiffResults[0][7-m][n] * maxArrowLength / maxAnalogValue;
+            for(n = 0; n <= 7; n++)
+            {
+                DiffCosResults[m][n] =  DiffResults[1][7-m][n] * maxArrowLength / maxAnalogValue;
+                DiffSinResults[m][n] = -DiffResults[0][7-m][n] * maxArrowLength / maxAnalogValue;
+            }
         }
-    }
     }
     else
     {

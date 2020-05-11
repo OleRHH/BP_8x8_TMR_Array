@@ -8,7 +8,6 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
-"./Interrupt_handler.obj" \
 "./adc_functions.obj" \
 "./lcd_functions.obj" \
 "./main.obj" \
@@ -159,8 +158,8 @@ BP_TMR_sensor_array.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "Interrupt_handler.obj" "adc_functions.obj" "lcd_functions.obj" "main.obj" "timer_functions.obj" "tm4c1294ncpdt_startup_ccs.obj" "uartDMA.obj" 
-	-$(RM) "Interrupt_handler.d" "adc_functions.d" "lcd_functions.d" "main.d" "timer_functions.d" "tm4c1294ncpdt_startup_ccs.d" "uartDMA.d" 
+	-$(RM) "adc_functions.obj" "lcd_functions.obj" "main.obj" "timer_functions.obj" "tm4c1294ncpdt_startup_ccs.obj" "uartDMA.obj" 
+	-$(RM) "adc_functions.d" "lcd_functions.d" "main.d" "timer_functions.d" "tm4c1294ncpdt_startup_ccs.d" "uartDMA.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

@@ -1,8 +1,4 @@
-/*
- * configuration.h
- *
- *  Created on: 13.02.2020
- */
+/* timer_functions.h */
 
 #ifndef TIMER_FUNCTIONS_H_
 #define TIMER_FUNCTIONS_H_
@@ -12,11 +8,9 @@
 #include <stdint.h>
 #include <driverlib/sysctl.h>
 #include <tm4c1294ncpdt.h>
-#include <driverlib/gpio.h>
-#include <driverlib/pin_map.h>      // GPIOPinConfigure
-#include <driverlib/interrupt.h>
+#include <driverlib/interrupt.h>  // intEnable(), IntPrioritySet()
 #include <driverlib/timer.h>
-#include <Interrupt_handler.h>  // interrupt handler
+#include <inc/hw_memmap.h>      // TIMER0_BASE_BASE
 
 
 // Interrupt priority. Lower numbers = higher priority.
@@ -24,10 +18,13 @@
 #define HIGH_PRIORITY 0x00
 #define LOW_PRIORITY  0x80
 
-void ConfigureGPIO(void);
+
+/*********************  # public Prototypes #   ***************************/
 void ConfigureTimer0(uint32_t);
 void timer0IntClear(void);
 
+// interrupt handler for Timer 0. Needs to be implemented in project.
+extern void Timer0IntHandler(void);
 
 
 #endif /* TIMER_FUNCTIONS_H_ */

@@ -7,7 +7,6 @@ CMD_SRCS += \
 ../tm4c1294ncpdt.cmd 
 
 C_SRCS += \
-../Interrupt_handler.c \
 ../adc_functions.c \
 ../lcd_functions.c \
 ../main.c \
@@ -16,7 +15,6 @@ C_SRCS += \
 ../uartDMA.c 
 
 C_DEPS += \
-./Interrupt_handler.d \
 ./adc_functions.d \
 ./lcd_functions.d \
 ./main.d \
@@ -25,7 +23,6 @@ C_DEPS += \
 ./uartDMA.d 
 
 OBJS += \
-./Interrupt_handler.obj \
 ./adc_functions.obj \
 ./lcd_functions.obj \
 ./main.obj \
@@ -34,7 +31,6 @@ OBJS += \
 ./uartDMA.obj 
 
 OBJS__QUOTED += \
-"Interrupt_handler.obj" \
 "adc_functions.obj" \
 "lcd_functions.obj" \
 "main.obj" \
@@ -43,7 +39,6 @@ OBJS__QUOTED += \
 "uartDMA.obj" 
 
 C_DEPS__QUOTED += \
-"Interrupt_handler.d" \
 "adc_functions.d" \
 "lcd_functions.d" \
 "main.d" \
@@ -52,7 +47,6 @@ C_DEPS__QUOTED += \
 "uartDMA.d" 
 
 C_SRCS__QUOTED += \
-"../Interrupt_handler.c" \
 "../adc_functions.c" \
 "../lcd_functions.c" \
 "../main.c" \
