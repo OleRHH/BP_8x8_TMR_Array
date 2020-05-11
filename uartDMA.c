@@ -55,12 +55,56 @@ void sendUARTDMA(void)
 //*****************************************************************************
 void sendCommandToMotor(char * data, uint16_t size)
 {
+    // the data structure to the stepper-motor is always 9 bytes.
+    // last byte is a checksum. See datasheet Trinamic TMCM-1141 for details.
+
     uint16_t i;
+    uint16_t checksum = 1;
+    static char stepperMotorCommand[9] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+    for(i = 1; i < 8; i++)
+    {
+        stepperMotorCommand[i] = data[i];
+        checksum += data[i];
+    }
+    stepperMotorCommand[8] = checksum;
+
     // send command to stepper-motor to send back position data (absolute)
     for(i = 0; i < size; i++)
     {
-        UARTCharPutNonBlocking(UART2_BASE, data[i]);
+        UARTCharPutNonBlocking(UART2_BASE, stepperMotorCommand[i]);
     }
+}
+
+
+//*****************************************************************************
+uint32_t receiveDataFromMotor(void)
+{
+    int i = 0;
+    uint32_t positionData;
+    char UART0receive[10];
+
+    while(UARTCharsAvail(UART2_BASE) && i < 10)
+    {
+        UART0receive[i++] = UARTCharGetNonBlocking(UART2_BASE);
+    }
+
+    // UART0receive position data from stepper-motor (absolute)
+    if(UART0receive[2] == 100 && UART0receive[3] == 6)
+    {
+        positionData = UART0receive[4];
+        positionData <<= 8;
+        positionData |= UART0receive[5];
+        positionData <<= 8;
+        positionData |= UART0receive[6];
+        positionData <<= 8;
+        positionData |= UART0receive[7];
+    }
+    else
+    {
+        positionData = 0;
+    }
+    return positionData;
 }
 
 

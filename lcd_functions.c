@@ -40,7 +40,7 @@ static COLOR color[768];
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
 /****************************************************************************/
-void writeInfos(bool relative, bool oversampling, uint16_t maxArrowLength, uint32_t maximumAnalogValue)
+void writeInfos(bool relative, bool oversampling, uint16_t maxArrowLength, uint32_t maximumAnalogValue, COLOR backColor)
 {
     char charValue[100];
     static bool old = true;
@@ -48,44 +48,44 @@ void writeInfos(bool relative, bool oversampling, uint16_t maxArrowLength, uint3
     if(old != relative)
     {
         old = relative;
-        writeScreenColor5INCH((COLOR)WHITE);
+        writeScreenColor5INCH(backColor);
     }
     if(relative == true)
     {
-        printString("relative:  true", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString("relative:  true", 10, 300, (COLOR)BLACK, backColor);
 
         sprintf(charValue, "length: %.3d", maxArrowLength);
-        printString(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString(charValue, 40, 300, (COLOR)BLACK, backColor);
 
         sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
-        printString(charValue, 70, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString(charValue, 70, 300, (COLOR)BLACK, backColor);
     }
     else
     {
-        printString("relative: false", 10, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString("relative: false", 10, 300, (COLOR)BLACK, backColor);
 
         sprintf(charValue, "length: %.3d", maxArrowLength);
-        printString(charValue, 40, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString(charValue, 40, 300, (COLOR)BLACK, backColor);
 
         sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
-        printString(charValue, 70, 300, (COLOR)BLACK, (COLOR)WHITE);
+        printString(charValue, 70, 300, (COLOR)BLACK, backColor);
 
         if(maximumAnalogValue > maxArrowLength)
         {
-            printString("Clipping!", 100, 300, (COLOR)BLACK, (COLOR)WHITE);
+            printString("Clipping!", 100, 300, (COLOR)BLACK, backColor);
         }
         else
         {
-            printString("Clipping!", 100, 300, (COLOR)WHITE, (COLOR)WHITE);
+            printString("Clipping!", 100, 300, backColor, backColor);
         }
     }
     if(oversampling == false)
     {
-        printString("Oversampling off", 250, 280, (COLOR)BLACK, (COLOR)WHITE);
+        printString("Oversampling off", 250, 280, (COLOR)BLACK, backColor);
     }
     else
     {
-        printString("Oversampling on ", 250, 280, (COLOR)BLACK, (COLOR)WHITE);
+        printString("Oversampling on ", 250, 280, (COLOR)BLACK, backColor);
     }
 }
 
@@ -869,6 +869,23 @@ void writeLineQuadrant4_II(short start_x, short start_y, short stop_x, short sto
 void ConfigureLCD5Inch(uint32_t SysClock) {
     uint32_t value;
 
+    // Set Port L  0-4: Multiplexer address output for 8x8 Array
+    // Pin 3 = D; Pin 2 = C; Pin 1 = B; Pin 0 = A; Pin 4 = nD
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
+    GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4);
+
+    // Set Port M Pins 0-7: Output LCD Data
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
+    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
+
+    // Set Port N Pins 0-3: Onboard LEDs output (0-1)  debug outputs (2-3)
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));
+    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
+
+/*************************************************************************/
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
@@ -947,6 +964,23 @@ void ConfigureLCD5Inch(uint32_t SysClock) {
 /******************************************************************************************************/
 void ConfigureLCD7Inch(uint32_t SysClock) {
 
+    // Set Port L  0-4: Multiplexer address output for 8x8 Array
+    // Pin 3 = D; Pin 2 = C; Pin 1 = B; Pin 0 = A; Pin 4 = nD
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
+    GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4);
+
+    // Set Port M Pins 0-7: Output LCD Data
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
+    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
+
+    // Set Port N Pins 0-3: Onboard LEDs output (0-1)  debug outputs (2-3)
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));
+    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
+
+/*************************************************************************/
     GPIO_PORTQ_DATA_R = 0x00;
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
@@ -1045,4 +1079,15 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
 
     writeCommand(0x29);                    // Set display on
 
+}
+
+
+/*********************************************************************************************/
+void ConfigureGPIO(void)
+{
+    // Set Port Q Pins 0-4: LCD Control output:
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);  // Clock Port Q
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOQ));
+    GPIOPinTypeGPIOOutput(GPIO_PORTQ_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                                         | GPIO_PIN_4);
 }

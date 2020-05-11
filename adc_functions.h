@@ -1,8 +1,4 @@
-/*
- * functions.h
- *
- *  Created on: 13.02.2020
- */
+/* functions.h */
 
 #ifndef ADC_FUNCTIONS_H_
 #define ADC_FUNCTIONS_H_
@@ -11,12 +7,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <driverlib/sysctl.h>
-#include <math.h>
+#include <tm4c1294ncpdt.h>
+#include <math.h>               // sqrt()
 #include <driverlib/adc.h>      // ADCIntClear(), ADCIntStatus(), ADCProcessorTrigger(), ADCSequenceDataGet()
 #include <inc/hw_memmap.h>      // ADC0_BASE, ADC1_BASE
 #include <driverlib/interrupt.h>
 
-#include <Interrupt_handler.h>  // interrupt handler
 
 /*****************************  # defines #   *****************************/
 // defines for ADC init             // Port and Pin
@@ -50,12 +46,14 @@ void ConfigureADC(void);
 void startAdcConversion(void);
 void adcIntClear(void);
 
+// interrupt handler for ADC 0. Needs to be implemented in project.
+extern void ADC0IntHandler(void);
 
 
 /*********************  # public global variables #   **********************/
 
 // 256 bytes array for transmit via RS-232 in one burst
-volatile int16_t DiffResults[2][8][8];
+int16_t DiffResults[2][8][8];
 
 // final ADC-values used to calculate the arrows on the LC-Display.
 int16_t DiffSinResults[8][8];
