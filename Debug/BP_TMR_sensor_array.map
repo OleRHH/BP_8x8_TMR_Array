@@ -1,7 +1,7 @@
 ******************************************************************************
                   TI ARM Linker Unix v20.2.0                   
 ******************************************************************************
->> Linked Mon May 11 09:40:55 2020
+>> Linked Mon May 11 17:46:42 2020
 
 OUTPUT FILE NAME:   <BP_TMR_sensor_array.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 00007d79

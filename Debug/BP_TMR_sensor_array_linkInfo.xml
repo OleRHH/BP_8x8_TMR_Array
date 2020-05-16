@@ -2,7 +2,7 @@
 <link_info>
    <banner>TI ARM Linker Unix v20.2.0.LTS</banner>
    <copyright>Copyright (c) 1996-2018 Texas Instruments Incorporated</copyright>
-   <link_time>0x5eb90187</link_time>
+   <link_time>0x5eb97362</link_time>
    <link_errors>0x0</link_errors>
    <output_file>BP_TMR_sensor_array.out</output_file>
    <entry_point>
