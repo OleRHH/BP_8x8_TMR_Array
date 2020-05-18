@@ -17,9 +17,6 @@
 
 /*****************************  # defines #   ***********************************/
 #define CLOCK_FREQ ( 120000000 )        // 120 MHz clock freq.
-#define OSZ_YEL     0b0000100           // Debug Output to oscilloscope
-#define OSZ_BLUE    0b0001000           // Debug Output to oscilloscope
-#define GPIO_PIN_3_DOWNTO_0 0x0000000F  // ADC0IntHandler()
 
 
 #endif /* MAIN_H_ */
