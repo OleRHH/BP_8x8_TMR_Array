@@ -1,19 +1,16 @@
 #include <main.h>
 
-/*****************************  # global variables #   ****************************/
+/*****************************  # global variables #   **************************/
 static bool relative = false, oversampling = true;
 static uint16_t maxArrowLength = 32;
 static uint32_t maximumAnalogValue;
 static COLOR backColor = (COLOR)WHITE;
 
 
-/***********************  TIMER 0 interrupt handler  ******************************/
-/* Periodically measure the sensor Array values and draw them to the display      */
+/***********************  TIMER 0 interrupt handler  ****************************/
+/* Periodically measure the sensor Array values and draw them to the display    */
 void Timer0IntHandler(void)
 {
-    GPIO_PORTN_DATA_R ^= OSZ_YEL;   // for debugging: toggle debug output each time handler is called
-    GPIO_PORTN_DATA_R |= OSZ_BLUE;  // for debugging: set high when handler is called
-
     timer0IntClear();
     drawDisplay5Inch(backColor);
 
@@ -25,11 +22,10 @@ void Timer0IntHandler(void)
 
 //    sendCommandToMotor(charCommand, 9);
 
-    GPIO_PORTN_DATA_R ^= OSZ_BLUE;  // for debugging: set low when handler is finished
 }
 
 
-/***********************  ADC Interrupt handler  **********************************/
+/***********************  ADC Interrupt handler  ********************************/
 /* capture the analog sensor array signals without busy waiting until ad-conversion
  * is complete */
 void ADC0IntHandler(void)
@@ -116,7 +112,7 @@ void UART0IntHandler(void)
         {
             sendCommandToMotor(UART0receive, 8);
         }
-        // oversampling enabled/disabled
+        // hardware averaging enabled/disabled
         else if(UART0receive[0] == '3')
         {
             if(UART0receive[1] == '0')
@@ -142,7 +138,7 @@ void UART0IntHandler(void)
 }
 
 
-/***********************  UART2 Interrupt handler  ****************************************/
+/***********************  UART2 Interrupt handler  ******************************/
 /* receive telemetry data from stepper-motor via RS485 */
 void UART2IntHandler(void)
 {
@@ -158,8 +154,11 @@ void UART2IntHandler(void)
 }
 
 
+/***********************  main() function  **************************************/
+/* the main() function initializes the hardware components and sets the         *
+ * LC-Display background color to white.                                        *
 /***********************  main function  ****************************************/
-int main(void)
+void main(void)
 {
     // set the clock frequency to CLOCK_FREQ (120 MHz)
     uint32_t SysClock = SysCtlClockFreqSet( (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN
@@ -180,7 +179,6 @@ int main(void)
 
     // set the display background color
     writeScreenColor5INCH(backColor);
-//    writeRecangle();
 
     IntMasterEnable();
 
