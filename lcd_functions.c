@@ -89,6 +89,17 @@ void writeInfos(bool relative, bool oversampling, uint16_t maxArrowLength, uint3
     }
 }
 
+/**************************  readTouchscreen()   ****************************/
+//         //
+//       //
+//                                                  //
+/****************************************************************************/
+enum CommandFromTouch readTouchscreen(char * command)
+{
+    command = NULL;
+    return noNewCommand;
+}
+
 
 /**************************  generateColors()   ****************************/
 // if option activated, the arrows have different colors in relation        //

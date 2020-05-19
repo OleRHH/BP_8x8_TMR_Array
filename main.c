@@ -2,26 +2,81 @@
 
 /*****************************  # global variables #   **************************/
 static bool relative = false, oversampling = true;
+static char * command;
+enum CommandFromTouch commandFromTouch;
 static uint16_t maxArrowLength = 32;
 static uint32_t maximumAnalogValue;
 static COLOR backColor = (COLOR)WHITE;
 
 
+/***********************  main() function  **************************************/
+/* the main() function initializes the hardware components and sets the         */
+/* LC-Display background color to white.                                        */
+/********************************************************************************/
+void main(void)
+{
+    // set the clock frequency to CLOCK_FREQ (120 MHz)
+    uint32_t SysClock = SysCtlClockFreqSet( (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN
+                            | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), CLOCK_FREQ);
+
+    // disable all interrupts during setup
+    IntMasterDisable();
+
+    // Initialize the UART, GPIO, ADC and Timer peripheries
+    ConfigureGPIO();
+    ConfigureADC();
+    ConfigureTimer0(SysClock);
+    ConfigureLCD5Inch(SysClock);
+//    ConfigureLCD7Inch(SysClock);
+    configureUartUDMA();
+    ConfigureUART0(SysClock);
+    ConfigureUART2(SysClock);
+
+    // set the display background color
+    writeScreenColor5INCH(backColor);
+
+    IntMasterEnable();
+
+    // busy waiting. Tasks now running in interrupt handler. The tasks are
+    // 1. Timer0IntHandler(): gets periodically called every 100 ms.
+    // 2. UART0IntHandler():  gets called on UART0 data receive.
+    // 3. ADC0IntHandler():   gets called when ADC complete.
+    while(1)
+    {
+    }
+}
+
+
+
 /***********************  TIMER 0 interrupt handler  ****************************/
-/* Periodically measure the sensor Array values and draw them to the display    */
+/* Periodically measures the sensor Array values and draw them to the display.   */
+/* Send commands to the stepper-motor.                                          */
+/********************************************************************************/
 void Timer0IntHandler(void)
 {
+    // clear the pending interrupt
     timer0IntClear();
+
+    // draw the arrows and button statuses to the LC-Display.
     drawDisplay5Inch(backColor);
 
 //    drawDisplay7Inch();
     writeInfos(relative, oversampling, maxArrowLength, maximumAnalogValue, backColor);
 
-    // start the first of 16 ADC read. The others will be triggered in the ADC handler
+    // Read touch screen informations. Returns command information.
+    // Commands for the motor could be: start, stop, left, right and so on.
+    // It can originate from the touch screen or UART0.
+    commandFromTouch = readTouchscreen(command);
+    switch(commandFromTouch)
+    {
+        noNewCommand:           break;
+        enterSettings:          disableTimer0(); settings(); break;
+        newCommandForMotor:     sendCommandToMotor(command, 9); break;
+    }
+
+    // Start sensor-array ad-conversion. This starts the first of 16 ADC
+    // read bursts. The other 15 bursts will be triggered in ADC0IntHandler().
     startAdcConversion();
-
-//    sendCommandToMotor(charCommand, 9);
-
 }
 
 
@@ -81,7 +136,7 @@ void UART0IntHandler(void)
 
     if( ui32Status & UART_INT_DMARX)
     {
-        UART0receive = getDataFromPc();
+        UART0receive = getUART0RxData();
 
         // setup DMA for next receive
         prepareReceiveDMA();
@@ -136,55 +191,3 @@ void UART0IntHandler(void)
         }
     }
 }
-
-
-/***********************  UART2 Interrupt handler  ******************************/
-/* receive telemetry data from stepper-motor via RS485 */
-void UART2IntHandler(void)
-{
-    uint32_t positionData;
-
-    uint32_t UIstatus = UARTIntStatus(UART2_BASE, true);    // Get the interrupt status.
-    UARTIntClear(UART2_BASE, UIstatus);
-
-    if( UIstatus & UART_INT_RX)
-    {
-        positionData = receiveDataFromMotor();
-    }
-}
-
-
-/***********************  main() function  **************************************/
-/* the main() function initializes the hardware components and sets the         *
- * LC-Display background color to white.                                        *
-/***********************  main function  ****************************************/
-void main(void)
-{
-    // set the clock frequency to CLOCK_FREQ (120 MHz)
-    uint32_t SysClock = SysCtlClockFreqSet( (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN
-                            | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), CLOCK_FREQ);
-
-    // disable all interrupts during setup
-    IntMasterDisable();
-
-    // Initialize the UART, GPIO, ADC and Timer peripheries
-    ConfigureGPIO();
-    ConfigureADC();
-    ConfigureTimer0(SysClock);
-    ConfigureLCD5Inch(SysClock);
-//    ConfigureLCD7Inch(SysClock);
-    configureUDMA();
-    ConfigureUART0(SysClock);
-    ConfigureUART2(SysClock);
-
-    // set the display background color
-    writeScreenColor5INCH(backColor);
-
-    IntMasterEnable();
-
-    // busy waiting. Tasks now running in interrupt handler.
-    while(1)
-    {
-    }
-}
-

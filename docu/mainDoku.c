@@ -18,8 +18,8 @@ static COLOR backColor = (COLOR)WHITE;
 
 
 /***********************  main() function  **************************************/
-/* the main() function initializes the hardware components and sets the         *
- * LC-Display background color to white.                                        *
+/* the main() function initializes the hardware components and sets the         */
+/* LC-Display background color to white.                                        */
 /********************************************************************************/
 void main(void)
 {
@@ -30,11 +30,11 @@ void main(void)
     // disable all interrupts during setup
     IntMasterDisable();
 
-    // Initialize the UART, GPIO, ADC and Timer peripheries
+    // Initialize the ADC, Timer, LCD and UART peripheries
     ConfigureADC();
     ConfigureTimer0(SysClock);
     ConfigureLCD(SysClock);
-    configureUDMA();
+    configureUartUDMA();
     ConfigureUART0(SysClock);
     ConfigureUART2(SysClock);
 
@@ -43,7 +43,10 @@ void main(void)
 
     IntMasterEnable();
 
-    // busy waiting. Tasks now running in interrupt handler.
+    // busy waiting. Tasks now running in interrupt handler. The tasks are
+    // 1. Timer0IntHandler(): gets periodically called every 100 ms.
+    // 2. UART0IntHandler():  gets called on UART0 data receive.
+    // 3. ADC0IntHandler():   gets called when ADC complete.
     while(1)
     {
     }

@@ -21,12 +21,12 @@
 /***********************  # public prototypes #   ***************************/
 void ConfigureUART0(uint32_t);
 void ConfigureUART2(uint32_t);
-void configureUDMA(void);
+void configureUartUDMA(void);
 void prepareReceiveDMA(void);
 void sendUARTDMA(void);
 void sendCommandToMotor(char *, uint16_t);
 uint32_t receiveDataFromMotor(void);
-char * getDataFromPc(void);
+char * getUART0RxData(void);
 
 // interrupt handler for UART 0 and UART 2. Needs to be implemented in project.
 extern void UART0IntHandler(void);
