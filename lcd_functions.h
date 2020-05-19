@@ -72,7 +72,14 @@ enum colors
     YELLOW  = 0x00FFFF,
     BLUE    = 0xFF0000,
     WHITE   = 0xFFFFFF,
-    GREY    = 0x505050
+    GREY    = 0x505050,
+};
+
+enum CommandFromTouch
+{
+    noNewCommand = 0,
+    enterSettings = 1,
+    newCommandForMotor = 2,
 };
 
 // x-y-coordinate structure
@@ -96,6 +103,7 @@ void drawDisplay5Inch(COLOR);
 void drawDisplay7Inch(void);
 void writeRecangle(void);
 void writeInfos(bool, bool, uint16_t, uint32_t, COLOR);
+enum CommandFromTouch readTouchscreen(char *);
 
 
 #endif /* LCD_FUNCTIONS_H_ */

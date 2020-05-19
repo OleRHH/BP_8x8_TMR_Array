@@ -16,7 +16,7 @@ static char UART0receive[8];
 
 
 //*****************************************************************************
-char * getDataFromPc(void)
+char * getUART0RxData(void)
 {
     return UART0receive;
 }
@@ -109,7 +109,7 @@ uint32_t receiveDataFromMotor(void)
 
 
 /*********************************************************************************************/
-void configureUDMA(void)
+void configureUartUDMA(void)
 {
     // Enable the uDMA controller at the system level. Wait until it is ready.
     SysCtlPeripheralEnable(SYSCTL_PERIPH_UDMA);
@@ -253,4 +253,20 @@ void ConfigureUART2(uint32_t SysClock)
 
 
 
+
+
+/***********************  UART2 Interrupt handler  ******************************/
+/* receive telemetry data from stepper-motor via RS485 */
+void UART2IntHandler(void)
+{
+    uint32_t positionData;
+
+    uint32_t UIstatus = UARTIntStatus(UART2_BASE, true);    // Get the interrupt status.
+    UARTIntClear(UART2_BASE, UIstatus);
+
+    if( UIstatus & UART_INT_RX)
+    {
+        positionData = receiveDataFromMotor();
+    }
+}
 
