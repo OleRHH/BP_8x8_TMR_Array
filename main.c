@@ -1,7 +1,7 @@
 #include <main.h>
 
 /*****************************  # global variables #   **************************/
-static bool relative = false, oversampling = true;
+static bool relative = true, adcAVG = true;
 static char * command;
 enum CommandFromTouch commandFromTouch;
 static uint16_t maxArrowLength = 32;
@@ -40,7 +40,7 @@ void main(void)
     // busy waiting. Tasks now running in interrupt handler. The tasks are
     // 1. Timer0IntHandler(): gets periodically called every 100 ms.
     // 2. UART0IntHandler():  gets called on UART0 data receive.
-    // 3. ADC0IntHandler():   gets called when ADC complete.
+    // 3. ADC1IntHandler():   gets called when ADC complete.
     while(1)
     {
     }
@@ -50,46 +50,51 @@ void main(void)
 
 /***********************  TIMER 0 interrupt handler  ****************************/
 /* Periodically measures the sensor Array values and draw them to the display.  */
-/* Send commands to the stepper-motor.                                          */
+/* Sends commands to the stepper-motor and calls setup-menu                     */
 /********************************************************************************/
 void Timer0IntHandler(void)
 {
     // clear the pending interrupt
     timer0IntClear();
 
-    // draw the arrows and button statuses to the LC-Display.
+    // Draw the arrows and button states to the LC-Display. This function also
+    // calculates the new arrow lines. This is the most time consuming part of
+    // the program.
     drawDisplay5Inch(backColor);
+//    drawDisplay7Inch(backColor);
 
-//    drawDisplay7Inch();
-    writeInfos(relative, oversampling, maxArrowLength, maximumAnalogValue, backColor);
+    writeInfos(relative, adcAVG, maxArrowLength, maximumAnalogValue, backColor);
 
-    // Read touch screen informations. Returns command information.
+    // Reads touch screen status. Returns command information and (if so)
+    // the command itself as a pointer.
+    commandFromTouch = readTouchscreen(command);
+
     // Commands for the motor could be: start, stop, left, right and so on.
     // It can originate from the touch screen or UART0.
-    commandFromTouch = readTouchscreen(command);
     switch(commandFromTouch)
     {
         noNewCommand:           break;
-        enterSettings:          disableTimer0(); settings(); break;
+        enterSettings:          settings(command); break;
         newCommandForMotor:     sendCommandToMotor(command, 9); break;
     }
 
     // Start sensor-array ad-conversion. This starts the first of 16 ADC
-    // read bursts. The other 15 bursts will be triggered in ADC0IntHandler().
+    // read bursts. The other 15 bursts will be triggered in ADC1IntHandler().
     startAdcConversion();
 }
 
 
 /***********************  ADC Interrupt handler  ********************************/
-/* capture the analog sensor array signals without busy waiting until           */
-/* ad-conversion is complete.                                                   */
+/* captures the analog sensor array signals without busy waiting.               */
+/* The digitized signals are being processed at the end.                        */
 /********************************************************************************/
-void ADC0IntHandler(void)
+void ADC1IntHandler(void)
 {
     static uint16_t step = 0;
 
     // Interrupt is set when a AD-conversion is finished. It needs to be cleared.
     adcIntClear();
+
 
     // advance step count each time an AD-conversion is finished. The first one
     // was already started in Timer0Inthandler. There are 16 steps in total.
@@ -104,8 +109,8 @@ void ADC0IntHandler(void)
     }
     GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
 
-    // store the previously captured analog values into local buffers
-    ReadArray(step-1);
+    // store the just captured analog values into buffers to be later processed.
+    storeArraySensorData(step - 1);
 
     // trigger the next AD-conversion (16 in total)
     if(step <= 15)
@@ -113,12 +118,15 @@ void ADC0IntHandler(void)
         startAdcConversion();
     }
 
-    // after 16 conversions process analog data and reset values for the next
-    // AD-conversion (starts with next Timer0 Interrupt).
+    // after 16 conversions: process analog data and reset values for the next
+    // AD-conversion (which gets started during the next Timer0 Interrupt).
     else
     {
+        // process arrow length and store results to be later drawn on LCD.
         maximumAnalogValue = computeArrows(relative, maxArrowLength);
+        // reset step counter for next use
         step = 0;
+        // reset digital multiplexer inputs
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, GPIO_PIN_4);
     }
@@ -126,72 +134,49 @@ void ADC0IntHandler(void)
 
 
 /***********************  UART0 Interrupt handler  ******************************/
-/* communication via RS232 interface with the PC (sending sensor data to matlab,
- * receiving commands etc) */
+/* communication via RS232 interface with the PC. The PC sends commands. The    */
+/* MCU sends Sensor-Array data. More options like sending Stepper-Motor         */
+/* temetery could also be implemented in the future.                            */
+/********************************************************************************/
 void UART0IntHandler(void)
 {
+    // pointer to a char string that is defined as UART0receive[8] in uartDMA.c
     char * UART0receive;
 
     // Read the interrupt status of the UART.
-    uint32_t ui32Status = UARTIntStatus(UART0_BASE, 1);
+    uint32_t interruptStatus = UARTGetIntStatus();
 
     // Clear any pending status. We are expecting a uDMA Receive Interrupt
-    UARTIntClear(UART0_BASE, ui32Status);
+    UART0ClearInterrupt(interruptStatus);
 
-    if( ui32Status & UART_INT_DMARX)
+    if( interruptStatus & DMA_RX_INTERRUPT)
     {
         UART0receive = getUART0RxData();
 
         // setup DMA for next receive
-        prepareReceiveDMA();
+        prepareNextReceiveDMA();
 
-        // UART0receive[] contains commands from Pc. The commands depend on
-        // the value of the first byte:
-        // '0': send Array Data (256 bytes) via serial interface to Matlab
-        if(UART0receive[0] == '0')
+        // 'char UART0receive[8]' contains commands from Pc. They are always
+        // 8 bytes. The commands depend on the value of the first byte:
+
+        // byte 0 contains the type of command:
+        switch (UART0receive[0])
         {
-            sendUARTDMA();
-        }
-        // '1': set arrow relative/absolute and arrow size.
-        else if(UART0receive[0] == '1')
-        {
-            if(UART0receive[1] == '0')
-            {
-                relative = false;
-            }
-            else if(UART0receive[1] == '1')
-            {
-                relative = true;
-            }
-            // the value was transmitted as char coded number.
-            maxArrowLength = UART0receive[4]<<24 | UART0receive[5]<<16 | UART0receive[6]<<8 | UART0receive[7];
-        }
-        // '2': commands past forwarded to the stepper-motor by UART2.
-        else if(UART0receive[0] == '2')
-        {
-            sendCommandToMotor(UART0receive, 8);
-        }
+        // send array data via RS-232 to a PC (matlab)
+        case '0': sendUARTDMA(); break;
+
+        // set arrow relative/absolute and arrow size.
+        case '1': relative = getRelativeAbsoluteSetting();
+                  maxArrowLength = getMaxArrowLength(); break;
+
+        // commands for the stepper-motor are being past forwarded to UART2.
+        case '2': sendCommandToMotor(UART0receive, 8); break;
+
         // hardware averaging enabled/disabled
-        else if(UART0receive[0] == '3')
-        {
-            if(UART0receive[1] == '0')
-            {
-                ADCHardwareOversampleConfigure(ADC0_BASE, 1);
-                ADCHardwareOversampleConfigure(ADC1_BASE, 1);
-                oversampling = false;
-            }
-            else if(UART0receive[1] == '1')
-            {
-                // set hardware oversampling for better resolution
-                ADCHardwareOversampleConfigure(ADC0_BASE, 64);
-                ADCHardwareOversampleConfigure(ADC1_BASE, 64);
-                oversampling = true;
-            }
-        }
-        // more commands.
-        else if(UART0receive[0] == '4')
-        {
-           // todo: additional commands from UART here, if desired.
+        case '3': adcAVG = getADCHardwareAveraging(UART0receive[1]); break;
+
+        // todo: additional commands from UART here, if desired.
+        case '4': break;
         }
     }
 }

@@ -6043,13 +6043,13 @@
 //
 //*****************************************************************************
 #define ADC_SAC_AVG_M           0x00000007  // Hardware Averaging Control
-#define ADC_SAC_AVG_OFF         0x00000000  // No hardware oversampling
-#define ADC_SAC_AVG_2X          0x00000001  // 2x hardware oversampling
-#define ADC_SAC_AVG_4X          0x00000002  // 4x hardware oversampling
-#define ADC_SAC_AVG_8X          0x00000003  // 8x hardware oversampling
-#define ADC_SAC_AVG_16X         0x00000004  // 16x hardware oversampling
-#define ADC_SAC_AVG_32X         0x00000005  // 32x hardware oversampling
-#define ADC_SAC_AVG_64X         0x00000006  // 64x hardware oversampling
+#define ADC_SAC_AVG_OFF         0x00000000  // No hardware adcAVG
+#define ADC_SAC_AVG_2X          0x00000001  // 2x hardware adcAVG
+#define ADC_SAC_AVG_4X          0x00000002  // 4x hardware adcAVG
+#define ADC_SAC_AVG_8X          0x00000003  // 8x hardware adcAVG
+#define ADC_SAC_AVG_16X         0x00000004  // 16x hardware adcAVG
+#define ADC_SAC_AVG_32X         0x00000005  // 32x hardware adcAVG
+#define ADC_SAC_AVG_64X         0x00000006  // 64x hardware adcAVG
 
 //*****************************************************************************
 //

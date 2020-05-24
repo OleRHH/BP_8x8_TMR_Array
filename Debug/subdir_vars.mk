@@ -12,6 +12,7 @@ C_SRCS += \
 ../main.c \
 ../timer_functions.c \
 ../tm4c1294ncpdt_startup_ccs.c \
+../touch.c \
 ../uartDMA.c 
 
 C_DEPS += \
@@ -20,6 +21,7 @@ C_DEPS += \
 ./main.d \
 ./timer_functions.d \
 ./tm4c1294ncpdt_startup_ccs.d \
+./touch.d \
 ./uartDMA.d 
 
 OBJS += \
@@ -28,6 +30,7 @@ OBJS += \
 ./main.obj \
 ./timer_functions.obj \
 ./tm4c1294ncpdt_startup_ccs.obj \
+./touch.obj \
 ./uartDMA.obj 
 
 OBJS__QUOTED += \
@@ -36,6 +39,7 @@ OBJS__QUOTED += \
 "main.obj" \
 "timer_functions.obj" \
 "tm4c1294ncpdt_startup_ccs.obj" \
+"touch.obj" \
 "uartDMA.obj" 
 
 C_DEPS__QUOTED += \
@@ -44,6 +48,7 @@ C_DEPS__QUOTED += \
 "main.d" \
 "timer_functions.d" \
 "tm4c1294ncpdt_startup_ccs.d" \
+"touch.d" \
 "uartDMA.d" 
 
 C_SRCS__QUOTED += \
@@ -52,6 +57,7 @@ C_SRCS__QUOTED += \
 "../main.c" \
 "../timer_functions.c" \
 "../tm4c1294ncpdt_startup_ccs.c" \
+"../touch.c" \
 "../uartDMA.c" 
 
 

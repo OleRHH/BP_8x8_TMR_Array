@@ -13,6 +13,7 @@ ORDERED_OBJS += \
 "./main.obj" \
 "./timer_functions.obj" \
 "./tm4c1294ncpdt_startup_ccs.obj" \
+"./touch.obj" \
 "./uartDMA.obj" \
 "../tm4c1294ncpdt.cmd" \
 $(GEN_CMDS__FLAG) \
@@ -158,8 +159,8 @@ BP_TMR_sensor_array.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "adc_functions.obj" "lcd_functions.obj" "main.obj" "timer_functions.obj" "tm4c1294ncpdt_startup_ccs.obj" "uartDMA.obj" 
-	-$(RM) "adc_functions.d" "lcd_functions.d" "main.d" "timer_functions.d" "tm4c1294ncpdt_startup_ccs.d" "uartDMA.d" 
+	-$(RM) "adc_functions.obj" "lcd_functions.obj" "main.obj" "timer_functions.obj" "tm4c1294ncpdt_startup_ccs.obj" "touch.obj" "uartDMA.obj" 
+	-$(RM) "adc_functions.d" "lcd_functions.d" "main.d" "timer_functions.d" "tm4c1294ncpdt_startup_ccs.d" "touch.d" "uartDMA.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

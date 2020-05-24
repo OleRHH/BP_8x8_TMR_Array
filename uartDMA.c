@@ -5,7 +5,7 @@
  */
 #include <uartDMA.h>
 
-//*****************************************************************************
+/********************************************************************************/
 // The control table used by the uDMA controller. This table must be aligned
 // to a 1024 byte boundary.
 #pragma DATA_ALIGN(pui8ControlTable, 1024)
@@ -15,15 +15,51 @@ uint8_t pui8ControlTable[1024];
 static char UART0receive[8];
 
 
-//*****************************************************************************
+/********************************************************************************/
+void UART0ClearInterrupt(unsigned int interruptStatus)
+{
+    UARTIntClear(UART0_BASE, interruptStatus);
+}
+
+
+/********************************************************************************/
+unsigned int UARTGetIntStatus(void)
+{
+    return UARTIntStatus(UART0_BASE, 1);
+}
+
+
+/********************************************************************************/
 char * getUART0RxData(void)
 {
     return UART0receive;
 }
 
 
-//*****************************************************************************
-void prepareReceiveDMA(void)
+/********************************************************************************/
+bool getRelativeAbsoluteSetting(void)
+{
+    if(UART0receive[1] == '0')
+    {
+        return false;
+    }
+    else if(UART0receive[1] == '1')
+    {
+        return true;
+    }
+}
+
+
+/********************************************************************************/
+uint16_t getMaxArrowLength(void)
+{
+    return ( UART0receive[4]<<24 | UART0receive[5]<<16
+           | UART0receive[6]<<8 | UART0receive[7] );
+}
+
+
+/********************************************************************************/
+void prepareNextReceiveDMA(void)
 {
     // prepare uDMA for the next UART0receive (8 bytes)
     uDMAChannelTransferSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT,
@@ -34,7 +70,7 @@ void prepareReceiveDMA(void)
 }
 
 
-/*********************************************************************************************/
+/********************************************************************************/
 void sendUARTDMA(void)
 {
     // Set up the transfer parameters for the uDMA UART TX channel.  This will
@@ -52,7 +88,7 @@ void sendUARTDMA(void)
 }
 
 
-//*****************************************************************************
+/********************************************************************************/
 void sendCommandToMotor(char * data, uint16_t size)
 {
     // the data structure to the stepper-motor is always 9 bytes.
@@ -69,7 +105,7 @@ void sendCommandToMotor(char * data, uint16_t size)
     }
     stepperMotorCommand[8] = checksum;
 
-    // send command to stepper-motor to send back position data (absolute)
+    // send command to stepper-motor via RS-485 (UART2)
     for(i = 0; i < size; i++)
     {
         UARTCharPutNonBlocking(UART2_BASE, stepperMotorCommand[i]);
@@ -77,7 +113,23 @@ void sendCommandToMotor(char * data, uint16_t size)
 }
 
 
-//*****************************************************************************
+/***********************  UART2 Interrupt handler  ******************************/
+/* receive telemetry data from stepper-motor via RS485 */
+void UART2IntHandler(void)
+{
+    uint32_t positionData;
+
+    uint32_t UIstatus = UARTIntStatus(UART2_BASE, true);    // Get the interrupt status.
+    UARTIntClear(UART2_BASE, UIstatus);
+
+    if( UIstatus & UART_INT_RX)
+    {
+        positionData = receiveDataFromMotor();
+    }
+}
+
+
+/********************************************************************************/
 uint32_t receiveDataFromMotor(void)
 {
     int i = 0;
@@ -108,7 +160,7 @@ uint32_t receiveDataFromMotor(void)
 }
 
 
-/*********************************************************************************************/
+/********************************************************************************/
 void configureUartUDMA(void)
 {
     // Enable the uDMA controller at the system level. Wait until it is ready.
@@ -146,13 +198,14 @@ void configureUartUDMA(void)
     // structure.  The mode is set to basic, the transfer source is the
     // UART data register, and the destination is the receive buffer. The
     // transfer size is set to match the size of the receive buffer.
-    uDMAChannelTransferSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT, UDMA_MODE_BASIC,
-                             (void *)(UART0_BASE + UART_O_DR), (void *)UART0receive, sizeof(UART0receive));
+    uDMAChannelTransferSet(UDMA_CHANNEL_UART0RX | UDMA_PRI_SELECT,
+                           UDMA_MODE_BASIC, (void *)(UART0_BASE + UART_O_DR),
+                           (void *)UART0receive, sizeof(UART0receive));
 
     // uDMA Tx:
     uDMAChannelAssign(UDMA_CH9_UART0TX);
 
-    // Put the attributes in a known state for the uDMA UART0TX channel.  These
+    // Put the attributes in a known state for the uDMA UART0TX channel. These
     // should already be disabled by default.
     uDMAChannelAttributeDisable(UDMA_CHANNEL_UART0TX, UDMA_ATTR_ALL);
 
@@ -183,8 +236,10 @@ void configureUartUDMA(void)
 }
 
 
-/*********************************************************************************************/
-/* UART0 is used to transmit Array Data (256 byes) via RS232 and to receive control commands*/
+/********************************************************************************/
+/* UART0 is used to transmit Array Data (256 byes) via RS232 and to receive     */
+/* control commands.                                                            */
+/********************************************************************************/
 void ConfigureUART0(uint32_t SysClock)
 {
     // Enable the GPIO Peripheral used by the UART and wait until it is ready.
@@ -201,7 +256,7 @@ void ConfigureUART0(uint32_t SysClock)
     GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
 
     // Configure the UART communication parameters.
-    UARTConfigSetExpClk(UART0_BASE, SysClock, 230400,
+    UARTConfigSetExpClk(UART0_BASE, SysClock, 115200,
                             UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                             UART_CONFIG_PAR_NONE);
 
@@ -224,8 +279,9 @@ void ConfigureUART0(uint32_t SysClock)
 
 
 
-/*********************************************************************************************/
-/* UART2 is used for communication with the stepper motor via RS485 */
+/********************************************************************************/
+/* UART2 is used for communication with the stepper motor via RS485             */
+/********************************************************************************/
 void ConfigureUART2(uint32_t SysClock)
 {
     // Enable the GPIO Peripheral used by the UART
@@ -254,19 +310,4 @@ void ConfigureUART2(uint32_t SysClock)
 
 
 
-
-/***********************  UART2 Interrupt handler  ******************************/
-/* receive telemetry data from stepper-motor via RS485 */
-void UART2IntHandler(void)
-{
-    uint32_t positionData;
-
-    uint32_t UIstatus = UARTIntStatus(UART2_BASE, true);    // Get the interrupt status.
-    UARTIntClear(UART2_BASE, UIstatus);
-
-    if( UIstatus & UART_INT_RX)
-    {
-        positionData = receiveDataFromMotor();
-    }
-}
 

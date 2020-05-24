@@ -40,7 +40,7 @@ static COLOR color[768];
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
 /****************************************************************************/
-void writeInfos(bool relative, bool oversampling, uint16_t maxArrowLength, uint32_t maximumAnalogValue, COLOR backColor)
+void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength, uint32_t maximumAnalogValue, COLOR backColor)
 {
     char charValue[100];
     static bool old = true;
@@ -79,7 +79,7 @@ void writeInfos(bool relative, bool oversampling, uint16_t maxArrowLength, uint3
             printString("Clipping!", 100, 300, backColor, backColor);
         }
     }
-    if(oversampling == false)
+    if(adcAVG == false)
     {
         printString("Oversampling off", 250, 280, (COLOR)BLACK, backColor);
     }
