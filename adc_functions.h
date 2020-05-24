@@ -40,14 +40,15 @@
 
 
 /*********************  # public Prototypes #   ****************************/
-void ReadArray(uint16_t);
+void storeArraySensorData(uint16_t);
 uint32_t computeArrows(bool, uint16_t);
 void ConfigureADC(void);
 void startAdcConversion(void);
 void adcIntClear(void);
+bool getADCHardwareAveraging(char);
 
 // interrupt handler for ADC 0. Needs to be implemented in project.
-extern void ADC0IntHandler(void);
+extern void ADC1IntHandler(void);
 
 
 /*********************  # public global variables #   **********************/

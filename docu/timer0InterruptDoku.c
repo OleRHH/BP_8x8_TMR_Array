@@ -1,6 +1,6 @@
 /***********************  TIMER 0 interrupt handler  ****************************/
 /* Periodically measures the sensor Array values and draw them to the display.  */
-/* Send commands to the stepper-motor.                                          */
+/* Sends commands to the stepper-motor and calls setup-menu                     */
 /********************************************************************************/
 void Timer0IntHandler(void)
 {
@@ -15,16 +15,20 @@ void Timer0IntHandler(void)
     // Read touch screen informations. Returns true if new command is available.
     newCommandForMotor = readTouchscreen(motorCommand);
 
-    // Send command to stepper-motor.
+    // Reads touch screen status. Returns command information and (if so)
+    // the command itself as a pointer.
+    commandFromTouch = readTouchscreen(command);
+
     // Commands for the motor could be: start, stop, left, right and so on.
     // It can originate from the touch screen or UART0.
-    if(newCommandForMotor == true)
+    switch(commandFromTouch)
     {
-        sendCommandToMotor(motorCommand, 9);
-        newCommandForMotor = false;
+        noNewCommand:           break;
+        enterSettings:          settings(command); break;
+        newCommandForMotor:     sendCommandToMotor(command, 9); break;
     }
 
     // Start sensor-array ad-conversion. This starts the first of 16 ADC
-    // read bursts. The other 15 bursts will be triggered in ADC0IntHandler().
+    // read bursts. The other 15 bursts will be triggered in ADC1IntHandler().
     startAdcConversion();
 }

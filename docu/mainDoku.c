@@ -46,7 +46,7 @@ void main(void)
     // busy waiting. Tasks now running in interrupt handler. The tasks are
     // 1. Timer0IntHandler(): gets periodically called every 100 ms.
     // 2. UART0IntHandler():  gets called on UART0 data receive.
-    // 3. ADC0IntHandler():   gets called when ADC complete.
+    // 3. ADC1IntHandler():   gets called when ADC complete.
     while(1)
     {
     }
