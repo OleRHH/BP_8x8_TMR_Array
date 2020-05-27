@@ -49,8 +49,8 @@ void main(void)
 
 
 /***********************  TIMER 0 interrupt handler  ****************************/
-/* Periodically measures the sensor Array values and draw them to the display.  */
-/* Sends commands to the stepper-motor and calls setup-menu                     */
+/* Periodically measures the sensor Array values and call function to draw the  */
+/* display. Also it sends commands to the stepper-motor and calls setup-menu.   */
 /********************************************************************************/
 void Timer0IntHandler(void)
 {
