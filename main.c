@@ -21,7 +21,7 @@
 static char * command;
 enum CommandFromTouch commandFromTouch;
 
-TMRSensorData sensor;
+TMRSensorData * sensorData;
 Settings * settings;
 
 /***********************  main() function  **************************************/
@@ -40,7 +40,7 @@ void main(void)
     // Initialize the UART, GPIO, ADC and Timer peripheries
     settings = loadSettings();
     ConfigureDebugGPIO();
-    ConfigureADC();
+    sensorData = ConfigureADC();
     ConfigureTimer0(SysClock);
     ConfigureLCD5Inch(SysClock);
 //    ConfigureLCD7Inch(SysClock);
@@ -72,15 +72,15 @@ void Timer0IntHandler(void)
     // clear the pending interrupt
     timer0IntClear();
     toggleOszi(1);
-    onOszi(2);
+//    onOszi(2);
 
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
     // the program.
-    drawDisplay5Inch(&sensor);
+    drawDisplay5Inch(&sensorData->arrows);
 //    drawDisplay7Inch(backColor);
 
-    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, &sensor);
+    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
 
     // Reads touch screen status. Returns command information and (if so)
     // the command itself as a pointer.
@@ -95,15 +95,15 @@ void Timer0IntHandler(void)
         newCommandForMotor:     sendCommandToMotor(command, 9); break;
     }
 
-    // Start sensor-array ad-conversion. This starts the first of 16 ADC
+    // Start sensorData-array ad-conversion. This starts the first of 16 ADC
     // read bursts. The other 15 bursts will be triggered in ADC1IntHandler().
     startADConversion();
-    offOszi(2);
+//    offOszi(2);
 }
 
 
 /***********************  ADC Interrupt handler  ********************************/
-/* captures the analog sensor array signals without busy waiting.               */
+/* captures the analog sensorData array signals without busy waiting.               */
 /* The digitized signals are being processed at the end.                        */
 /********************************************************************************/
 void ADC1IntHandler(void)
@@ -135,7 +135,7 @@ void ADC1IntHandler(void)
     else
     {
         // process arrow length and store results to be later drawn on LCD.
-        computeArrows(settings->relative, settings->maxArrowLength, &sensor);
+        computeArrows(settings->relative, settings->maxArrowLength, sensorData);
         // reset step counter for next use
         step = 0;
         // reset digital multiplexer inputs
@@ -174,7 +174,7 @@ void UART0IntHandler(void)
         switch (UART0receive[0])
         {
         // send array data via RS-232 to a PC (matlab)
-        case '0':   sendUARTDMA(&sensor); break;
+        case '0':   sendUARTDMA(sensorData->resultsForUARTSend); break;
 
         // set arrow relative/absolute and arrow size.
         case '1':   settings->relative = getRelativeAbsoluteSetting();

@@ -1,5 +1,11 @@
 #include <timer_functions.h>
 
+#include <driverlib/sysctl.h>
+#include <tm4c1294ncpdt.h>
+#include <driverlib/interrupt.h>  // intEnable(), IntPrioritySet()
+#include <driverlib/timer.h>
+#include <inc/hw_memmap.h>      // TIMER0_BASE_BASE
+
 
 /*********************************************************************************************/
 void timer0IntClear(void)

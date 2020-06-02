@@ -15,8 +15,9 @@ Settings * loadSettings(void)
     settings->relative = true;
     settings->coloredArrows = true;
     settings->maxArrowLength = 32;
-    settings->adcAVG = false;
+    settings->adcAVG = true;
     settings->backgroundColor = 0x00FFFFFF;
+    settings->motorIncrement = 100;
 
     return settings;
 }
