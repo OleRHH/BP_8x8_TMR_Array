@@ -10,16 +10,21 @@
 typedef struct {
     // final ADC-values used to calculate the arrows on the LC-Display.
     union {
+        // 256 bytes array for transmit via RS-232 in one burst
         char resultsForUARTSend[256];
-        struct {
+        struct
+        {
             int16_t dSin[8][8];
             int16_t dCos[8][8];
-        }rawData;
+        };
     };
+    struct {
+        int16_t dSin[8][8];
+        int16_t dCos[8][8];
+    }diff;
+
     int16_t DiffSinResults[8][8];
     int16_t DiffCosResults[8][8];
-    // 256 bytes array for transmit via RS-232 in one burst
-    int16_t DiffResults[2][8][8];
     // these values are used to color the arrows depending on their length.
     uint16_t arrowLength[8][8];
     uint16_t maxAnalogValue;

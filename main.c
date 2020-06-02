@@ -72,12 +72,12 @@ void Timer0IntHandler(void)
     // clear the pending interrupt
     timer0IntClear();
     toggleOszi(1);
-    onOszi(2);
+//    onOszi(2);
 
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
     // the program.
-    drawDisplay5Inch(sensorData->resultsForUARTSend);
+    drawDisplay5Inch( (void *) &sensorData->diff);
 //    drawDisplay7Inch(backColor);
 
     writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
@@ -98,7 +98,7 @@ void Timer0IntHandler(void)
     // Start sensorData-array ad-conversion. This starts the first of 16 ADC
     // read bursts. The other 15 bursts will be triggered in ADC1IntHandler().
     startADConversion();
-    offOszi(2);
+//    offOszi(2);
 }
 
 
@@ -174,7 +174,7 @@ void UART0IntHandler(void)
         switch (UART0receive[0])
         {
         // send array data via RS-232 to a PC (matlab)
-        case '0':   sendUARTDMA(sensorData); break;
+        case '0':   sendUARTDMA(sensorData->resultsForUARTSend); break;
 
         // set arrow relative/absolute and arrow size.
         case '1':   settings->relative = getRelativeAbsoluteSetting();

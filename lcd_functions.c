@@ -10,7 +10,7 @@
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
 
-#include <adc_functions.h>
+//#include <adc_functions.h>
 #include <fonts.h>
 #include <lcd_functions.h>
 
@@ -73,7 +73,10 @@ COLOR backColor;
 int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
 
-
+struct SensorData {
+    int16_t dSin[8][8];
+    int16_t dCos[8][8];
+} * sensorData;
 /***************************  writeInfos()   *******************************/
 // writes some info as text on the display.                                 //
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
@@ -316,11 +319,11 @@ void writeScreenColor7INCH(COLOR color)
 /**************************  drawDisplay5Inch()   ***************************/
 // draws all arrows to the 5 inch LC-Display.                               //
 /****************************************************************************/
-void drawDisplay5Inch(TMRSensorData * sensor)
+void drawDisplay5Inch(void * data)
 {
     int16_t m = 0, n = 0;               // m = row , n = column
     point start, stop;
-
+    sensorData = (struct SensorData *) data;
     // write the arrows
     for(m = 0; m <= 7; m++)
     {
@@ -344,12 +347,13 @@ void drawDisplay5Inch(TMRSensorData * sensor)
             writeLine(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
 
             // III. write new arrows
-            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + sensor->DiffCosResults[m][n];
-            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + sensor->DiffSinResults[m][n];
+            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + sensorData->dCos[m][n];
+            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + sensorData->dSin[m][n];
 
-            writeLine(start.x, start.y, stop.x, stop.y, color[sensor->arrowLength[m][n]], WITH_ARROW);
-            oldDiffCosResults[m][n] = sensor->DiffCosResults[m][n];
-            oldDiffSinResults[m][n] = sensor->DiffSinResults[m][n];
+            writeLine(start.x, start.y, stop.x, stop.y, (COLOR)0x00, WITH_ARROW);
+//            writeLine(start.x, start.y, stop.x, stop.y, color[sensor->arrowLength[m][n]], WITH_ARROW);
+            oldDiffCosResults[m][n] = sensorData->dCos[m][n];
+            oldDiffSinResults[m][n] = sensorData->dSin[m][n];
         }
     }
 }
@@ -359,40 +363,40 @@ void drawDisplay5Inch(TMRSensorData * sensor)
 /**************************  drawDisplay7Inch()   ***************************/
 // draws all arrows to the 7 inch LC-Display.                               //
 /****************************************************************************/
-void drawDisplay7Inch(TMRSensorData * sensor)
+void drawDisplay7Inch(void) //TMRSensorData * sensor)
 {
-    int16_t m = 0, n = 0, xGrid, yGrid;
-
-    // delete the old arrows
-    for(xGrid = GRID_OFFSET_X_7_INCH; xGrid < ( 480 + GRID_OFFSET_X_7_INCH); xGrid += 60)
-    {
-        for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
-        {
-            writeLine(xGrid, yGrid, xGrid + oldDiffCosResults[m][n],
-                       yGrid - oldDiffSinResults[m][n], (COLOR)0x000000, WITH_ARROW);
-            m++;
-        }
-        m = 0;
-        n++;
-    }
-
-    // write the new arrows
-    n = 0;
-    for(xGrid = GRID_OFFSET_X_7_INCH; xGrid < ( 480 + GRID_OFFSET_X_7_INCH); xGrid += 60)
-    {
-        for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
-        {
-            writeLine(xGrid, yGrid, xGrid + sensor->DiffCosResults[m][n],
-                       yGrid - sensor->DiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
-            writeLine(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000FF, NO_ARROW);    // draw a small cross..
-            writeLine(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000FF, NO_ARROW);    // ..as as grid indicator
-            oldDiffCosResults[m][n] = sensor->DiffCosResults[m][n];
-            oldDiffSinResults[m][n] = sensor->DiffSinResults[m][n];
-            m++;
-        }
-        m = 0;
-        n++;
-    }
+//    int16_t m = 0, n = 0, xGrid, yGrid;
+//
+//    // delete the old arrows
+//    for(xGrid = GRID_OFFSET_X_7_INCH; xGrid < ( 480 + GRID_OFFSET_X_7_INCH); xGrid += 60)
+//    {
+//        for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
+//        {
+//            writeLine(xGrid, yGrid, xGrid + oldDiffCosResults[m][n],
+//                       yGrid - oldDiffSinResults[m][n], (COLOR)0x000000, WITH_ARROW);
+//            m++;
+//        }
+//        m = 0;
+//        n++;
+//    }
+//
+//    // write the new arrows
+//    n = 0;
+//    for(xGrid = GRID_OFFSET_X_7_INCH; xGrid < ( 480 + GRID_OFFSET_X_7_INCH); xGrid += 60)
+//    {
+//        for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
+//        {
+//            writeLine(xGrid, yGrid, xGrid + sensor->DiffCosResults[m][n],
+//                       yGrid - sensor->DiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
+//            writeLine(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000FF, NO_ARROW);    // draw a small cross..
+//            writeLine(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000FF, NO_ARROW);    // ..as as grid indicator
+//            oldDiffCosResults[m][n] = sensor->DiffCosResults[m][n];
+//            oldDiffSinResults[m][n] = sensor->DiffSinResults[m][n];
+//            m++;
+//        }
+//        m = 0;
+//        n++;
+//    }
 }
 
 

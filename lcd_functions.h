@@ -52,7 +52,6 @@ typedef struct
     uint16_t y;
 } point;
 
-
 COLOR color[768];
 
 /**************************  # public Prototypes #   **********************/
@@ -63,8 +62,8 @@ void ConfigureGPIO(void);
 void printString(char *, uint16_t, uint16_t, COLOR);
 void setLCDBackgroundColor(COLOR);
 void writeScreenColor7INCH(COLOR);
-void drawDisplay5Inch(TMRSensorData *);
-void drawDisplay7Inch(TMRSensorData *);
+void drawDisplay5Inch(void *);
+void drawDisplay7Inch(void); //TMRSensorData *);
 void writeRecangle(void);
 void writeInfos(bool, bool, uint16_t, uint16_t);
 enum CommandFromTouch readTouchscreen(char *);
