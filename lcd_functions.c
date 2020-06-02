@@ -10,7 +10,7 @@
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
 
-//#include <adc_functions.h>
+#include <adc_functions.h>
 #include <fonts.h>
 #include <lcd_functions.h>
 
@@ -76,7 +76,7 @@ int16_t oldDiffCosResults[8][8];
 struct SensorData {
     int16_t dSin[8][8];
     int16_t dCos[8][8];
-} * sensorData;
+} * sensor;
 /***************************  writeInfos()   *******************************/
 // writes some info as text on the display.                                 //
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
@@ -321,9 +321,9 @@ void writeScreenColor7INCH(COLOR color)
 /****************************************************************************/
 void drawDisplay5Inch(void * data)
 {
+    sensor  = (struct SensorData *) data;
     int16_t m = 0, n = 0;               // m = row , n = column
     point start, stop;
-    sensorData = (struct SensorData *) data;
     // write the arrows
     for(m = 0; m <= 7; m++)
     {
@@ -347,13 +347,13 @@ void drawDisplay5Inch(void * data)
             writeLine(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
 
             // III. write new arrows
-            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + sensorData->dCos[m][n];
-            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + sensorData->dSin[m][n];
+            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + sensor->dCos[m][n];
+            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + sensor->dSin[m][n];
 
             writeLine(start.x, start.y, stop.x, stop.y, (COLOR)0x00, WITH_ARROW);
 //            writeLine(start.x, start.y, stop.x, stop.y, color[sensor->arrowLength[m][n]], WITH_ARROW);
-            oldDiffCosResults[m][n] = sensorData->dCos[m][n];
-            oldDiffSinResults[m][n] = sensorData->dSin[m][n];
+            oldDiffCosResults[m][n] = sensor->dCos[m][n];
+            oldDiffSinResults[m][n] = sensor->dSin[m][n];
         }
     }
 }

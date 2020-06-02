@@ -1,7 +1,7 @@
 ******************************************************************************
                   TI ARM Linker Unix v20.2.0                   
 ******************************************************************************
->> Linked Tue Jun  2 20:52:54 2020
+>> Linked Tue Jun  2 21:41:07 2020
 
 OUTPUT FILE NAME:   <BP_TMR_sensor_array.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 00007cc1
@@ -12,7 +12,7 @@ MEMORY CONFIGURATION
          name            origin    length      used     unused   attr    fill
 ----------------------  --------  ---------  --------  --------  ----  --------
   FLASH                 00000000   00100000  0000a8ea  000f5716  R  X
-  SRAM                  20000000   00040000  00006a47  000395b9  RW X
+  SRAM                  20000000   00040000  00006a4b  000395b5  RW X
 
 
 SEGMENT ALLOCATION MAP
@@ -28,8 +28,8 @@ run origin  load origin   length   init length attrs members
   20000000    20000000    0000026c   00000000    rw- .vtable
   20000270    20000270    00004e20   00000000    rw- .stack
   20005090    20005090    00000013   00000000    rw- .data
-20005400    20005400    000019a8   00000000    rw-
-  20005400    20005400    000019a8   00000000    rw- .bss
+20005400    20005400    000019ac   00000000    rw-
+  20005400    20005400    000019ac   00000000    rw- .bss
 
 
 SECTION ALLOCATION MAP
@@ -221,7 +221,7 @@ section   page    origin      length       input sections
                   2000509c    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : errno.c.obj (.data)
                   200050a0    00000003     lcd_functions.obj (.data)
 
-.bss       0    20005400    000019a8     UNINITIALIZED
+.bss       0    20005400    000019ac     UNINITIALIZED
                   20005400    00000c00     (.common:color)
                   20006000    00000400     (.common:pui8ControlTable)
                   20006400    00000382     (.common:SensorData)
@@ -241,8 +241,9 @@ section   page    origin      length       input sections
                   20006d90    00000008     uartDMA.obj (.bss:UART0receive)
                   20006d98    00000004     main.obj (.bss)
                   20006d9c    00000004     (.common:backColor)
-                  20006da0    00000004     (.common:sensorData)
-                  20006da4    00000004     (.common:settings)
+                  20006da0    00000004     (.common:sensor)
+                  20006da4    00000004     (.common:sensorData)
+                  20006da8    00000004     (.common:settings)
 
 .stack     0    20000270    00004e20     UNINITIALIZED
                   20000270    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : boot_cortex_m.c.obj (.stack)
@@ -260,12 +261,12 @@ MODULE SUMMARY
        adc_functions.obj               2500    0         2178   
        uartDMA.obj                     840     0         1041   
        tm4c1294ncpdt_startup_ccs.obj   12      520       0      
-       main.obj                        404     0         11     
+       main.obj                        404     0         15     
        debug_functions.obj             192     0         0      
        timer_functions.obj             100     0         0      
        EEPROM_functions.obj            60      0         12     
     +--+-------------------------------+-------+---------+---------+
-       Total:                          14576   8776      6581   
+       Total:                          14576   8776      6585   
                                                                 
     /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib
        sysctl.obj                      730     596       0      
@@ -325,14 +326,14 @@ MODULE SUMMARY
        Stack:                          0       0         20000  
        Linker Generated:               0       61        0      
     +--+-------------------------------+-------+---------+---------+
-       Grand Total:                    32427   10794     27205  
+       Grand Total:                    32427   10794     27209  
 
 
 LINKER GENERATED COPY TABLES
 
 __TI_cinit_table @ 0000a8d8 records: 3, size/record: 8, table size: 24
 	.data: load addr=0000a8bc, load size=00000009 bytes, run addr=20005090, run size=00000013 bytes, compression=lzss
-	.bss: load addr=0000a8c8, load size=00000008 bytes, run addr=20005400, run size=000019a8 bytes, compression=zero_init
+	.bss: load addr=0000a8c8, load size=00000008 bytes, run addr=20005400, run size=000019ac bytes, compression=zero_init
 	.vtable: load addr=0000a8d0, load size=00000008 bytes, run addr=20000000, run size=0000026c bytes, compression=zero_init
 
 
@@ -518,11 +519,12 @@ ffffffff  binit
 00006c71  scalbnl                       
 0000526f  sendCommandToMotor            
 00005251  sendUARTDMA                   
-20006da0  sensorData                    
+20006da0  sensor                        
+20006da4  sensorData                    
 0000068f  setLCDBackgroundColor         
 00003565  setMultiplexer                
 20006d84  setting                       
-20006da4  settings                      
+20006da8  settings                      
 00004c15  sin                           
 00004c15  sinl                          
 00007b65  sprintf                       
@@ -778,8 +780,9 @@ address   name
 20006d82  commandFromTouch              
 20006d84  setting                       
 20006d9c  backColor                     
-20006da0  sensorData                    
-20006da4  settings                      
+20006da0  sensor                        
+20006da4  sensorData                    
+20006da8  settings                      
 ffffffff  __TI_pprof_out_hndl           
 ffffffff  __TI_prof_data_size           
 ffffffff  __TI_prof_data_start          
@@ -789,4 +792,4 @@ ffffffff  binit
 UNDEFED   __mpu_init                    
 UNDEFED   _system_post_cinit            
 
-[217 symbols]
+[218 symbols]
