@@ -16,7 +16,6 @@
 #include <driverlib/interrupt.h>
 #include <driverlib/udma.h>
 
-#include <adc_functions.h>
 #include <uartDMA.h>
 
 /********************************************************************************/

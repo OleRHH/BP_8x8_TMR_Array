@@ -17,6 +17,7 @@ Settings * loadSettings(void)
     settings->maxArrowLength = 32;
     settings->adcAVG = false;
     settings->backgroundColor = 0x00FFFFFF;
+    settings->motorIncrement = 100;
 
     return settings;
 }

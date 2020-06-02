@@ -2,12 +2,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <driverlib/sysctl.h>
-#include <tm4c1294ncpdt.h>
-#include <math.h>               // sqrt()
+#include <driverlib/gpio.h>     // GPIO_PIN_X
+#include <driverlib/interrupt.h>
 #include <driverlib/adc.h>      // ADCIntClear(), ADCIntStatus(), ADCProcessorTrigger(), ADCSequenceDataGet()
 #include <inc/hw_memmap.h>      // ADC0_BASE, ADC1_BASE, GPIO_PORTX_BASE
-#include <driverlib/interrupt.h>
-#include <driverlib/gpio.h>     // GPIO_PIN_X
+#include <tm4c1294ncpdt.h>
+#include <math.h>               // sqrt()
+
 #include <adc_functions.h>
 
 
@@ -195,14 +196,14 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
             sensor->dSin[m][n] = negSinResults[m][n] - posSinResults[m][n];
 
             // calculate arrow length
-            sensor->arrowLength[m][n] = (uint16_t) sqrt(
+            sensor->arrows.arrowLength[m][n] = (uint16_t) sqrt(
                     sensor->dCos[m][n] * sensor->dCos[m][n] +
                     sensor->dSin[m][n] * sensor->dSin[m][n] );
 
             // store length of longest arrow
-            if(sensor->arrowLength[m][n] > sensor->maxAnalogValue)
+            if(sensor->arrows.arrowLength[m][n] > sensor->maxAnalogValue)
             {
-                sensor->maxAnalogValue = sensor->arrowLength[m][n];
+                sensor->maxAnalogValue = sensor->arrows.arrowLength[m][n];
             }
         }
     }
@@ -218,10 +219,10 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
         {
             for(n = 0; n <= 7; n++)
             {
-                sensor->diff.dCos[m][n]  = sensor->dCos[7-m][n] * maxArrowLength;
-                sensor->diff.dCos[m][n] /= sensor->maxAnalogValue;
-                sensor->diff.dSin[m][n]  =-sensor->dSin[7-m][n] * maxArrowLength;
-                sensor->diff.dSin[m][n] /= sensor->maxAnalogValue;
+                sensor->arrows.dCos[m][n]  = sensor->dCos[7-m][n] * maxArrowLength;
+                sensor->arrows.dCos[m][n] /= sensor->maxAnalogValue;
+                sensor->arrows.dSin[m][n]  =-sensor->dSin[7-m][n] * maxArrowLength;
+                sensor->arrows.dSin[m][n] /= sensor->maxAnalogValue;
             }
         }
     }
@@ -231,16 +232,16 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
         {
             for(n = 0; n <= 7; n++)
             {
-                sensor->diff.dCos[m][n] =  sensor->dCos[7-m][n];
-                sensor->diff.dSin[m][n] = -sensor->dSin[7-m][n];
+                sensor->arrows.dCos[m][n] =  sensor->dCos[7-m][n];
+                sensor->arrows.dSin[m][n] = -sensor->dSin[7-m][n];
 
                 // limit the maximum arrow length to the max allowed value.
-                if(sensor->arrowLength[7-m][n] > maxArrowLength)
+                if(sensor->arrows.arrowLength[7-m][n] > maxArrowLength)
                 {
-                    sensor->diff.dCos[m][n] *= maxArrowLength;
-                    sensor->diff.dCos[m][n] /= sensor->arrowLength[7-m][n];
-                    sensor->diff.dSin[m][n] *= maxArrowLength;
-                    sensor->diff.dSin[m][n] /= sensor->arrowLength[7-m][n];
+                    sensor->arrows.dCos[m][n] *= maxArrowLength;
+                    sensor->arrows.dCos[m][n] /= sensor->arrows.arrowLength[7-m][n];
+                    sensor->arrows.dSin[m][n] *= maxArrowLength;
+                    sensor->arrows.dSin[m][n] /= sensor->arrows.arrowLength[7-m][n];
                 }
             }
         }

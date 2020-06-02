@@ -10,7 +10,6 @@
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
 
-#include <adc_functions.h>
 #include <fonts.h>
 #include <lcd_functions.h>
 
@@ -73,10 +72,6 @@ COLOR backColor;
 int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
 
-struct SensorData {
-    int16_t dSin[8][8];
-    int16_t dCos[8][8];
-} * sensor;
 /***************************  writeInfos()   *******************************/
 // writes some info as text on the display.                                 //
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
@@ -319,9 +314,8 @@ void writeScreenColor7INCH(COLOR color)
 /**************************  drawDisplay5Inch()   ***************************/
 // draws all arrows to the 5 inch LC-Display.                               //
 /****************************************************************************/
-void drawDisplay5Inch(void * data)
+void drawDisplay5Inch(struct arrows * arrow)
 {
-    sensor  = (struct SensorData *) data;
     int16_t m = 0, n = 0;               // m = row , n = column
     point start, stop;
     // write the arrows
@@ -329,8 +323,6 @@ void drawDisplay5Inch(void * data)
     {
         for(n = 0; n <= 7; n++)
         {
-//            init_grid();
-
             // I. delete old arrows
             start.x = n * 32 + GRID_OFFSET_X_5_INCH;
             start.y = m * 32 + GRID_OFFSET_Y_5_INCH;
@@ -347,13 +339,13 @@ void drawDisplay5Inch(void * data)
             writeLine(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
 
             // III. write new arrows
-            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + sensor->dCos[m][n];
-            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + sensor->dSin[m][n];
+            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + arrow->dCos[m][n];
+            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + arrow->dSin[m][n];
 
             writeLine(start.x, start.y, stop.x, stop.y, (COLOR)0x00, WITH_ARROW);
-//            writeLine(start.x, start.y, stop.x, stop.y, color[sensor->arrowLength[m][n]], WITH_ARROW);
-            oldDiffCosResults[m][n] = sensor->dCos[m][n];
-            oldDiffSinResults[m][n] = sensor->dSin[m][n];
+//            writeLine(start.x, start.y, stop.x, stop.y, color[arrow->arrowLength[m][n]], WITH_ARROW);
+            oldDiffCosResults[m][n] = arrow->dCos[m][n];
+            oldDiffSinResults[m][n] = arrow->dSin[m][n];
         }
     }
 }

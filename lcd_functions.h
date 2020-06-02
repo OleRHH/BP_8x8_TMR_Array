@@ -44,6 +44,12 @@ enum CommandFromTouch
     newCommandForMotor = 2,
 };
 
+struct arrows {
+    int16_t dSin[8][8];
+    int16_t dCos[8][8];
+    uint16_t arrowLength[8][8];
+};
+
 // x-y-coordinate structure
 // todo: this concept wasn't fully implemented
 typedef struct
@@ -62,7 +68,7 @@ void ConfigureGPIO(void);
 void printString(char *, uint16_t, uint16_t, COLOR);
 void setLCDBackgroundColor(COLOR);
 void writeScreenColor7INCH(COLOR);
-void drawDisplay5Inch(void *);
+void drawDisplay5Inch(struct arrows *);
 void drawDisplay7Inch(void); //TMRSensorData *);
 void writeRecangle(void);
 void writeInfos(bool, bool, uint16_t, uint16_t);

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "driverlib/sysctl.h"           // SysCtlClockFreqSet
+#include <driverlib/interrupt.h>        // IntMasterDisable
 
 #include <adc_functions.h>
 #include <EEPROM_functions.h>
@@ -77,7 +78,7 @@ void Timer0IntHandler(void)
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
     // the program.
-    drawDisplay5Inch((void *)&sensorData->diff);
+    drawDisplay5Inch(&sensorData->arrows);
 //    drawDisplay7Inch(backColor);
 
     writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);

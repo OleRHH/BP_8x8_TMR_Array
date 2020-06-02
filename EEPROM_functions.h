@@ -18,6 +18,7 @@ typedef struct
     bool coloredArrows;
     uint16_t maxArrowLength;
     int32_t backgroundColor;
+    int32_t motorIncrement;
 } Settings;
 
 
