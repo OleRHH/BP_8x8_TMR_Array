@@ -1,13 +1,28 @@
+/*****************************  # Includes #   **********************************/
+#include <stdbool.h>
+#include <stdint.h>
+#include "driverlib/sysctl.h"           // SysCtlClockFreqSet
+
+#include <adc_functions.h>
+#include <EEPROM_functions.h>
+#include <lcd_functions.h>
+#include <timer_functions.h>
+#include <uartDMA.h>
+#include <touch.h>
 #include <main.h>
+#include <debug_functions.h>
+
+
+/*****************************  # defines #   ***********************************/
+#define CLOCK_FREQ ( 120000000 )        // 120 MHz clock freq.
+
 
 /*****************************  # global variables #   **************************/
-static bool relative = true, adcAVG = true;
 static char * command;
 enum CommandFromTouch commandFromTouch;
-static uint16_t maxArrowLength = 32;
-static uint32_t maximumAnalogValue;
-static COLOR backColor = (COLOR)WHITE;
 
+TMRSensorData sensor;
+Settings * settings;
 
 /***********************  main() function  **************************************/
 /* the main() function initializes the hardware components and sets the         */
@@ -23,7 +38,8 @@ void main(void)
     IntMasterDisable();
 
     // Initialize the UART, GPIO, ADC and Timer peripheries
-    ConfigureGPIO();
+    settings = loadSettings();
+    ConfigureDebugGPIO();
     ConfigureADC();
     ConfigureTimer0(SysClock);
     ConfigureLCD5Inch(SysClock);
@@ -33,7 +49,7 @@ void main(void)
     ConfigureUART2(SysClock);
 
     // set the display background color
-    writeScreenColor5INCH(backColor);
+    setLCDBackgroundColor((COLOR)settings->backgroundColor);
 
     IntMasterEnable();
 
@@ -47,7 +63,6 @@ void main(void)
 }
 
 
-
 /***********************  TIMER 0 interrupt handler  ****************************/
 /* Periodically measures the sensor Array values and call function to draw the  */
 /* display. Also it sends commands to the stepper-motor and calls setup-menu.   */
@@ -56,14 +71,16 @@ void Timer0IntHandler(void)
 {
     // clear the pending interrupt
     timer0IntClear();
+    toggleOszi(1);
+    onOszi(2);
 
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
     // the program.
-    drawDisplay5Inch(backColor);
+    drawDisplay5Inch(&sensor);
 //    drawDisplay7Inch(backColor);
 
-    writeInfos(relative, adcAVG, maxArrowLength, maximumAnalogValue, backColor);
+    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, &sensor);
 
     // Reads touch screen status. Returns command information and (if so)
     // the command itself as a pointer.
@@ -74,13 +91,14 @@ void Timer0IntHandler(void)
     switch(commandFromTouch)
     {
         noNewCommand:           break;
-        enterSettings:          settings(command); break;
+//        enterSettings:          settings(command); break;
         newCommandForMotor:     sendCommandToMotor(command, 9); break;
     }
 
     // Start sensor-array ad-conversion. This starts the first of 16 ADC
     // read bursts. The other 15 bursts will be triggered in ADC1IntHandler().
-    startAdcConversion();
+    startADConversion();
+    offOszi(2);
 }
 
 
@@ -100,14 +118,8 @@ void ADC1IntHandler(void)
     // was already started in Timer0Inthandler. There are 16 steps in total.
     step++;
 
-    // Port L is used to address the analog multiplexers on the TMR sensor array
-    // GPIO_PIN_4 is inverted after half the measures are done. This is because
-    // of the sensor-array hardware layout.
-    if(step == 8)
-    {
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, ~GPIO_PIN_4);
-    }
-    GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
+    //
+    setMultiplexer(step);
 
     // store the just captured analog values into buffers to be later processed.
     storeArraySensorData(step - 1);
@@ -115,7 +127,7 @@ void ADC1IntHandler(void)
     // trigger the next AD-conversion (16 in total)
     if(step <= 15)
     {
-        startAdcConversion();
+        startADConversion();
     }
 
     // after 16 conversions: process analog data and reset values for the next
@@ -123,12 +135,11 @@ void ADC1IntHandler(void)
     else
     {
         // process arrow length and store results to be later drawn on LCD.
-        maximumAnalogValue = computeArrows(relative, maxArrowLength);
+        computeArrows(settings->relative, settings->maxArrowLength, &sensor);
         // reset step counter for next use
         step = 0;
         // reset digital multiplexer inputs
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, GPIO_PIN_4);
+        setMultiplexer(step);
     }
 }
 
@@ -163,17 +174,21 @@ void UART0IntHandler(void)
         switch (UART0receive[0])
         {
         // send array data via RS-232 to a PC (matlab)
-        case '0': sendUARTDMA(); break;
+        case '0':   sendUARTDMA(&sensor); break;
 
         // set arrow relative/absolute and arrow size.
-        case '1': relative = getRelativeAbsoluteSetting();
-                  maxArrowLength = getMaxArrowLength(); break;
+        case '1':   settings->relative = getRelativeAbsoluteSetting();
+                    settings->maxArrowLength = getMaxArrowLength();
+                    saveSettings(settings);
+                    break;
 
         // commands for the stepper-motor are being past forwarded to UART2.
-        case '2': sendCommandToMotor(UART0receive, 8); break;
+        case '2':   sendCommandToMotor(UART0receive, 8); break;
 
         // hardware averaging enabled/disabled
-        case '3': adcAVG = getADCHardwareAveraging(UART0receive[1]); break;
+        case '3':   settings->adcAVG = getADCHardwareAveraging(UART0receive[1]);
+                    saveSettings(settings);
+                    break;
 
         // todo: additional commands from UART here, if desired.
         case '4': break;

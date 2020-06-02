@@ -30,5 +30,5 @@ void Timer0IntHandler(void)
 
     // Start sensor-array ad-conversion. This starts the first of 16 ADC
     // read bursts. The other 15 bursts will be triggered in ADC1IntHandler().
-    startAdcConversion();
+    startADConversion();
 }

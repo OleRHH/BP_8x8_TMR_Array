@@ -1,8 +1,22 @@
+/*****************************  # Includes #   ****************************/
+#include <tm4c1294ncpdt.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <driverlib/sysctl.h>
+// gpio configure
+#include <driverlib/gpio.h>     // GPIO_PIN_X
+#include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
+
+#include <adc_functions.h>
+#include <fonts.h>
 #include <lcd_functions.h>
 
 
 /**********************  # intern Prototypes #   **********************/
-void writeChar(uint16_t, COLOR, COLOR);
+void writeChar(uint16_t, COLOR);
 
 void writeCommand(unsigned char);
 void writeCmdData(unsigned char);
@@ -28,10 +42,10 @@ void writeLineQuadrant4_II(short, short, short, short, double, COLOR);  // 270°
 
 uint16_t offset = 0;
 
+COLOR backColor;
+
 int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
-static COLOR color[768];
-
 
 
 
@@ -40,7 +54,7 @@ static COLOR color[768];
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
 /****************************************************************************/
-void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength, uint32_t maximumAnalogValue, COLOR backColor)
+void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength, TMRSensorData * sensor)
 {
     char charValue[100];
     static bool old = true;
@@ -48,44 +62,44 @@ void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength, uint32_t ma
     if(old != relative)
     {
         old = relative;
-        writeScreenColor5INCH(backColor);
+        setLCDBackgroundColor(backColor);
     }
     if(relative == true)
     {
-        printString("relative:  true", 10, 300, (COLOR)BLACK, backColor);
+        printString("relative:  true", 10, 300, (COLOR)BLACK);
 
         sprintf(charValue, "length: %.3d", maxArrowLength);
-        printString(charValue, 40, 300, (COLOR)BLACK, backColor);
+        printString(charValue, 40, 300, (COLOR)BLACK);
 
-        sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
-        printString(charValue, 70, 300, (COLOR)BLACK, backColor);
+        sprintf(charValue, "max analog: %.3d", sensor->maxAnalogValue);
+        printString(charValue, 70, 300, (COLOR)BLACK);
     }
     else
     {
-        printString("relative: false", 10, 300, (COLOR)BLACK, backColor);
+        printString("relative: false", 10, 300, (COLOR)BLACK);
 
         sprintf(charValue, "length: %.3d", maxArrowLength);
-        printString(charValue, 40, 300, (COLOR)BLACK, backColor);
+        printString(charValue, 40, 300, (COLOR)BLACK);
 
-        sprintf(charValue, "max analog: %.3d", maximumAnalogValue);
-        printString(charValue, 70, 300, (COLOR)BLACK, backColor);
+        sprintf(charValue, "max analog: %.3d", sensor->maxAnalogValue);
+        printString(charValue, 70, 300, (COLOR)BLACK);
 
-        if(maximumAnalogValue > maxArrowLength)
+        if(sensor->maxAnalogValue > maxArrowLength)
         {
-            printString("Clipping!", 100, 300, (COLOR)BLACK, backColor);
+            printString("Clipping!", 100, 300, (COLOR)BLACK);
         }
         else
         {
-            printString("Clipping!", 100, 300, backColor, backColor);
+            printString("Clipping!", 100, 300, backColor);
         }
     }
     if(adcAVG == false)
     {
-        printString("Oversampling off", 250, 280, (COLOR)BLACK, backColor);
+        printString("Oversampling off", 250, 280, (COLOR)BLACK);
     }
     else
     {
-        printString("Oversampling on ", 250, 280, (COLOR)BLACK, backColor);
+        printString("Oversampling on ", 250, 280, (COLOR)BLACK);
     }
 }
 
@@ -148,7 +162,7 @@ void generateColors(void)
 /****************************  printString()   *****************************/
 // writes a string to the given position on the LD-Display                  //
 /****************************************************************************/
-void printString(char *text, uint16_t row, uint16_t column, COLOR color, COLOR backcolor)
+void printString(char *text, uint16_t row, uint16_t column, COLOR color)
 {
     uint16_t letter, numLetter, lv;
     uint16_t length = strlen(text);
@@ -165,7 +179,7 @@ void printString(char *text, uint16_t row, uint16_t column, COLOR color, COLOR b
         {
             letter = (font_12_16[text[numLetter]][lv + 1] << 4)
                     | (font_12_16[text[numLetter]][lv] >> 4);
-            writeChar(letter, color, backcolor);
+            writeChar(letter, color);
         }
         columnStart += FONT_WIDTH_BIG;
         columnStop  += FONT_WIDTH_BIG;
@@ -177,7 +191,7 @@ void printString(char *text, uint16_t row, uint16_t column, COLOR color, COLOR b
 // helper function for printString():                                      //
 // writes a single letter with height 12 pixel                              //
 /****************************************************************************/
-void writeChar(uint16_t letter, COLOR color, COLOR backcolor)
+void writeChar(uint16_t letter, COLOR color)
 {
     uint16_t lv;
 
@@ -193,13 +207,13 @@ void writeChar(uint16_t letter, COLOR color, COLOR backcolor)
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
         } else {
-            GPIO_PORTM_DATA_R = backcolor.red;
+            GPIO_PORTM_DATA_R = backColor.red;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-            GPIO_PORTM_DATA_R = backcolor.green;
+            GPIO_PORTM_DATA_R = backColor.green;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-            GPIO_PORTM_DATA_R = backcolor.blue;
+            GPIO_PORTM_DATA_R = backColor.blue;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
         }
@@ -208,28 +222,27 @@ void writeChar(uint16_t letter, COLOR color, COLOR backcolor)
 }
 
 
-/***********************  writeScreenColor5INCH()   ***********************/
+/***********************  setLCDBackgroundColor()   ***********************/
 // Writes the hole screen in one color                                      //
 /****************************************************************************/
-void writeScreenColor5INCH(COLOR color)
+void setLCDBackgroundColor(COLOR backcolor)
 {
     uint32_t count = 0;
-
-    generateColors();
+    backColor = backcolor;
 
     writePosition(0, 0, 479, 271);
     writeCommand(0x2C);
 
     while (count++ < 130560) {
-        GPIO_PORTM_DATA_R = color.red;       // Write data byte
+        GPIO_PORTM_DATA_R = backColor.red;       // Write data byte
         GPIO_PORTQ_DATA_R = 0x15;            // Chip select = 0, Write state = 0
         GPIO_PORTQ_DATA_R = 0x1F;            // Initial state
 
-        GPIO_PORTM_DATA_R = color.green;    // Write data byte
+        GPIO_PORTM_DATA_R = backColor.green;    // Write data byte
         GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
         GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
 
-        GPIO_PORTM_DATA_R = color.blue;     // Write data byte
+        GPIO_PORTM_DATA_R = backColor.blue;     // Write data byte
         GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
         GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
     }
@@ -278,10 +291,8 @@ void writeScreenColor7INCH(COLOR color)
 /**************************  drawDisplay5Inch()   ***************************/
 // draws all arrows to the 5 inch LC-Display.                               //
 /****************************************************************************/
-void drawDisplay5Inch(COLOR backColor)
+void drawDisplay5Inch(TMRSensorData * sensor)
 {
-    GPIO_PORTN_DATA_R |= 0b1000;        // for debugging: set high when handler is called
-
     int16_t m = 0, n = 0;               // m = row , n = column
     point start, stop;
 
@@ -308,15 +319,14 @@ void drawDisplay5Inch(COLOR backColor)
             writeLine(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
 
             // III. write new arrows
-            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + DiffCosResults[m][n];
-            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + DiffSinResults[m][n];
+            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + sensor->DiffCosResults[m][n];
+            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + sensor->DiffSinResults[m][n];
 
-            writeLine(start.x, start.y, stop.x, stop.y, color[arrowLength[m][n]], WITH_ARROW);
-            oldDiffCosResults[m][n] = DiffCosResults[m][n];
-            oldDiffSinResults[m][n] = DiffSinResults[m][n];
+            writeLine(start.x, start.y, stop.x, stop.y, color[sensor->arrowLength[m][n]], WITH_ARROW);
+            oldDiffCosResults[m][n] = sensor->DiffCosResults[m][n];
+            oldDiffSinResults[m][n] = sensor->DiffSinResults[m][n];
         }
     }
-    GPIO_PORTN_DATA_R ^= 0b1000;
 }
 
 
@@ -324,7 +334,7 @@ void drawDisplay5Inch(COLOR backColor)
 /**************************  drawDisplay7Inch()   ***************************/
 // draws all arrows to the 7 inch LC-Display.                               //
 /****************************************************************************/
-void drawDisplay7Inch(void)
+void drawDisplay7Inch(TMRSensorData * sensor)
 {
     int16_t m = 0, n = 0, xGrid, yGrid;
 
@@ -347,12 +357,12 @@ void drawDisplay7Inch(void)
     {
         for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
         {
-            writeLine(xGrid, yGrid, xGrid + DiffCosResults[m][n],
-                       yGrid - DiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
+            writeLine(xGrid, yGrid, xGrid + sensor->DiffCosResults[m][n],
+                       yGrid - sensor->DiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
             writeLine(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000FF, NO_ARROW);    // draw a small cross..
             writeLine(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000FF, NO_ARROW);    // ..as as grid indicator
-            oldDiffCosResults[m][n] = DiffCosResults[m][n];
-            oldDiffSinResults[m][n] = DiffSinResults[m][n];
+            oldDiffCosResults[m][n] = sensor->DiffCosResults[m][n];
+            oldDiffSinResults[m][n] = sensor->DiffSinResults[m][n];
             m++;
         }
         m = 0;
@@ -891,10 +901,11 @@ void ConfigureLCD5Inch(uint32_t SysClock) {
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
     GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
 
-    // Set Port N Pins 0-3: Onboard LEDs output (0-1)  debug outputs (2-3)
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));
-    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
+    // Set Port Q Pins 0-4: LCD Control output:
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);  // Clock Port Q
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOQ));
+    GPIOPinTypeGPIOOutput(GPIO_PORTQ_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                                         | GPIO_PIN_4);
 
 /*************************************************************************/
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
@@ -969,6 +980,8 @@ void ConfigureLCD5Inch(uint32_t SysClock) {
 //    writeCmdData(0b00000001);             // flip vertical
 
     writeCommand(0x29);                    // Set display on
+
+    generateColors();
 }
 
 
@@ -986,10 +999,11 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
     GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
 
-    // Set Port N Pins 0-3: Onboard LEDs output (0-1)  debug outputs (2-3)
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));
-    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
+    // Set Port Q Pins 0-4: LCD Control output:
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);  // Clock Port Q
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOQ));
+    GPIOPinTypeGPIOOutput(GPIO_PORTQ_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                                         | GPIO_PIN_4);
 
 /*************************************************************************/
     GPIO_PORTQ_DATA_R = 0x00;
@@ -1090,15 +1104,5 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
 
     writeCommand(0x29);                    // Set display on
 
-}
-
-
-/*********************************************************************************************/
-void ConfigureGPIO(void)
-{
-    // Set Port Q Pins 0-4: LCD Control output:
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);  // Clock Port Q
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOQ));
-    GPIOPinTypeGPIOOutput(GPIO_PORTQ_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
-                                         | GPIO_PIN_4);
+    generateColors();
 }
