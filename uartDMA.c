@@ -3,6 +3,20 @@
  *
  *  Created on: 10.05.2020
  */
+/*****************************  # Includes #   ****************************/
+#include <stdbool.h>
+#include <stdint.h>
+#include <driverlib/sysctl.h>
+#include <tm4c1294ncpdt.h>
+#include <driverlib/gpio.h>
+#include <driverlib/uart.h>
+#include <inc/hw_memmap.h>          // needed for UART0_BASE
+#include "inc/hw_uart.h"            // needed for UART_O_DR
+#include <driverlib/pin_map.h>      // GPIOPinConfigure
+#include <driverlib/interrupt.h>
+#include <driverlib/udma.h>
+
+#include <adc_functions.h>
 #include <uartDMA.h>
 
 /********************************************************************************/
@@ -39,14 +53,14 @@ char * getUART0RxData(void)
 /********************************************************************************/
 bool getRelativeAbsoluteSetting(void)
 {
-    if(UART0receive[1] == '0')
+    bool setting = false;
+
+    if(UART0receive[1] == '1')
     {
-        return false;
+        setting = true;
     }
-    else if(UART0receive[1] == '1')
-    {
-        return true;
-    }
+
+    return setting;
 }
 
 
@@ -71,7 +85,7 @@ void prepareNextReceiveDMA(void)
 
 
 /********************************************************************************/
-void sendUARTDMA(void)
+void sendUARTDMA(TMRSensorData * sensor)
 {
     // Set up the transfer parameters for the uDMA UART TX channel.  This will
     // configure the transfer source and destination and the transfer size.
@@ -79,9 +93,9 @@ void sendUARTDMA(void)
     // request.  The source is the DiffResults array and the destination is the UART
     // data register.
     uDMAChannelTransferSet(UDMA_CHANNEL_UART0TX | UDMA_PRI_SELECT,
-                               UDMA_MODE_BASIC, (char *)DiffResults,
+                               UDMA_MODE_BASIC, (char *)sensor->DiffResults,
                                (void *)(UART0_BASE + UART_O_DR),
-                               sizeof(DiffResults));
+                               sizeof(sensor->DiffResults));
     // The uDMA TX channel must be enabled to send a data burst.
     // It starts immediately because the Tx FIFO is empty (or should be)
     uDMAChannelEnable(UDMA_CHANNEL_UART0TX);

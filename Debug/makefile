@@ -8,7 +8,9 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./EEPROM_functions.obj" \
 "./adc_functions.obj" \
+"./debug_functions.obj" \
 "./lcd_functions.obj" \
 "./main.obj" \
 "./timer_functions.obj" \
@@ -159,8 +161,8 @@ BP_TMR_sensor_array.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "adc_functions.obj" "lcd_functions.obj" "main.obj" "timer_functions.obj" "tm4c1294ncpdt_startup_ccs.obj" "touch.obj" "uartDMA.obj" 
-	-$(RM) "adc_functions.d" "lcd_functions.d" "main.d" "timer_functions.d" "tm4c1294ncpdt_startup_ccs.d" "touch.d" "uartDMA.d" 
+	-$(RM) "EEPROM_functions.obj" "adc_functions.obj" "debug_functions.obj" "lcd_functions.obj" "main.obj" "timer_functions.obj" "tm4c1294ncpdt_startup_ccs.obj" "touch.obj" "uartDMA.obj" 
+	-$(RM) "EEPROM_functions.d" "adc_functions.d" "debug_functions.d" "lcd_functions.d" "main.d" "timer_functions.d" "tm4c1294ncpdt_startup_ccs.d" "touch.d" "uartDMA.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

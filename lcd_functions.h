@@ -9,19 +9,10 @@
 
 
 /*****************************  # Includes #   ****************************/
-#include <tm4c1294ncpdt.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <driverlib/sysctl.h>
-#include <adc_functions.h>
-#include <fonts.h>
 
-// gpio configure
-#include <driverlib/gpio.h>     // GPIO_PIN_X
-#include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
+
 
 /*****************************  # defines #   *****************************/
 // constants for LCD
@@ -91,18 +82,20 @@ typedef struct
 } point;
 
 
+COLOR color[768];
+
 /**************************  # public Prototypes #   **********************/
 void ConfigureLCD5Inch(uint32_t);
 void ConfigureLCD7Inch(uint32_t);
 void ConfigureGPIO(void);
 
-void printString(char *, uint16_t, uint16_t, COLOR, COLOR);
-void writeScreenColor5INCH(COLOR);
+void printString(char *, uint16_t, uint16_t, COLOR);
+void setLCDBackgroundColor(COLOR);
 void writeScreenColor7INCH(COLOR);
-void drawDisplay5Inch(COLOR);
-void drawDisplay7Inch(void);
+void drawDisplay5Inch(TMRSensorData *);
+void drawDisplay7Inch(TMRSensorData *);
 void writeRecangle(void);
-void writeInfos(bool, bool, uint16_t, uint32_t, COLOR);
+void writeInfos(bool, bool, uint16_t, TMRSensorData *);
 enum CommandFromTouch readTouchscreen(char *);
 
 

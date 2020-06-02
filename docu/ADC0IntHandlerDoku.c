@@ -29,7 +29,7 @@ void ADC1IntHandler(void)
     // trigger the next AD-conversion (16 in total)
     if(step <= 15)
     {
-        startAdcConversion();
+        startADConversion();
     }
 
     // after 16 conversions: process analog data and reset values for the next

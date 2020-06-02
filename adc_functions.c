@@ -1,15 +1,55 @@
+/*****************************  # Includes #   ****************************/
+#include <stdbool.h>
+#include <stdint.h>
+#include <driverlib/sysctl.h>
+#include <tm4c1294ncpdt.h>
+#include <math.h>               // sqrt()
+#include <driverlib/adc.h>      // ADCIntClear(), ADCIntStatus(), ADCProcessorTrigger(), ADCSequenceDataGet()
+#include <inc/hw_memmap.h>      // ADC0_BASE, ADC1_BASE, GPIO_PORTX_BASE
+#include <driverlib/interrupt.h>
+#include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <adc_functions.h>
 
 
+/*****************************  # defines #   *****************************/
+// defines for ADC init             // Port and Pin
+#define ROW_1_L ADC_CTL_CH13        // PD2
+#define ROW_2_L ADC_CTL_CH15        // PD0
+#define ROW_3_L ADC_CTL_CH14        // PD1
+#define ROW_4_L ADC_CTL_CH12        // PD3
+#define ROW_5_L ADC_CTL_CH5         // PD6
+#define ROW_6_L ADC_CTL_CH4         // PD7
+#define ROW_7_L ADC_CTL_CH7         // PD4
+#define ROW_8_L ADC_CTL_CH6         // PD5
+#define ROW_8_R ADC_CTL_CH19        // PK3
+#define ROW_7_R ADC_CTL_CH18        // PK2
+#define ROW_6_R ADC_CTL_CH17        // PK1
+#define ROW_5_R ADC_CTL_CH16        // PK0
+#define ROW_4_R ADC_CTL_CH8         // PE5
+#define ROW_3_R ADC_CTL_CH9         // PE4
+#define ROW_2_R ADC_CTL_CH0         // PE3
+#define ROW_1_R ADC_CTL_CH1         // PE2
+#define GPIO_PIN_3_DOWNTO_0 0x0F    // ADC1IntHandler()
+
+// Interrupt priority. Lower numbers = higher priority.
+// Valid numbers: 0x00, 0x20, 0x40, 0x60, 0x80, 0xA0, 0xC0, 0xE0
+#define HIGH_PRIORITY 0x00
+#define LOW_PRIORITY  0x80
+
+
 /***************************  # global variables #   ****************************/
-// All ADC-Values. Temporarily stored here while ad conversion in progress.
+// All ADC-Values. Temporarily stored here while ADC in progress.
 static int16_t SinResults[8][16];
 static int16_t CosResults[8][16];
 
+// The offset values are being computed but are not used at the moment.
+// They are here for historic reasons and to be used again in the future.
+int16_t SinOffset[8][8];
+int16_t CosOffset[8][8];
 
 
 /********************************************************************************/
-void startAdcConversion(void)
+void startADConversion(void)
 {
     ADCProcessorTrigger(ADC0_BASE, 0);
     ADCProcessorTrigger(ADC1_BASE, 1);
@@ -21,6 +61,24 @@ void startAdcConversion(void)
 void adcIntClear(void)
 {
     ADCIntClear(ADC1_BASE, 2);
+}
+
+
+/********************************************************************************/
+void setMultiplexer(uint16_t step)
+{
+    // Port L is used to address the analog multiplexers on the TMR sensor array
+    // GPIO_PIN_4 is inverted after half the measures are done. This is because
+    // of the sensor-array hardware layout.
+    if(step == 0)
+    {
+        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, GPIO_PIN_4);
+    }
+    if(step == 8)
+    {
+        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, ~GPIO_PIN_4);
+    }
+    GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
 }
 
 
@@ -105,7 +163,7 @@ void storeArraySensorData(uint16_t step)
 /***********************  computeArrows() ***************************************/
 /* Compute differential signal                                                  */
 /********************************************************************************/
-uint32_t computeArrows(bool relative, uint16_t maxArrowLength)
+void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * sensor)
 {
     int16_t negSinResults[8][8];
     int16_t posSinResults[8][8];
@@ -113,9 +171,9 @@ uint32_t computeArrows(bool relative, uint16_t maxArrowLength)
     int16_t negCosResults[8][8];
     int16_t posCosResults[8][8];
 
-    int16_t maxAnalogValue = 1;
     uint16_t m, n;
 
+    sensor->maxAnalogValue = 1;
     for(m = 0; m <= 7; m++)
     {
         for(n = 0; n <= 7; n++)
@@ -124,22 +182,22 @@ uint32_t computeArrows(bool relative, uint16_t maxArrowLength)
             //differential: 0-1, 2-3, ... , 14-15
             negCosResults[m][n]  = CosResults[m][(n << 1)];     // 0, 2, 4, .., 14
             posCosResults[m][n]  = CosResults[m][(n << 1) + 1]; // 1, 3, 5, .., 15
-            DiffResults[1][m][n] = negCosResults[m][n] - posCosResults[m][n];
+            sensor->DiffResults[1][m][n] = negCosResults[m][n] - posCosResults[m][n];
             CosOffset[m][n]      = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
             negSinResults[m][n]  = SinResults[m][(n << 1)];
             posSinResults[m][n]  = SinResults[m][(n << 1) + 1];
-            DiffResults[0][m][n] = negSinResults[m][n] - posSinResults[m][n];
+            sensor->DiffResults[0][m][n] = negSinResults[m][n] - posSinResults[m][n];
             SinOffset[m][n]      = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
 
             // calculate arrow length
-            arrowLength[m][n] = (uint16_t) sqrt(
-                                    DiffResults[1][m][n]*DiffResults[1][m][n] +
-                                    DiffResults[0][m][n]*DiffResults[0][m][n] );
+            sensor->arrowLength[m][n] = (uint16_t) sqrt(
+                    sensor->DiffResults[1][m][n] * sensor->DiffResults[1][m][n] +
+                    sensor->DiffResults[0][m][n] * sensor->DiffResults[0][m][n] );
 
             // store length of longest arrow
-            if(arrowLength[m][n] > maxAnalogValue)
+            if(sensor->arrowLength[m][n] > sensor->maxAnalogValue)
             {
-                maxAnalogValue = arrowLength[m][n];
+                sensor->maxAnalogValue = sensor->arrowLength[m][n];
             }
         }
     }
@@ -155,10 +213,10 @@ uint32_t computeArrows(bool relative, uint16_t maxArrowLength)
         {
             for(n = 0; n <= 7; n++)
             {
-                DiffCosResults[m][n]  = DiffResults[1][7-m][n] * maxArrowLength;
-                DiffCosResults[m][n] /= maxAnalogValue;
-                DiffSinResults[m][n]  =-DiffResults[0][7-m][n] * maxArrowLength;
-                DiffSinResults[m][n] /= maxAnalogValue;
+                sensor->DiffCosResults[m][n]  = sensor->DiffResults[1][7-m][n] * maxArrowLength;
+                sensor->DiffCosResults[m][n] /= sensor->maxAnalogValue;
+                sensor->DiffSinResults[m][n]  =-sensor->DiffResults[0][7-m][n] * maxArrowLength;
+                sensor->DiffSinResults[m][n] /= sensor->maxAnalogValue;
             }
         }
     }
@@ -168,22 +226,20 @@ uint32_t computeArrows(bool relative, uint16_t maxArrowLength)
         {
             for(n = 0; n <= 7; n++)
             {
-                DiffCosResults[m][n] =  DiffResults[1][7-m][n];
-                DiffSinResults[m][n] = -DiffResults[0][7-m][n];
+                sensor->DiffCosResults[m][n] =  sensor->DiffResults[1][7-m][n];
+                sensor->DiffSinResults[m][n] = -sensor->DiffResults[0][7-m][n];
 
                 // limit the maximum arrow length to the max allowed value.
-                if(arrowLength[7-m][n] > maxArrowLength)
+                if(sensor->arrowLength[7-m][n] > maxArrowLength)
                 {
-                    DiffCosResults[m][n] *=  maxArrowLength;
-                    DiffCosResults[m][n] /=  arrowLength[7-m][n];
-                    DiffSinResults[m][n] *= maxArrowLength;
-                    DiffSinResults[m][n] /= arrowLength[7-m][n];
+                    sensor->DiffCosResults[m][n] *=  maxArrowLength;
+                    sensor->DiffCosResults[m][n] /=  sensor->arrowLength[7-m][n];
+                    sensor->DiffSinResults[m][n] *= maxArrowLength;
+                    sensor->DiffSinResults[m][n] /= sensor->arrowLength[7-m][n];
                 }
             }
         }
     }
-
-    return maxAnalogValue;
 }
 
 
