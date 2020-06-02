@@ -1,6 +1,6 @@
 /*****************************  # Includes #   ****************************/
-#include <stdbool.h>
-#include <stdint.h>
+#include <adc_functions.h>
+
 #include <driverlib/sysctl.h>
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <driverlib/interrupt.h>
@@ -8,8 +8,6 @@
 #include <inc/hw_memmap.h>      // ADC0_BASE, ADC1_BASE, GPIO_PORTX_BASE
 #include <tm4c1294ncpdt.h>
 #include <math.h>               // sqrt()
-
-#include <adc_functions.h>
 
 
 /*****************************  # defines #   *****************************/

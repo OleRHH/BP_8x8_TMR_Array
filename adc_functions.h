@@ -5,6 +5,7 @@
 /************************  # public Includes #   ****************************/
 #include <stdbool.h>
 #include <stdint.h>
+#include <driverlib/interrupt.h>        // IntMasterDisable
 
 
 typedef struct {

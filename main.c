@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "driverlib/sysctl.h"           // SysCtlClockFreqSet
-#include <driverlib/interrupt.h>        // IntMasterDisable
 
 #include <adc_functions.h>
 #include <EEPROM_functions.h>

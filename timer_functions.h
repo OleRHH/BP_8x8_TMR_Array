@@ -6,6 +6,7 @@
 /*****************************  # Includes #   ****************************/
 #include <stdbool.h>
 #include <stdint.h>
+#include <driverlib/interrupt.h>        // IntMasterDisable
 
 
 // Interrupt priority. Lower numbers = higher priority.

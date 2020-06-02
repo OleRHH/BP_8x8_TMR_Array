@@ -1,17 +1,16 @@
 /*****************************  # Includes #   ****************************/
+#include <lcd_functions.h>
+
 #include <tm4c1294ncpdt.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <driverlib/sysctl.h>
 // gpio configure
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
 
 #include <fonts.h>
-#include <lcd_functions.h>
 
 
 /*****************************  # defines #   *****************************/
@@ -342,8 +341,8 @@ void drawDisplay5Inch(struct arrows * arrow)
             stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + arrow->dCos[m][n];
             stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + arrow->dSin[m][n];
 
-            writeLine(start.x, start.y, stop.x, stop.y, (COLOR)0x00, WITH_ARROW);
-//            writeLine(start.x, start.y, stop.x, stop.y, color[arrow->arrowLength[m][n]], WITH_ARROW);
+//            writeLine(start.x, start.y, stop.x, stop.y, (COLOR)0x00, WITH_ARROW);
+            writeLine(start.x, start.y, stop.x, stop.y, color[arrow->arrowLength[m][n]], WITH_ARROW);
             oldDiffCosResults[m][n] = arrow->dCos[m][n];
             oldDiffSinResults[m][n] = arrow->dSin[m][n];
         }

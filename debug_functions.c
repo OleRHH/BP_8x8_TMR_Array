@@ -5,14 +5,12 @@
  *      Author: ole
  */
 
-// gpio configure
-#include <stdbool.h>
-#include <stdint.h>
+#include <debug_functions.h>
+
 #include <tm4c1294ncpdt.h>
 #include <driverlib/sysctl.h>           // SysCtlClockFreqSet
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
-#include <debug_functions.h>
 
 //#define OSZ_YEL     0b0000100           // Debug Output to oscilloscope
 //#define OSZ_BLUE    0b0001000           // Debug Output to oscilloscope

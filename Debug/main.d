@@ -13,8 +13,8 @@ main.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LT
 main.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/machine/_stdint.h
 main.obj: /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/sys/_stdint.h
 main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/sysctl.h
-main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/adc_functions.h
+main.obj: /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/EEPROM_functions.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/lcd_functions.h
 main.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/timer_functions.h
@@ -37,8 +37,8 @@ main.obj: /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/machine/_stdint.h: 
 /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include/sys/_stdint.h: 
 /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/sysctl.h: 
-/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/adc_functions.h: 
+/home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/interrupt.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/EEPROM_functions.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/lcd_functions.h: 
 /home/ole/CodeComposerStudio10/workspace/Bachelorprojekt/BP_TMR_sensor_array/timer_functions.h: 
