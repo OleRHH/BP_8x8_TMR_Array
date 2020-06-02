@@ -85,7 +85,7 @@ void prepareNextReceiveDMA(void)
 
 
 /********************************************************************************/
-void sendUARTDMA(TMRSensorData * sensor)
+void sendUARTDMA(char * resultsForUARTSend)
 {
     // Set up the transfer parameters for the uDMA UART TX channel.  This will
     // configure the transfer source and destination and the transfer size.
@@ -93,9 +93,9 @@ void sendUARTDMA(TMRSensorData * sensor)
     // request.  The source is the DiffResults array and the destination is the UART
     // data register.
     uDMAChannelTransferSet(UDMA_CHANNEL_UART0TX | UDMA_PRI_SELECT,
-                               UDMA_MODE_BASIC, (char *)sensor->DiffResults,
+                               UDMA_MODE_BASIC, resultsForUARTSend,
                                (void *)(UART0_BASE + UART_O_DR),
-                               sizeof(sensor->DiffResults));
+                               256);
     // The uDMA TX channel must be enabled to send a data burst.
     // It starts immediately because the Tx FIFO is empty (or should be)
     uDMAChannelEnable(UDMA_CHANNEL_UART0TX);

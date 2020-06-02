@@ -66,8 +66,6 @@ void writeLineQuadrant4_I (short, short, short, short, double, COLOR);  // 270°
 void writeLineQuadrant4_II(short, short, short, short, double, COLOR);  // 270° < degree < 360°
 
 
-
-
 uint16_t offset = 0;
 
 COLOR backColor;
@@ -76,13 +74,12 @@ int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
 
 
-
 /***************************  writeInfos()   *******************************/
 // writes some info as text on the display.                                 //
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
 /****************************************************************************/
-void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength, TMRSensorData * sensor)
+void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength, uint16_t maxAnalogValue)
 {
     char charValue[100];
     static bool old = true;
@@ -99,7 +96,7 @@ void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength, TMRSensorDa
         sprintf(charValue, "length: %.3d", maxArrowLength);
         printString(charValue, 40, 300, (COLOR)BLACK);
 
-        sprintf(charValue, "max analog: %.3d", sensor->maxAnalogValue);
+        sprintf(charValue, "max analog: %.3d", maxAnalogValue);
         printString(charValue, 70, 300, (COLOR)BLACK);
     }
     else
@@ -109,10 +106,10 @@ void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength, TMRSensorDa
         sprintf(charValue, "length: %.3d", maxArrowLength);
         printString(charValue, 40, 300, (COLOR)BLACK);
 
-        sprintf(charValue, "max analog: %.3d", sensor->maxAnalogValue);
+        sprintf(charValue, "max analog: %.3d", maxAnalogValue);
         printString(charValue, 70, 300, (COLOR)BLACK);
 
-        if(sensor->maxAnalogValue > maxArrowLength)
+        if(maxAnalogValue > maxArrowLength)
         {
             printString("Clipping!", 100, 300, (COLOR)BLACK);
         }

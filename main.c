@@ -77,10 +77,10 @@ void Timer0IntHandler(void)
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
     // the program.
-    drawDisplay5Inch(sensorData);
+    drawDisplay5Inch(sensorData->resultsForUARTSend);
 //    drawDisplay7Inch(backColor);
 
-    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData);
+    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
 
     // Reads touch screen status. Returns command information and (if so)
     // the command itself as a pointer.

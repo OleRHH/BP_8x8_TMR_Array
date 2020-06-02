@@ -66,7 +66,7 @@ void writeScreenColor7INCH(COLOR);
 void drawDisplay5Inch(TMRSensorData *);
 void drawDisplay7Inch(TMRSensorData *);
 void writeRecangle(void);
-void writeInfos(bool, bool, uint16_t, TMRSensorData *);
+void writeInfos(bool, bool, uint16_t, uint16_t);
 enum CommandFromTouch readTouchscreen(char *);
 
 

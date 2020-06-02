@@ -9,6 +9,13 @@
 
 typedef struct {
     // final ADC-values used to calculate the arrows on the LC-Display.
+    union {
+        char resultsForUARTSend[256];
+        struct {
+            int16_t dSin[8][8];
+            int16_t dCos[8][8];
+        }rawData;
+    };
     int16_t DiffSinResults[8][8];
     int16_t DiffCosResults[8][8];
     // 256 bytes array for transmit via RS-232 in one burst
@@ -20,7 +27,7 @@ typedef struct {
 
 
 /*********************  # public Prototypes #   ****************************/
-TMRSensorData *  ConfigureADC(void);
+TMRSensorData * ConfigureADC(void);
 void storeArraySensorData(uint16_t);
 void computeArrows(bool, uint16_t, TMRSensorData *);
 void startADConversion(void);

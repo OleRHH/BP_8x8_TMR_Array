@@ -17,7 +17,7 @@ void ConfigureUART0(uint32_t);
 void ConfigureUART2(uint32_t);
 void configureUartUDMA(void);
 void prepareNextReceiveDMA(void);
-void sendUARTDMA(TMRSensorData *);
+void sendUARTDMA(char *);
 void sendCommandToMotor(char *, uint16_t);
 uint32_t receiveDataFromMotor(void);
 char * getUART0RxData(void);
