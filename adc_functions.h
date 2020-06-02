@@ -20,7 +20,7 @@ typedef struct {
 
 
 /*********************  # public Prototypes #   ****************************/
-void ConfigureADC(void);
+TMRSensorData *  ConfigureADC(void);
 void storeArraySensorData(uint16_t);
 void computeArrows(bool, uint16_t, TMRSensorData *);
 void startADConversion(void);

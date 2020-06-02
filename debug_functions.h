@@ -16,6 +16,8 @@
 void toggleLED(uint16_t);
 void toggleOszi(uint16_t);
 void onLED(uint16_t);
+void offLED(uint16_t);
+void onOszi(uint16_t);
 void offOszi(uint16_t);
 void ConfigureDebugGPIO(void);
 

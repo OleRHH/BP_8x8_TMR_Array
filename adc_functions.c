@@ -47,6 +47,8 @@ static int16_t CosResults[8][16];
 int16_t SinOffset[8][8];
 int16_t CosOffset[8][8];
 
+// Strct to hold all sensor data used in other functions
+TMRSensorData * SensorData;
 
 /********************************************************************************/
 void startADConversion(void)
@@ -249,7 +251,7 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
 /* They are multiplexed to 16 analog inputs.                                    */
 /* So there are 16 analog inputs to be measured simultaneously                  */
 /********************************************************************************/
-void ConfigureADC(void)
+TMRSensorData *  ConfigureADC(void)
 {
     // enable clock for peripheries
     SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
@@ -302,5 +304,7 @@ void ConfigureADC(void)
     ADCIntRegister(ADC1_BASE, 2, ADC1IntHandler);
     ADCIntEnable(ADC1_BASE, 2);
     IntEnable(INT_ADC1SS2);
+
+    return SensorData;
 
 }
