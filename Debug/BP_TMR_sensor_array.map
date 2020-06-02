@@ -1,7 +1,7 @@
 ******************************************************************************
                   TI ARM Linker Unix v20.2.0                   
 ******************************************************************************
->> Linked Tue Jun  2 23:12:57 2020
+>> Linked Tue Jun  2 23:58:15 2020
 
 OUTPUT FILE NAME:   <BP_TMR_sensor_array.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 00007cc9
@@ -255,16 +255,24 @@ MODULE SUMMARY
        Module                          code    ro data   rw data
        ------                          ----    -------   -------
     ./
-       lcd_functions.obj               10468   8252      3335   
+       tm4c1294ncpdt_startup_ccs.obj   12      520       0      
+    +--+-------------------------------+-------+---------+---------+
+       Total:                          12      520       0      
+                                                                
+    ./main/
+       main.obj                        404     0         3087   
+    +--+-------------------------------+-------+---------+---------+
+       Total:                          404     0         3087   
+                                                                
+    ./src/
+       lcd_functions.obj               10468   8252      263    
        adc_functions.obj               2500    0         1922   
        uartDMA.obj                     840     0         1041   
-       tm4c1294ncpdt_startup_ccs.obj   12      520       0      
-       main.obj                        404     0         15     
        debug_functions.obj             192     0         0      
        timer_functions.obj             100     0         0      
        EEPROM_functions.obj            68      0         16     
     +--+-------------------------------+-------+---------+---------+
-       Total:                          14584   8772      6329   
+       Total:                          14168   8252      3242   
                                                                 
     /home/ole/CodeComposerStudio10/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib
        sysctl.obj                      730     596       0      

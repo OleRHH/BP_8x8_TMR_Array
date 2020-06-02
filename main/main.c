@@ -9,7 +9,6 @@
 #include <timer_functions.h>
 #include <uartDMA.h>
 #include <touch.h>
-#include <main.h>
 #include <debug_functions.h>
 
 

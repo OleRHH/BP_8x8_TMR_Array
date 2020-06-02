@@ -7,69 +7,21 @@ CMD_SRCS += \
 ../tm4c1294ncpdt.cmd 
 
 C_SRCS += \
-../EEPROM_functions.c \
-../adc_functions.c \
-../debug_functions.c \
-../lcd_functions.c \
-../main.c \
-../timer_functions.c \
-../tm4c1294ncpdt_startup_ccs.c \
-../touch.c \
-../uartDMA.c 
+../tm4c1294ncpdt_startup_ccs.c 
 
 C_DEPS += \
-./EEPROM_functions.d \
-./adc_functions.d \
-./debug_functions.d \
-./lcd_functions.d \
-./main.d \
-./timer_functions.d \
-./tm4c1294ncpdt_startup_ccs.d \
-./touch.d \
-./uartDMA.d 
+./tm4c1294ncpdt_startup_ccs.d 
 
 OBJS += \
-./EEPROM_functions.obj \
-./adc_functions.obj \
-./debug_functions.obj \
-./lcd_functions.obj \
-./main.obj \
-./timer_functions.obj \
-./tm4c1294ncpdt_startup_ccs.obj \
-./touch.obj \
-./uartDMA.obj 
+./tm4c1294ncpdt_startup_ccs.obj 
 
 OBJS__QUOTED += \
-"EEPROM_functions.obj" \
-"adc_functions.obj" \
-"debug_functions.obj" \
-"lcd_functions.obj" \
-"main.obj" \
-"timer_functions.obj" \
-"tm4c1294ncpdt_startup_ccs.obj" \
-"touch.obj" \
-"uartDMA.obj" 
+"tm4c1294ncpdt_startup_ccs.obj" 
 
 C_DEPS__QUOTED += \
-"EEPROM_functions.d" \
-"adc_functions.d" \
-"debug_functions.d" \
-"lcd_functions.d" \
-"main.d" \
-"timer_functions.d" \
-"tm4c1294ncpdt_startup_ccs.d" \
-"touch.d" \
-"uartDMA.d" 
+"tm4c1294ncpdt_startup_ccs.d" 
 
 C_SRCS__QUOTED += \
-"../EEPROM_functions.c" \
-"../adc_functions.c" \
-"../debug_functions.c" \
-"../lcd_functions.c" \
-"../main.c" \
-"../timer_functions.c" \
-"../tm4c1294ncpdt_startup_ccs.c" \
-"../touch.c" \
-"../uartDMA.c" 
+"../tm4c1294ncpdt_startup_ccs.c" 
 
 

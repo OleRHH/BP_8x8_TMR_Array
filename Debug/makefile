@@ -8,15 +8,15 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
-"./EEPROM_functions.obj" \
-"./adc_functions.obj" \
-"./debug_functions.obj" \
-"./lcd_functions.obj" \
-"./main.obj" \
-"./timer_functions.obj" \
 "./tm4c1294ncpdt_startup_ccs.obj" \
-"./touch.obj" \
-"./uartDMA.obj" \
+"./main/main.obj" \
+"./src/EEPROM_functions.obj" \
+"./src/adc_functions.obj" \
+"./src/debug_functions.obj" \
+"./src/lcd_functions.obj" \
+"./src/timer_functions.obj" \
+"./src/touch.obj" \
+"./src/uartDMA.obj" \
 "../tm4c1294ncpdt.cmd" \
 $(GEN_CMDS__FLAG) \
 -llibc.a \
@@ -30,7 +30,11 @@ RMDIR := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
+-include main/subdir_vars.mk
+-include src/subdir_vars.mk
 -include subdir_rules.mk
+-include main/subdir_rules.mk
+-include src/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -161,8 +165,8 @@ BP_TMR_sensor_array.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "EEPROM_functions.obj" "adc_functions.obj" "debug_functions.obj" "lcd_functions.obj" "main.obj" "timer_functions.obj" "tm4c1294ncpdt_startup_ccs.obj" "touch.obj" "uartDMA.obj" 
-	-$(RM) "EEPROM_functions.d" "adc_functions.d" "debug_functions.d" "lcd_functions.d" "main.d" "timer_functions.d" "tm4c1294ncpdt_startup_ccs.d" "touch.d" "uartDMA.d" 
+	-$(RM) "tm4c1294ncpdt_startup_ccs.obj" "main/main.obj" "src/EEPROM_functions.obj" "src/adc_functions.obj" "src/debug_functions.obj" "src/lcd_functions.obj" "src/timer_functions.obj" "src/touch.obj" "src/uartDMA.obj" 
+	-$(RM) "tm4c1294ncpdt_startup_ccs.d" "main/main.d" "src/EEPROM_functions.d" "src/adc_functions.d" "src/debug_functions.d" "src/lcd_functions.d" "src/timer_functions.d" "src/touch.d" "src/uartDMA.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
