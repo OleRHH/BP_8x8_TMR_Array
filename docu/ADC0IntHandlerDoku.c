@@ -2,7 +2,7 @@
 /* captures the analog sensor array signals without busy waiting.               */
 /* The digitized signals are being processed at the end.                        */
 /********************************************************************************/
-void ADC1IntHandler(void)
+void ADC1InterruptHandler(void)
 {
     static uint16_t step = 0;
 

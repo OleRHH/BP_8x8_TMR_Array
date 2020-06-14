@@ -16,11 +16,11 @@
 
 
 /*********************  # public Prototypes #   ***************************/
-void ConfigureTimer0(uint32_t);
+void configureTimer0(uint32_t);
 void timer0IntClear(void);
 
 // interrupt handler for Timer 0. Needs to be implemented in project.
-extern void Timer0IntHandler(void);
+extern void Timer0InterruptHandler(void);
 
 
 #endif /* TIMER_FUNCTIONS_H_ */

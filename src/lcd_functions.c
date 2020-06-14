@@ -907,7 +907,7 @@ void writeLineQuadrant4_II(short start_x, short start_y, short stop_x, short sto
 
 /******************************************************************************************************/
 // LCD Panel initialize:
-void ConfigureLCD5Inch(uint32_t SysClock) {
+void configureLCD5Inch(uint32_t SysClock, COLOR backgroundColor) {
     uint32_t value;
 
     // Set Port L  0-4: Multiplexer address output for 8x8 Array
@@ -1002,11 +1002,12 @@ void ConfigureLCD5Inch(uint32_t SysClock) {
     writeCommand(0x29);                    // Set display on
 
     generateColors();
+    setLCDBackgroundColor(backgroundColor);
 }
 
 
 /******************************************************************************************************/
-void ConfigureLCD7Inch(uint32_t SysClock) {
+void configureLCD7Inch(uint32_t SysClock, COLOR backgroundColor) {
 
     // Set Port L  0-4: Multiplexer address output for 8x8 Array
     // Pin 3 = D; Pin 2 = C; Pin 1 = B; Pin 0 = A; Pin 4 = nD
@@ -1125,4 +1126,5 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     writeCommand(0x29);                    // Set display on
 
     generateColors();
+    setLCDBackgroundColor(backgroundColor);
 }

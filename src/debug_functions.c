@@ -63,7 +63,7 @@ void offOszi(uint16_t num)
 
 
 /*********************************************************************************************/
-void ConfigureDebugGPIO(void)
+void configureDebugGPIO(void)
 {
 
     // Set Port N Pins 0-3: Onboard LEDs output (0-1)  debug outputs (2-3)

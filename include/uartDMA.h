@@ -28,7 +28,7 @@ void UART0ClearInterrupt(unsigned int interruptStatus);
 
 
 // interrupt handler for UART 0 and UART 2. Needs to be implemented in project.
-extern void UART0IntHandler(void);
+extern void UART0InterruptHandler(void);
 extern void UART2IntHandler(void);
 
 

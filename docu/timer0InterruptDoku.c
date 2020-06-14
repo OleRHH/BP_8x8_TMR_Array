@@ -2,7 +2,7 @@
 /* Periodically measures the sensor Array values and draw them to the display.  */
 /* Sends commands to the stepper-motor and calls setup-menu                     */
 /********************************************************************************/
-void Timer0IntHandler(void)
+void Timer0InterruptHandler(void)
 {
     // clear the pending timer 0 interrupt
     timer0IntClear();
@@ -29,6 +29,6 @@ void Timer0IntHandler(void)
     }
 
     // Start sensor-array ad-conversion. This starts the first of 16 ADC
-    // read bursts. The other 15 bursts will be triggered in ADC1IntHandler().
+    // read bursts. The other 15 bursts will be triggered in ADC1InterruptHandler().
     startADConversion();
 }

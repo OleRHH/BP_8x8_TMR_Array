@@ -1,11 +1,12 @@
 /*****************************  # Includes #   **********************************/
-#include <stdbool.h>                    // needed for sysctl.h
-#include <stdint.h>                     // needed for sysctl.h
+#include <stdbool.h>
+#include <stdint.h>
 #include <driverlib/sysctl.h>           // SysCtlClockFreqSet
 
 #include <adc_functions.h>
-#include <timer_functions.h>
+#include <EEPROM_functions.h>
 #include <lcd_functions.h>
+#include <timer_functions.h>
 #include <uartDMA.h>
 
 
@@ -14,7 +15,10 @@
 
 
 /*****************************  # global variables #   **************************/
-static COLOR backColor = (COLOR)WHITE;
+static char * command;
+static enum CommandFromTouch commandFromTouch;
+static TMRSensorData * sensorData;
+static Settings * settings;
 
 
 /***********************  main() function  **************************************/
@@ -30,25 +34,23 @@ void main(void)
     // disable all interrupts during setup
     IntMasterDisable();
 
-    // Initialize the ADC, Timer, LCD and UART peripheries
-    ConfigureADC();
-    ConfigureTimer0(SysClock);
-    ConfigureLCD(SysClock);
+    // Load Settings. Initialize the UART, GPIO, ADC and Timer peripheries.
+    settings = loadSettings();
+    configureDebugGPIO();
+    sensorData = configureADC();
+    configureTimer0(SysClock);
+    configureLCD(SysClock, (COLOR)settings->backgroundColor);
     configureUartUDMA();
     ConfigureUART0(SysClock);
     ConfigureUART2(SysClock);
 
-    // set the display background color
-    writeScreenColor(backColor);
-
     IntMasterEnable();
 
     // busy waiting. Tasks now running in interrupt handler. The tasks are
-    // 1. Timer0IntHandler(): gets periodically called every 100 ms.
-    // 2. UART0IntHandler():  gets called on UART0 data receive.
-    // 3. ADC1IntHandler():   gets called when ADC complete.
+    // 1. Timer0InterruptHandler(): gets periodically called every 100 ms.
+    // 2. UART0InterruptHandler():  gets called on UART0 data receive.
+    // 3. ADC1InterruptHandler():   gets called when ADC complete.
     while(1)
     {
     }
 }
-

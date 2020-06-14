@@ -282,7 +282,7 @@ void ConfigureUART0(uint32_t SysClock)
     UARTDMAEnable(UART0_BASE, UART_DMA_RX | UART_DMA_TX);
 
     // Enable the UART DMA TX/RX interrupts.
-    UARTIntRegister(UART0_BASE, UART0IntHandler);
+    UARTIntRegister(UART0_BASE, UART0InterruptHandler);
 //  UARTIntEnable(UART0_BASE, UART_INT_RX);
     UARTIntEnable(UART0_BASE, UART_INT_DMARX);
 

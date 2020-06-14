@@ -31,7 +31,7 @@ typedef struct {
 
 
 /*********************  # public Prototypes #   ****************************/
-TMRSensorData * ConfigureADC(void);
+TMRSensorData * configureADC(void);
 void storeArraySensorData(uint16_t);
 void computeArrows(bool, uint16_t, TMRSensorData *);
 void startADConversion(void);
@@ -40,7 +40,7 @@ bool getADCHardwareAveraging(char);
 void setMultiplexer(uint16_t step);
 
 // interrupt handler for ADC 0. Needs to be implemented in project.
-extern void ADC1IntHandler(void);
+extern void ADC1InterruptHandler(void);
 
 
 #endif /* ADC_FUNCTIONS_H_ */

@@ -61,8 +61,8 @@ typedef struct
 COLOR color[768];
 
 /**************************  # public Prototypes #   **********************/
-void ConfigureLCD5Inch(uint32_t);
-void ConfigureLCD7Inch(uint32_t);
+void configureLCD5Inch(uint32_t, COLOR);
+void configureLCD7Inch(uint32_t, COLOR);
 void ConfigureGPIO(void);
 
 void printString(char *, uint16_t, uint16_t, COLOR);

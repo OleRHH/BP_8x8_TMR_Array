@@ -1,7 +1,7 @@
 /*****************************  # Includes #   **********************************/
 #include <stdbool.h>
 #include <stdint.h>
-#include "driverlib/sysctl.h"           // SysCtlClockFreqSet
+#include <driverlib/sysctl.h>           // SysCtlClockFreqSet
 
 #include <adc_functions.h>
 #include <EEPROM_functions.h>
@@ -18,10 +18,10 @@
 
 /*****************************  # global variables #   **************************/
 static char * command;
-enum CommandFromTouch commandFromTouch;
+static enum CommandFromTouch commandFromTouch;
+static TMRSensorData * sensorData;
+static Settings * settings;
 
-TMRSensorData * sensorData;
-Settings * settings;
 
 /***********************  main() function  **************************************/
 /* the main() function initializes the hardware components and sets the         */
@@ -36,26 +36,23 @@ void main(void)
     // disable all interrupts during setup
     IntMasterDisable();
 
-    // Initialize the UART, GPIO, ADC and Timer peripheries
+    // Load Settings. Initialize the UART, GPIO, ADC and Timer peripheries.
     settings = loadSettings();
-    ConfigureDebugGPIO();
-    sensorData = ConfigureADC();
-    ConfigureTimer0(SysClock);
-    ConfigureLCD5Inch(SysClock);
-//    ConfigureLCD7Inch(SysClock);
+    configureDebugGPIO();
+    sensorData = configureADC();
+    configureTimer0(SysClock);
+    configureLCD5Inch(SysClock, (COLOR)settings->backgroundColor);
+//    configureLCD7Inch(SysClock, (COLOR)settings->backgroundColor);
     configureUartUDMA();
     ConfigureUART0(SysClock);
     ConfigureUART2(SysClock);
 
-    // set the display background color
-    setLCDBackgroundColor((COLOR)settings->backgroundColor);
-
     IntMasterEnable();
 
     // busy waiting. Tasks now running in interrupt handler. The tasks are
-    // 1. Timer0IntHandler(): gets periodically called every 100 ms.
-    // 2. UART0IntHandler():  gets called on UART0 data receive.
-    // 3. ADC1IntHandler():   gets called when ADC complete.
+    // 1. Timer0InterruptHandler(): gets periodically called every 100 ms.
+    // 2. UART0InterruptHandler():  gets called on UART0 data receive.
+    // 3. ADC1InterruptHandler():   gets called when ADC complete.
     while(1)
     {
     }
@@ -66,7 +63,7 @@ void main(void)
 /* Periodically measures the sensor Array values and call function to draw the  */
 /* display. Also it sends commands to the stepper-motor and calls setup-menu.   */
 /********************************************************************************/
-void Timer0IntHandler(void)
+void Timer0InterruptHandler(void)
 {
     // clear the pending interrupt
     timer0IntClear();
@@ -81,7 +78,7 @@ void Timer0IntHandler(void)
 
     writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
 
-    // Reads touch screen status. Returns command information and (if so)
+    // Reads touch screen status. Returns command information and
     // the command itself as a pointer.
     commandFromTouch = readTouchscreen(command);
 
@@ -95,7 +92,7 @@ void Timer0IntHandler(void)
     }
 
     // Start sensorData-array ad-conversion. This starts the first of 16 ADC
-    // read bursts. The other 15 bursts will be triggered in ADC1IntHandler().
+    // read bursts. The other 15 bursts will be triggered in ADC1InterruptHandler().
     startADConversion();
 //    offOszi(2);
 }
@@ -105,7 +102,7 @@ void Timer0IntHandler(void)
 /* captures the analog sensorData array signals without busy waiting.               */
 /* The digitized signals are being processed at the end.                        */
 /********************************************************************************/
-void ADC1IntHandler(void)
+void ADC1InterruptHandler(void)
 {
     static uint16_t step = 0;
 
@@ -148,7 +145,7 @@ void ADC1IntHandler(void)
 /* MCU sends Sensor-Array data. More options like sending Stepper-Motor         */
 /* temetery could also be implemented in the future.                            */
 /********************************************************************************/
-void UART0IntHandler(void)
+void UART0InterruptHandler(void)
 {
     // pointer to a char string that is defined as UART0receive[8] in uartDMA.c
     char * UART0receive;

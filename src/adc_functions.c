@@ -28,7 +28,7 @@
 #define ROW_3_R ADC_CTL_CH9         // PE4
 #define ROW_2_R ADC_CTL_CH0         // PE3
 #define ROW_1_R ADC_CTL_CH1         // PE2
-#define GPIO_PIN_3_DOWNTO_0 0x0F    // ADC1IntHandler()
+#define GPIO_PIN_3_DOWNTO_0 0x0F    // ADC1InterruptHandler()
 
 // Interrupt priority. Lower numbers = higher priority.
 // Valid numbers: 0x00, 0x20, 0x40, 0x60, 0x80, 0xA0, 0xC0, 0xE0
@@ -247,13 +247,13 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
 }
 
 
-/***************************  ConfigureADC()  ***********************************/
+/***************************  configureADC()  ***********************************/
 /* The sensor array has 64 TMR-Sensors with four analog signals each (sin+,     */
 /* sin-, cos+, cos-). This makes in total 256 analog signals to be measured.    */
 /* They are multiplexed to 16 analog inputs.                                    */
 /* So there are 16 analog inputs to be measured simultaneously                  */
 /********************************************************************************/
-TMRSensorData *  ConfigureADC(void)
+TMRSensorData *  configureADC(void)
 {
     // enable clock for peripheries
     SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
@@ -303,7 +303,7 @@ TMRSensorData *  ConfigureADC(void)
 
 
     IntPrioritySet(INT_ADC0SS2, HIGH_PRIORITY);           // set priority
-    ADCIntRegister(ADC1_BASE, 2, ADC1IntHandler);
+    ADCIntRegister(ADC1_BASE, 2, ADC1InterruptHandler);
     ADCIntEnable(ADC1_BASE, 2);
     IntEnable(INT_ADC1SS2);
 
