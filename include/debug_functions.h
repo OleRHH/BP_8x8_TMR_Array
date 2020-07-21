@@ -19,7 +19,7 @@ void onLED(uint16_t);
 void offLED(uint16_t);
 void onOszi(uint16_t);
 void offOszi(uint16_t);
-void ConfigureDebugGPIO(void);
+void configureDebugGPIO(void);
 
 
 #endif /* DEBUG_FUNCTIONS_H_ */

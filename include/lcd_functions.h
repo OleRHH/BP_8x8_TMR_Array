@@ -61,15 +61,16 @@ typedef struct
 COLOR color[768];
 
 /**************************  # public Prototypes #   **********************/
-void ConfigureLCD5Inch(uint32_t);
-void ConfigureLCD7Inch(uint32_t);
+void configureLCD5Inch(uint32_t, COLOR);
+void configureLCD7Inch(uint32_t, COLOR);
 void ConfigureGPIO(void);
 
 void printString(char *, uint16_t, uint16_t, COLOR);
 void setLCDBackgroundColor(COLOR);
+void setLCDBackgroundColor7(COLOR backcolor);
 void writeScreenColor7INCH(COLOR);
 void drawDisplay5Inch(struct arrows *);
-void drawDisplay7Inch(void); //TMRSensorData *);
+void drawDisplay7Inch(struct arrows *);
 void writeRecangle(void);
 void writeInfos(bool, bool, uint16_t, uint16_t);
 enum CommandFromTouch readTouchscreen(char *);

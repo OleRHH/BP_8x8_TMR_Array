@@ -37,8 +37,11 @@
 #define MIN_LENGTH_FOR_ARROW  1
 #define GRID_OFFSET_X_5_INCH ( 30 )
 #define GRID_OFFSET_Y_5_INCH ( 20 )
-#define GRID_OFFSET_X_7_INCH ( 200 )
-#define GRID_OFFSET_Y_7_INCH ( 50 )
+#define GRID_OFFSET_X_7_INCH ( 320 )
+#define GRID_OFFSET_Y_7_INCH ( 30 )
+
+//#define GRID_OFFSET_X_7_INCH ( 200 )
+//#define GRID_OFFSET_Y_7_INCH ( 50 )
 
 
 /**********************  # intern Prototypes #   **********************/
@@ -271,6 +274,33 @@ void setLCDBackgroundColor(COLOR backcolor)
 }
 
 
+/***********************  writeScreenColor7INCH()   *************************/
+// Writes the hole screen in one color                                      //
+/****************************************************************************/
+void setLCDBackgroundColor7(COLOR backcolor)
+{
+    uint32_t count = 0;
+    backColor = backcolor;
+
+    writePosition(0, 0, 799, 479);
+    writeCommand(0x2C);
+
+    while (count++ < 384000) {
+        GPIO_PORTM_DATA_R = backColor.red;       // Write data byte
+        GPIO_PORTQ_DATA_R = 0x15;            // Chip select = 0, Write state = 0
+        GPIO_PORTQ_DATA_R = 0x1F;            // Initial state
+
+        GPIO_PORTM_DATA_R = backColor.green;    // Write data byte
+        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
+        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
+
+        GPIO_PORTM_DATA_R = backColor.blue;     // Write data byte
+        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
+        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
+    }
+}
+
+
 /***********************  writeRectangle()   ********************************/
 // Writes a rectangle as frame for the arrow field on the display.          //
 /****************************************************************************/
@@ -281,32 +311,6 @@ void writeRecangle(void)
     writeLine(80, 470, 720, 470, (COLOR)YELLOW, 0);
     writeLine(80, 10, 80, 470, (COLOR)YELLOW, 0);
     writeLine(720, 10, 720, 470, (COLOR)YELLOW, 0);
-}
-
-
-/***********************  writeScreenColor7INCH()   *************************/
-// Writes the hole screen in one color                                      //
-/****************************************************************************/
-void writeScreenColor7INCH(COLOR color)
-{
-    uint32_t count = 0;
-
-    writePosition(0, 0, 799, 479);
-    writeCommand(0x2C);
-
-    while (count++ < 384000) {
-        GPIO_PORTM_DATA_R = color.red;       // Write data byte
-        GPIO_PORTQ_DATA_R = 0x15;            // Chip select = 0, Write state = 0
-        GPIO_PORTQ_DATA_R = 0x1F;            // Initial state
-
-        GPIO_PORTM_DATA_R = color.green;    // Write data byte
-        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
-        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
-
-        GPIO_PORTM_DATA_R = color.blue;     // Write data byte
-        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
-        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
-    }
 }
 
 
@@ -354,40 +358,39 @@ void drawDisplay5Inch(struct arrows * arrow)
 /**************************  drawDisplay7Inch()   ***************************/
 // draws all arrows to the 7 inch LC-Display.                               //
 /****************************************************************************/
-void drawDisplay7Inch(void) //TMRSensorData * sensor)
+void drawDisplay7Inch(struct arrows * arrow)
 {
-//    int16_t m = 0, n = 0, xGrid, yGrid;
-//
-//    // delete the old arrows
-//    for(xGrid = GRID_OFFSET_X_7_INCH; xGrid < ( 480 + GRID_OFFSET_X_7_INCH); xGrid += 60)
-//    {
-//        for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
-//        {
-//            writeLine(xGrid, yGrid, xGrid + oldDiffCosResults[m][n],
-//                       yGrid - oldDiffSinResults[m][n], (COLOR)0x000000, WITH_ARROW);
-//            m++;
-//        }
-//        m = 0;
-//        n++;
-//    }
-//
-//    // write the new arrows
-//    n = 0;
-//    for(xGrid = GRID_OFFSET_X_7_INCH; xGrid < ( 480 + GRID_OFFSET_X_7_INCH); xGrid += 60)
-//    {
-//        for(yGrid = 470 - GRID_OFFSET_Y_7_INCH; yGrid > GRID_OFFSET_Y_7_INCH; yGrid -= 50)
-//        {
-//            writeLine(xGrid, yGrid, xGrid + sensor->DiffCosResults[m][n],
-//                       yGrid - sensor->DiffSinResults[m][n], (COLOR)0xffffff, WITH_ARROW);
-//            writeLine(xGrid - 2, yGrid, xGrid + 2, yGrid, (COLOR)0x0000FF, NO_ARROW);    // draw a small cross..
-//            writeLine(xGrid, yGrid - 2, xGrid, yGrid + 2, (COLOR)0x0000FF, NO_ARROW);    // ..as as grid indicator
-//            oldDiffCosResults[m][n] = sensor->DiffCosResults[m][n];
-//            oldDiffSinResults[m][n] = sensor->DiffSinResults[m][n];
-//            m++;
-//        }
-//        m = 0;
-//        n++;
-//    }
+    int16_t m = 0, n = 0;               // m = row , n = column
+    point start, stop;
+    // write the arrows
+    for(m = 0; m <= 7; m++)
+    {
+        for(n = 0; n <= 7; n++)
+        {
+            // I. delete old arrows
+            start.x = n * 60 + GRID_OFFSET_X_7_INCH;
+            start.y = m * 60 + GRID_OFFSET_Y_7_INCH;
+            stop.x  = start.x + oldDiffCosResults[m][n];
+            stop.y  = start.y + oldDiffSinResults[m][n];
+
+            writeLine(start.x, start.y, stop.x, stop.y, backColor, WITH_ARROW);
+
+            // II. write grid cross
+            stop.x  = start.x;
+            stop.y  = start.y;
+            writeLine(start.x - 2, start.y, stop.x + 2, stop.y, (COLOR)BLACK, NO_ARROW);    // draw a small cross..
+            writeLine(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
+
+            // III. write new arrows
+            stop.x  = n * 60 + GRID_OFFSET_X_7_INCH + arrow->dCos[m][n];
+            stop.y  = m * 60 + GRID_OFFSET_Y_7_INCH + arrow->dSin[m][n];
+
+//            writeLine(start.x, start.y, stop.x, stop.y, (COLOR)0x00, WITH_ARROW);
+            writeLine(start.x, start.y, stop.x, stop.y, color[arrow->arrowLength[m][n]], WITH_ARROW);
+            oldDiffCosResults[m][n] = arrow->dCos[m][n];
+            oldDiffSinResults[m][n] = arrow->dSin[m][n];
+        }
+    }
 }
 
 
@@ -907,7 +910,7 @@ void writeLineQuadrant4_II(short start_x, short start_y, short stop_x, short sto
 
 /******************************************************************************************************/
 // LCD Panel initialize:
-void ConfigureLCD5Inch(uint32_t SysClock) {
+void configureLCD5Inch(uint32_t SysClock, COLOR backgroundColor) {
     uint32_t value;
 
     // Set Port L  0-4: Multiplexer address output for 8x8 Array
@@ -1002,11 +1005,12 @@ void ConfigureLCD5Inch(uint32_t SysClock) {
     writeCommand(0x29);                    // Set display on
 
     generateColors();
+    setLCDBackgroundColor(backgroundColor);
 }
 
 
 /******************************************************************************************************/
-void ConfigureLCD7Inch(uint32_t SysClock) {
+void configureLCD7Inch(uint32_t SysClock, COLOR backgroundColor) {
 
     // Set Port L  0-4: Multiplexer address output for 8x8 Array
     // Pin 3 = D; Pin 2 = C; Pin 1 = B; Pin 0 = A; Pin 4 = nD
@@ -1026,8 +1030,6 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
                                          | GPIO_PIN_4);
 
 /*************************************************************************/
-    GPIO_PORTQ_DATA_R = 0x00;
-    SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
@@ -1036,7 +1038,7 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     GPIO_PORTQ_DATA_R |= RST;               //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    writeCommand(SOFTWARE_RESET);          // Software reset
+    writeCommand(SOFTWARE_RESET);           // Software reset
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
     GPIO_PORTQ_DATA_R = INITIAL_STATE;      // Initial state
@@ -1047,41 +1049,45 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     GPIO_PORTQ_DATA_R |= RST;               //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    writeCommand(SOFTWARE_RESET);          // Software reset
+    writeCommand(SOFTWARE_RESET);           // Software reset
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
-    writeCommand(SET_PLL_MN);              // Set PLL Freq to 120 MHz
-    writeCmdData(0x24);                   //
-    writeCmdData(0x02);                   //
-    writeCmdData(0x04);                   //
+    writeCommand(SET_PLL_MN);               // Set PLL Freq to 120 MHz
+    writeCmdData(0x24);                     //
+    writeCmdData(0x02);                     //
+    writeCmdData(0x04);                     //
 
-    writeCommand(START_PLL);               // Start PLL
-    writeCmdData(0x01);                   //
+    writeCommand(START_PLL);                // Start PLL
+    writeCmdData(0x01);                     //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    writeCommand(START_PLL);               // Lock PLL
-    writeCmdData(0x03);                   //
+    writeCommand(START_PLL);                // Lock PLL
+    writeCmdData(0x03);                     //
     SysCtlDelay((SysClock/3) / 1000);       // wait 1 ms
 
-    writeCommand(SOFTWARE_RESET);          // Software reset
+    writeCommand(SOFTWARE_RESET);           // Software reset
     SysCtlDelay((SysClock/3) / 100);        // wait 10 ms
 
 /*************************************************************************/
-    writeCommand(0xe6);       // pixel clock frequency
-    writeCmdData(0x04); // LCD_FPR = 290985 = 33.300 Mhz Result for 7" Display
-    writeCmdData(0x70);   //
-    writeCmdData(0xA9);   //
+    writeCommand(0xe6);                     // pixel clock frequency
+    writeCmdData(0x04);                     // LCD_FPR = 290985 = 33.300 Mhz Result for 7" Display
+    writeCmdData(0x70);                     //
+    writeCmdData(0xA9);                     //
 
-    writeCommand(0xB0);          //SET LCD MODE   SIZE !!
-    writeCmdData(0x19); //19 TFT panel data width - Enable FRC or dithering for color depth enhancement 8 18  1f- 38
-    writeCmdData(0x20); //SET TFT MODE & hsync+Vsync+DEN MODE   20  or 00
-    writeCmdData(0x03); //SET horizontal size=800+1 HightByte   !!!!!!!!!!!!
-    writeCmdData(0x1F);      //SET horizontal size=800+1 LowByte
-    writeCmdData(0x01);      //SET vertical size=480+1 HightByte
-    writeCmdData(0xDF);      //SET vertical size=480+1 LowByte
-    writeCmdData(0x00); //Even line RGB sequence / Odd line RGB sequence RGB
+    writeCommand(SET_LCD_MODE);             //SET LCD MODE SIZE
 
-    writeCommand(0xB4);            // Set Horizontal Period
+    writeCmdData(0x20);                     // ..TFT panel 24bit
+    writeCmdData(0x00);                     // ..TFT mode
+
+//    writeCmdData(0x19);                     //19 TFT panel data width - Enable FRC or dithering for color depth enhancement 8 18  1f- 38
+//    writeCmdData(0x20);                     //SET TFT MODE & hsync+Vsync+DEN MODE   20  or 00
+    writeCmdData(0x03);                     //SET horizontal size = 800-1 HightByte
+    writeCmdData(0x1F);                     //SET horizontal size = 800-1 LowByte
+    writeCmdData(0x01);                     //SET vertical size = 480-1 HightByte
+    writeCmdData(0xDF);                     //SET vertical size = 480-1 LowByte
+    writeCmdData(0x00);                     //Even line RGB sequence / Odd line RGB sequence RGB
+
+    writeCommand(SET_HORI_PERIOD);            // Set Horizontal Period
     writeCmdData(0x03); //03 High byte of horizontal total period (display + non-display)
     writeCmdData(0x5E); //51 Low byte of the horizontal total period (display + non-display)
     writeCmdData(0x00); //High byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data.
@@ -1095,7 +1101,7 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     writeCmdData(0x00);                   //
     //   ** too small will give you half a PICTURE !!
 
-    writeCommand(0xB6);          //Set Vertical Period
+    writeCommand(SET_VERT_PERIOD);          //Set Vertical Period
     writeCmdData(0x01); //01 High byte of the vertical total (display + non-display)
     writeCmdData(0xFE); //F4 Low byte F5 INCREASES SYNC TIME AND BACK PORCH
     writeCmdData(0x00);      // 00
@@ -1107,7 +1113,7 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     writeCmdData(0x00);              // Set vert.Sync pulse start pos= 8    LB
     writeCmdData(0x04);                   //
 
-    writeCommand(0x36);
+    writeCommand(SET_ADRESS_MODE);
     writeCmdData(0x01);
 
     // PWM signal frequency = PLL clock
@@ -1119,10 +1125,11 @@ void ConfigureLCD7Inch(uint32_t SysClock) {
     writeCommand(0x0A);
     writeCmdData(0x1C);         //Power Mode
 
-    writeCommand(0xF0); //set pixel data format 8bit
+    writeCommand(SET_PIXEL_DATA_FORMAT); //set pixel data format 8bit
     writeCmdData(0x00);
 
-    writeCommand(0x29);                    // Set display on
+    writeCommand(SET_DISPLAY_ON);                    // Set display on
 
     generateColors();
+    setLCDBackgroundColor7(backgroundColor);
 }

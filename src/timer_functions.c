@@ -14,7 +14,7 @@ void timer0IntClear(void)
 }
 
 /*********************************************************************************************/
-void ConfigureTimer0(uint32_t SysClock)
+void configureTimer0(uint32_t SysClock)
 /* this timer is used to run the program periodically. Upon call the analog inputs are read,
  * converted and send to the LC-Display */
 {
@@ -24,7 +24,7 @@ void ConfigureTimer0(uint32_t SysClock)
     TimerLoadSet(TIMER0_BASE, TIMER_A, SysClock / 10);      // fires every 100 ms
     TimerEnable(TIMER0_BASE, TIMER_A);
     IntPrioritySet(INT_TIMER0A, LOW_PRIORITY);             // set priority
-    TimerIntRegister(TIMER0_BASE, TIMER_A, Timer0IntHandler);
+    TimerIntRegister(TIMER0_BASE, TIMER_A, Timer0InterruptHandler);
     IntEnable(INT_TIMER0A);
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 }
