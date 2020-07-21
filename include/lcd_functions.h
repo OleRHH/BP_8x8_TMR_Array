@@ -67,9 +67,10 @@ void ConfigureGPIO(void);
 
 void printString(char *, uint16_t, uint16_t, COLOR);
 void setLCDBackgroundColor(COLOR);
+void setLCDBackgroundColor7(COLOR backcolor);
 void writeScreenColor7INCH(COLOR);
 void drawDisplay5Inch(struct arrows *);
-void drawDisplay7Inch(void); //TMRSensorData *);
+void drawDisplay7Inch(struct arrows *);
 void writeRecangle(void);
 void writeInfos(bool, bool, uint16_t, uint16_t);
 enum CommandFromTouch readTouchscreen(char *);

@@ -1,7 +1,7 @@
 /*****************************  # Includes #   **********************************/
 #include <stdbool.h>
 #include <stdint.h>
-#include <driverlib/sysctl.h>           // SysCtlClockFreqSet
+#include <driverlib/sysctl.h>                           // SysCtlClockFreqSet
 
 #include <adc_functions.h>
 #include <EEPROM_functions.h>
@@ -13,8 +13,9 @@
 
 
 /*****************************  # defines #   ***********************************/
-#define CLOCK_FREQ ( 120000000 )        // 120 MHz clock freq.
-
+#define CLOCK_FREQ ( 120000000 )                        // 120 MHz clock freq.
+//#define LCD5INCH
+//#define DEBUG
 
 /*****************************  # global variables #   **************************/
 static char * command;
@@ -41,8 +42,13 @@ void main(void)
     configureDebugGPIO();
     sensorData = configureADC();
     configureTimer0(SysClock);
+
+#ifdef LCD5INCH
     configureLCD5Inch(SysClock, (COLOR)settings->backgroundColor);
-//    configureLCD7Inch(SysClock, (COLOR)settings->backgroundColor);
+#else
+    configureLCD7Inch(SysClock, (COLOR)settings->backgroundColor);
+#endif
+
     configureUartUDMA();
     ConfigureUART0(SysClock);
     ConfigureUART2(SysClock);
@@ -67,16 +73,23 @@ void Timer0InterruptHandler(void)
 {
     // clear the pending interrupt
     timer0IntClear();
-    toggleOszi(1);
-//    onOszi(2);
+
+    #ifdef DEBUG
+        toggleOszi(1);                                // for debuging with osci
+        onOszi(2);                                    // for debuging with osci
+    #endif
 
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
     // the program.
-    drawDisplay5Inch(&sensorData->arrows);
-//    drawDisplay7Inch(backColor);
 
-    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
+    #ifdef LCD5INCH
+        drawDisplay5Inch(&sensorData->arrows);
+    #else
+        drawDisplay7Inch(&sensorData->arrows);
+    #endif
+
+//    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
 
     // Reads touch screen status. Returns command information and
     // the command itself as a pointer.
@@ -94,7 +107,10 @@ void Timer0InterruptHandler(void)
     // Start sensorData-array ad-conversion. This starts the first of 16 ADC
     // read bursts. The other 15 bursts will be triggered in ADC1InterruptHandler().
     startADConversion();
-//    offOszi(2);
+
+    #ifdef DEBUG
+        offOszi(2);                                    // for debuging with osci
+    #endif
 }
 
 
