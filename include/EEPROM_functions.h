@@ -24,6 +24,6 @@ typedef struct
 
 Settings * loadSettings(void);
 void saveSettings(Settings *);
-
+void EEPROMInit(void);
 
 #endif /* EEPROM_FUNCTIONS_H_ */
