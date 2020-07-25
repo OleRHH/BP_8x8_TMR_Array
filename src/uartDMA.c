@@ -119,7 +119,7 @@ void sendCommandToMotor(char * data, uint16_t size)
     stepperMotorCommand[8] = checksum;
 
     // send command to stepper-motor via RS-485 (UART2)
-    for(i = 0; i < size; i++)
+    for(i = 0; i < 9; i++)
     {
         UARTCharPutNonBlocking(UART2_BASE, stepperMotorCommand[i]);
     }

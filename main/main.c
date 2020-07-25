@@ -38,10 +38,12 @@ void main(void)
     IntMasterDisable();
 
     // Load Settings. Initialize the UART, GPIO, ADC and Timer peripheries.
-    settings = loadSettings();
     configureDebugGPIO();
     sensorData = configureADC();
     configureTimer0(SysClock);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_EEPROM0);
+    EEPROMInit();
+    settings = loadSettings();
 
 #ifdef LCD5INCH
     configureLCD5Inch(SysClock, (COLOR)settings->backgroundColor);
@@ -88,7 +90,7 @@ void Timer0InterruptHandler(void)
     #else
         drawDisplay7Inch(&sensorData->arrows);
     #endif
-
+//        sendCommandToMotor("12345678", 8);
 //    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
 
     // Reads touch screen status. Returns command information and

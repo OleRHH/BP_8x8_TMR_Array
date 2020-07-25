@@ -12,22 +12,22 @@
 
 /*****************************  # defines #   *****************************/
 // defines for ADC init             // Port and Pin
-#define ROW_1_L ADC_CTL_CH13        // PD2
-#define ROW_2_L ADC_CTL_CH15        // PD0
-#define ROW_3_L ADC_CTL_CH14        // PD1
-#define ROW_4_L ADC_CTL_CH12        // PD3
-#define ROW_5_L ADC_CTL_CH5         // PD6
-#define ROW_6_L ADC_CTL_CH4         // PD7
-#define ROW_7_L ADC_CTL_CH7         // PD4
-#define ROW_8_L ADC_CTL_CH6         // PD5
-#define ROW_8_R ADC_CTL_CH19        // PK3
-#define ROW_7_R ADC_CTL_CH18        // PK2
-#define ROW_6_R ADC_CTL_CH17        // PK1
-#define ROW_5_R ADC_CTL_CH16        // PK0
-#define ROW_4_R ADC_CTL_CH8         // PE5
-#define ROW_3_R ADC_CTL_CH9         // PE4
-#define ROW_2_R ADC_CTL_CH0         // PE3
-#define ROW_1_R ADC_CTL_CH1         // PE2
+#define ROW_1_R ADC_CTL_CH13        // PD2
+#define ROW_2_R ADC_CTL_CH15        // PD0
+#define ROW_3_R ADC_CTL_CH14        // PD1
+#define ROW_4_R ADC_CTL_CH12        // PD3
+#define ROW_5_R ADC_CTL_CH5         // PD6
+#define ROW_6_R ADC_CTL_CH4         // PD7
+#define ROW_7_R ADC_CTL_CH7         // PD4
+#define ROW_8_R ADC_CTL_CH6         // PD5
+#define ROW_8_L ADC_CTL_CH19        // PK3
+#define ROW_7_L ADC_CTL_CH18        // PK2
+#define ROW_6_L ADC_CTL_CH17        // PK1
+#define ROW_5_L ADC_CTL_CH16        // PK0
+#define ROW_4_L ADC_CTL_CH8         // PE5
+#define ROW_3_L ADC_CTL_CH9         // PE4
+#define ROW_2_L ADC_CTL_CH0         // PE3
+#define ROW_1_L ADC_CTL_CH1         // PE2
 #define GPIO_PIN_3_DOWNTO_0 0x0F    // ADC1InterruptHandler()
 
 // Interrupt priority. Lower numbers = higher priority.
