@@ -7,63 +7,21 @@ CMD_SRCS += \
 ../tm4c1294ncpdt.cmd 
 
 C_SRCS += \
-../Interrupt_handler.c \
-../configuration.c \
-../fonts.c \
-../functions.c \
-../lcd_functions.c \
-../main.c \
-../tm4c1294ncpdt_startup_ccs.c \
-../write_memory.c 
+../tm4c1294ncpdt_startup_ccs.c 
 
 C_DEPS += \
-./Interrupt_handler.d \
-./configuration.d \
-./fonts.d \
-./functions.d \
-./lcd_functions.d \
-./main.d \
-./tm4c1294ncpdt_startup_ccs.d \
-./write_memory.d 
+./tm4c1294ncpdt_startup_ccs.d 
 
 OBJS += \
-./Interrupt_handler.obj \
-./configuration.obj \
-./fonts.obj \
-./functions.obj \
-./lcd_functions.obj \
-./main.obj \
-./tm4c1294ncpdt_startup_ccs.obj \
-./write_memory.obj 
+./tm4c1294ncpdt_startup_ccs.obj 
 
 OBJS__QUOTED += \
-"Interrupt_handler.obj" \
-"configuration.obj" \
-"fonts.obj" \
-"functions.obj" \
-"lcd_functions.obj" \
-"main.obj" \
-"tm4c1294ncpdt_startup_ccs.obj" \
-"write_memory.obj" 
+"tm4c1294ncpdt_startup_ccs.obj" 
 
 C_DEPS__QUOTED += \
-"Interrupt_handler.d" \
-"configuration.d" \
-"fonts.d" \
-"functions.d" \
-"lcd_functions.d" \
-"main.d" \
-"tm4c1294ncpdt_startup_ccs.d" \
-"write_memory.d" 
+"tm4c1294ncpdt_startup_ccs.d" 
 
 C_SRCS__QUOTED += \
-"../Interrupt_handler.c" \
-"../configuration.c" \
-"../fonts.c" \
-"../functions.c" \
-"../lcd_functions.c" \
-"../main.c" \
-"../tm4c1294ncpdt_startup_ccs.c" \
-"../write_memory.c" 
+"../tm4c1294ncpdt_startup_ccs.c" 
 
 

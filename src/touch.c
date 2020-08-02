@@ -71,32 +71,76 @@ void read_coordinate(int *xpos, int *ypos)
     //printf("ypox= %5d\n", *ypos);
 }
 
-// arrows = 1, display = 2, stepper-motor = 3
+// arrows = 1, diplay = 2, stepper mototr = 3 , menu = 4
 int read_button(int xpos, int ypos)
 {
     bool x, y;
-    x = (xpos > 3500 && xpos < 3700);
-    y = (ypos > 2900 && ypos < 3500);
+    x = (xpos > 3400 && xpos < 4000);
+    y = (ypos > 3000 && ypos < 3650);
     if (x && y)
     {
         return 1; // arrows
 
     }
 
-    x = (xpos > 3500 && xpos < 3700);
-    y = (ypos > 1700 && ypos < 2300);
+    x = (xpos > 3400 && xpos < 4000);
+    y = (ypos > 2150 && ypos < 2850);
     if (x && y)
     {
         return 2; // display
 
     }
 
-    x = (xpos > 3500 && xpos < 3700);
-    y = (ypos > 700 && ypos < 1300);
+    x = (xpos > 3400 && xpos < 4000);
+    y = (ypos > 1300 && ypos < 2000);
     if (x && y)
     {
-        return 3; // stepper-motor
+        return 3; // stepper motor
+    }
 
+    x = (xpos > 3400 && xpos < 4000);
+    y = (ypos > 550 && ypos < 1300);
+    if (x && y)
+    {
+        return 4; // men�
+    }
+
+    return 0;
+
+}
+
+// stop = 1, links = 2, rechts = 3 , start = 4
+int read_motor_button(int xpos, int ypos)
+{
+    bool x, y;
+    x = (xpos > 3000 && xpos < 3300);
+    y = (ypos > 3300 && ypos < 3800);
+    if (x && y)
+    {
+        return 1; // stop
+
+    }
+
+    x = (xpos > 3000 && xpos < 3300);
+    y = (ypos > 2400 && ypos < 2900);
+    if (x && y)
+    {
+        return 2; // links
+
+    }
+
+    x = (xpos > 3000 && xpos < 3300);
+    y = (ypos > 1400 && ypos < 1900);
+    if (x && y)
+    {
+        return 3; // rechts
+    }
+
+    x = (xpos > 3000 && xpos < 3300);
+    y = (ypos > 400 && ypos < 1000);
+    if (x && y)
+    {
+        return 4; // start
     }
 
     return 0;

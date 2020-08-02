@@ -285,8 +285,227 @@ EEPROMBlockCountGet(void)
 #endif
 }
 
+//*****************************************************************************
+//
+//! Reads data from the EEPROM.
+//!
+//! \param pui32Data is a pointer to storage for the data read from the EEPROM.
+//! This pointer must point to at least \e ui32Count bytes of available memory.
+//! \param ui32Address is the byte address within the EEPROM from which data is
+//! to be read.  This value must be a multiple of 4.
+//! \param ui32Count is the number of bytes of data to read from the EEPROM.
+//! This value must be a multiple of 4.
+//!
+//! This function may be called to read a number of words of data from a
+//! word-aligned address within the EEPROM.  Data read is copied into the
+//! buffer pointed to by the \e pui32Data parameter.
+//!
+//! \return None.
+//
+//*****************************************************************************
+void
+EEPROMRead(uint32_t *pui32Data, uint32_t ui32Address, uint32_t ui32Count)
+{
+    //
+    // Check parameters in a debug build.
+    //
+    ASSERT(pui32Data);
+    ASSERT(ui32Address < SIZE_FROM_EESIZE(HWREG(EEPROM_EESIZE)));
+    ASSERT((ui32Address + ui32Count) <=
+           SIZE_FROM_EESIZE(HWREG(EEPROM_EESIZE)));
+    ASSERT((ui32Address & 3) == 0);
+    ASSERT((ui32Count & 3) == 0);
 
+    //
+    // Set the block and offset appropriately to read the first word.
+    //
+    HWREG(EEPROM_EEBLOCK) = EEPROMBlockFromAddr(ui32Address);
+    HWREG(EEPROM_EEOFFSET) = OFFSET_FROM_ADDR(ui32Address);
 
+    //
+    // Convert the byte count to a word count.
+    //
+    ui32Count /= 4;
+
+    //
+    // Read each word in turn.
+    //
+    while(ui32Count)
+    {
+        //
+        // Read the next word through the autoincrementing register.
+        //
+        *pui32Data = HWREG(EEPROM_EERDWRINC);
+
+        //
+        // Move on to the next word.
+        //
+        pui32Data++;
+        ui32Count--;
+
+        //
+        // Do we need to move to the next block?  This is the case if the
+        // offset register has just wrapped back to 0.  Note that we only
+        // write the block register if we have more data to read.  If this
+        // register is written, the hardware expects a read or write operation
+        // next.  If a mass erase is requested instead, the mass erase will
+        // fail.
+        //
+        if(ui32Count && (HWREG(EEPROM_EEOFFSET) == 0))
+        {
+            HWREG(EEPROM_EEBLOCK) += 1;
+        }
+    }
+}
+
+//*****************************************************************************
+//
+//! Writes data to the EEPROM.
+//!
+//! \param pui32Data points to the first word of data to write to the EEPROM.
+//! \param ui32Address defines the byte address within the EEPROM that the data
+//! is to be written to.  This value must be a multiple of 4.
+//! \param ui32Count defines the number of bytes of data that is to be written.
+//! This value must be a multiple of 4.
+//!
+//! This function may be called to write data into the EEPROM at a given
+//! word-aligned address.  The call is synchronous and returns only after
+//! all data has been written or an error occurs.
+//!
+//! \return Returns 0 on success or non-zero values on failure.  Failure codes
+//! are logical OR combinations of \b EEPROM_RC_WRBUSY, \b EEPROM_RC_NOPERM,
+//! \b EEPROM_RC_WKCOPY, \b EEPROM_RC_WKERASE, and \b EEPROM_RC_WORKING.
+//
+//*****************************************************************************
+uint32_t
+EEPROMProgram(uint32_t *pui32Data, uint32_t ui32Address, uint32_t ui32Count)
+{
+    uint32_t ui32Status;
+
+    //
+    // Check parameters in a debug build.
+    //
+    ASSERT(pui32Data);
+    ASSERT(ui32Address < SIZE_FROM_EESIZE(HWREG(EEPROM_EESIZE)));
+    ASSERT((ui32Address + ui32Count) <=
+           SIZE_FROM_EESIZE(HWREG(EEPROM_EESIZE)));
+    ASSERT((ui32Address & 3) == 0);
+    ASSERT((ui32Count & 3) == 0);
+
+    //
+    // Make sure the EEPROM is idle before we start.
+    //
+    do
+    {
+        //
+        // Read the status.
+        //
+        ui32Status = HWREG(EEPROM_EEDONE);
+    }
+    while(ui32Status & EEPROM_EEDONE_WORKING);
+
+    //
+    // Set the block and offset appropriately to program the first word.
+    //
+    HWREG(EEPROM_EEBLOCK) = EEPROMBlockFromAddr(ui32Address);
+    HWREG(EEPROM_EEOFFSET) = OFFSET_FROM_ADDR(ui32Address);
+
+    //
+    // Convert the byte count to a word count.
+    //
+    ui32Count /= 4;
+
+    //
+    // Write each word in turn.
+    //
+    while(ui32Count)
+    {
+        //
+        // This is a workaround for a silicon problem on Blizzard rev A.  We
+        // need to do this before every word write to ensure that we don't
+        // have problems in multi-word writes that span multiple flash sectors.
+        //
+        if(CLASS_IS_TM4C123 && REVISION_IS_A0)
+        {
+            _EEPROMSectorMaskSet(ui32Address);
+        }
+
+        //
+        // Write the next word through the autoincrementing register.
+        //
+        HWREG(EEPROM_EERDWRINC) = *pui32Data;
+
+        //
+        // Wait a few cycles.  In some cases, the WRBUSY bit is not set
+        // immediately and this prevents us from dropping through the polling
+        // loop before the bit is set.
+        //
+        SysCtlDelay(10);
+
+        //
+        // Wait for the write to complete.
+        //
+        do
+        {
+            //
+            // Read the status.
+            //
+            ui32Status = HWREG(EEPROM_EEDONE);
+        }
+        while(ui32Status & EEPROM_EEDONE_WORKING);
+
+        //
+        // Make sure we completed the write without errors.  Note that we
+        // must check this per-word because write permission can be set per
+        // block resulting in only a section of the write not being performed.
+        //
+        if(ui32Status & EEPROM_EEDONE_NOPERM)
+        {
+            //
+            // An error was reported that would prevent the values from
+            // being written correctly.
+            //
+            if(CLASS_IS_TM4C123 && REVISION_IS_A0)
+            {
+                _EEPROMSectorMaskClear();
+            }
+            return(ui32Status);
+        }
+
+        //
+        // Move on to the next word.
+        //
+        pui32Data++;
+        ui32Count--;
+
+        //
+        // Do we need to move to the next block?  This is the case if the
+        // offset register has just wrapped back to 0.  Note that we only
+        // write the block register if we have more data to read.  If this
+        // register is written, the hardware expects a read or write operation
+        // next.  If a mass erase is requested instead, the mass erase will
+        // fail.
+        //
+        if(ui32Count && (HWREG(EEPROM_EEOFFSET) == 0))
+        {
+            HWREG(EEPROM_EEBLOCK) += 1;
+        }
+    }
+
+    //
+    // Clear the sector protection bits to prevent possible problems when
+    // programming the main flash array later.
+    //
+    if(CLASS_IS_TM4C123 && REVISION_IS_A0)
+    {
+        _EEPROMSectorMaskClear();
+    }
+
+    //
+    // Return the current status to the caller.
+    //
+    return(HWREG(EEPROM_EEDONE));
+}
 
 //*****************************************************************************
 //
