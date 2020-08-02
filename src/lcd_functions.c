@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <driverlib/sysctl.h>
-// gpio configure
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
 
@@ -14,7 +13,7 @@
 
 
 /*****************************  # defines #   *****************************/
-// constants for LCD
+// constants for LCD initializiation
 #define RST 0x10
 #define INITIAL_STATE (0x1F)
 #define SOFTWARE_RESET (0x01)
@@ -28,8 +27,11 @@
 #define SET_PIXEL_DATA_FORMAT (0xF0)
 #define SET_DISPLAY_ON (0x29)
 
+// constants for writing text to dsiplay
 #define FONT_WIDTH_BIG 12
 #define FONT_HIGHT_BIG 16
+
+// constants for arrow output on display
 #define NO_ARROW        0
 #define WITH_ARROW      1
 #define ARROW_ANGLE     0.7
@@ -44,14 +46,12 @@
 //#define GRID_OFFSET_Y_7_INCH ( 50 )
 
 
-/**********************  # intern Prototypes #   **********************/
-void writeChar(uint16_t, COLOR);
-
+/**********************  # intern prototypes #   **********************/
 void writeCommand(unsigned char);
 void writeCmdData(unsigned char);
 void writeData(COLOR);
 void writePosition(uint16_t, uint16_t, uint16_t, uint16_t);
-void generateColors(void);
+
 void writeLine(short, short, short, short, COLOR, uint16_t);
 void writeLine0Degree  (short, short, short, short, COLOR);
 void writeLine90Degree (short, short, short, short, COLOR);
@@ -66,7 +66,11 @@ void writeLineQuadrant3_II(short, short, short, short, double, COLOR);  // 180°
 void writeLineQuadrant4_I (short, short, short, short, double, COLOR);  // 270° < degree < 360°
 void writeLineQuadrant4_II(short, short, short, short, double, COLOR);  // 270° < degree < 360°
 
+void writeChar(uint16_t, COLOR);
+void printString(char *, uint16_t, uint16_t, COLOR);
+void generateColors(void);
 
+/**************************  # global variables #    ************************/
 uint16_t offset = 0;
 
 COLOR backColor;
@@ -74,7 +78,8 @@ COLOR backColor;
 int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
 
-/***************************  writeInfos()   *******************************/
+
+/***************************  writeInfos()   ********************************/
 // writes some info as text on the display.                                 //
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
@@ -247,7 +252,7 @@ void writeChar(uint16_t letter, COLOR color)
 }
 
 
-/***********************  setLCDBackgroundColor()   ***********************/
+/***********************  setLCDBackgroundColor()  **************************/
 // Writes the hole screen in one color                                      //
 /****************************************************************************/
 void setLCDBackgroundColor(COLOR backcolor)
@@ -274,7 +279,7 @@ void setLCDBackgroundColor(COLOR backcolor)
 }
 
 
-/***********************  writeScreenColor7INCH()   *************************/
+/***********************  setLCDBackgroundColor7()  *************************/
 // Writes the hole screen in one color                                      //
 /****************************************************************************/
 void setLCDBackgroundColor7(COLOR backcolor)
@@ -304,13 +309,19 @@ void setLCDBackgroundColor7(COLOR backcolor)
 /***********************  writeRectangle()   ********************************/
 // Writes a rectangle as frame for the arrow field on the display.          //
 /****************************************************************************/
-void writeRecangle(void)
+void drawFrame(void)
 {
     // write the frame for the Array Display
-    writeLine(80, 10, 720, 10, (COLOR)YELLOW, 0);
-    writeLine(80, 470, 720, 470, (COLOR)YELLOW, 0);
-    writeLine(80, 10, 80, 470, (COLOR)YELLOW, 0);
-    writeLine(720, 10, 720, 470, (COLOR)YELLOW, 0);
+//    writeLine(80, 10, 720, 10, (COLOR)YELLOW, 0);
+//    writeLine(80, 470, 720, 470, (COLOR)YELLOW, 0);
+//    writeLine(80, 10, 80, 470, (COLOR)YELLOW, 0);
+//    writeLine(720, 10, 720, 470, (COLOR)YELLOW, 0);
+
+    // write the frame for the 7 Inch Array Display
+//    write_line(285, 10, 780, 10, (COLOR) 0x00FF00, 0);
+//    write_line(285, 470, 780, 470, (COLOR) 0x00FF00, 0);
+//    write_line(285, 10, 285, 470, (COLOR) 0x00FF00, 0);
+//    write_line(780, 10, 780, 470, (COLOR) 0x00FF00, 0);
 }
 
 
@@ -1006,6 +1017,7 @@ void configureLCD5Inch(uint32_t SysClock, COLOR backgroundColor) {
 
     generateColors();
     setLCDBackgroundColor(backgroundColor);
+    drawFrame();
 }
 
 
@@ -1132,4 +1144,5 @@ void configureLCD7Inch(uint32_t SysClock, COLOR backgroundColor) {
 
     generateColors();
     setLCDBackgroundColor7(backgroundColor);
+    drawFrame();
 }

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <driverlib/sysctl.h>                           // SysCtlClockFreqSet
 
+// each module has its own include file
 #include <adc_functions.h>
 #include <EEPROM_functions.h>
 #include <lcd_functions.h>
@@ -14,7 +15,8 @@
 
 /*****************************  # defines #   ***********************************/
 #define CLOCK_FREQ ( 120000000 )                        // 120 MHz clock freq.
-//#define LCD5INCH
+#define LCD5INCH
+//#define EEPROM_INIT          // uncomment to init settings with default values
 //#define DEBUG
 
 /*****************************  # global variables #   **************************/
@@ -23,7 +25,7 @@ static enum CommandFromTouch commandFromTouch;
 static TMRSensorData * sensorData;
 static Settings * settings;
 
-
+extern void menu(void);
 /***********************  main() function  **************************************/
 /* the main() function initializes the hardware components and sets the         */
 /* LC-Display background color to white.                                        */
@@ -37,25 +39,35 @@ void main(void)
     // disable all interrupts during setup
     IntMasterDisable();
 
-    // Load Settings. Initialize the UART, GPIO, ADC and Timer peripheries.
+    // Configure the GPIO, ADC, UART, EEPROM and Timer peripheries.
     configureDebugGPIO();
     sensorData = configureADC();
+    configureUartUDMA();
+    ConfigureUART0(SysClock);
+    ConfigureUART2(SysClock);
     configureTimer0(SysClock);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_EEPROM0);
-    EEPROMInit();
-    settings = loadSettings();
+    configureEEPROM();
 
+    // if defined: initialize EEPROM settings with default values.
+#ifdef EEPROM_INIT
+    settings = initSettings();
+    saveSettingsToEEPROM(settings);
+#endif
+
+    // Load stored settings from EEPROM.
+    settings = loadSettingsFromEEPROM();
+
+    // This program works with a 5'' or 7'' display. If defined: 5''
 #ifdef LCD5INCH
     configureLCD5Inch(SysClock, (COLOR)settings->backgroundColor);
 #else
     configureLCD7Inch(SysClock, (COLOR)settings->backgroundColor);
 #endif
 
-    configureUartUDMA();
-    ConfigureUART0(SysClock);
-    ConfigureUART2(SysClock);
+    menu();
 
     IntMasterEnable();
+
 
     // busy waiting. Tasks now running in interrupt handler. The tasks are
     // 1. Timer0InterruptHandler(): gets periodically called every 100 ms.
@@ -68,7 +80,7 @@ void main(void)
 
 
 /***********************  TIMER 0 interrupt handler  ****************************/
-/* Periodically measures the sensor Array values and call function to draw the  */
+/* Periodically measures the sensor Array values and calls function to draw the */
 /* display. Also it sends commands to the stepper-motor and calls setup-menu.   */
 /********************************************************************************/
 void Timer0InterruptHandler(void)
@@ -90,8 +102,8 @@ void Timer0InterruptHandler(void)
     #else
         drawDisplay7Inch(&sensorData->arrows);
     #endif
-//        sendCommandToMotor("12345678", 8);
-//    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
+
+    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
 
     // Reads touch screen status. Returns command information and
     // the command itself as a pointer.
@@ -159,41 +171,41 @@ void ADC1InterruptHandler(void)
 
 
 /***********************  UART0 Interrupt handler  ******************************/
-/* communication via RS232 interface with the PC. The PC sends commands. The    */
+/* Communication via RS232 interface with the PC. The PC sends commands. The    */
 /* MCU sends Sensor-Array data. More options like sending Stepper-Motor         */
 /* temetery could also be implemented in the future.                            */
+/* 'char UART0receive[8]' contains commands from PC. They are always 8 bytes.   */
+/* The type of command depends on the value of the first byte.                  */
 /********************************************************************************/
 void UART0InterruptHandler(void)
 {
-    // pointer to a char string that is defined as UART0receive[8] in uartDMA.c
-    char * UART0receive;
 
-    // Read the interrupt status of the UART.
+    // Read the interrupt status of the UART0 peripherie.
     uint32_t interruptStatus = UARTGetIntStatus();
 
     // Clear any pending status. We are expecting a uDMA Receive Interrupt
     UART0ClearInterrupt(interruptStatus);
 
+    // Message (8 bytes) from Pc received (via UDMA receive)
     if( interruptStatus & DMA_RX_INTERRUPT)
     {
-        UART0receive = getUART0RxData();
+        // pointer to a char string that is defined as UART0receive[8] in uartDMA.c
+        char * UART0receive = getUART0RxData();
 
         // setup DMA for next receive
         prepareNextReceiveDMA();
 
-        // 'char UART0receive[8]' contains commands from Pc. They are always
-        // 8 bytes. The commands depend on the value of the first byte:
 
-        // byte 0 contains the type of command:
+        // byte 0 contains the type of command from Pc:
         switch (UART0receive[0])
         {
         // send array data via RS-232 to a PC (matlab)
         case '0':   sendUARTDMA(sensorData->resultsForUARTSend); break;
 
-        // set arrow relative/absolute and arrow size.
+        // set arrow relative/absolute and set arrow size.
         case '1':   settings->relative = getRelativeAbsoluteSetting();
                     settings->maxArrowLength = getMaxArrowLength();
-                    saveSettings(settings);
+                    saveSettingsToEEPROM(settings);
                     break;
 
         // commands for the stepper-motor are being past forwarded to UART2.
@@ -201,7 +213,7 @@ void UART0InterruptHandler(void)
 
         // hardware averaging enabled/disabled
         case '3':   settings->adcAVG = getADCHardwareAveraging(UART0receive[1]);
-                    saveSettings(settings);
+                    saveSettingsToEEPROM(settings);
                     break;
 
         // todo: additional commands from UART here, if desired.

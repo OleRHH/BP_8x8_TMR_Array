@@ -21,9 +21,10 @@ typedef struct
     int32_t motorIncrement;
 } Settings;
 
+Settings * initSettings(void);
+void configureEEPROM(void);
+void saveSettingsToEEPROM(Settings *);
+Settings * loadSettingsFromEEPROM(void);
 
-Settings * loadSettings(void);
-void saveSettings(Settings *);
-void EEPROMInit(void);
 
 #endif /* EEPROM_FUNCTIONS_H_ */

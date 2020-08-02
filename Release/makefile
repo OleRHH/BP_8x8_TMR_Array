@@ -8,14 +8,20 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
-"./Interrupt_handler.obj" \
-"./configuration.obj" \
-"./fonts.obj" \
-"./functions.obj" \
-"./lcd_functions.obj" \
-"./main.obj" \
 "./tm4c1294ncpdt_startup_ccs.obj" \
-"./write_memory.obj" \
+"./docu/ADC0IntHandlerDoku.obj" \
+"./docu/UART0IntHandlerDoku.obj" \
+"./docu/mainDoku.obj" \
+"./docu/timer0InterruptDoku.obj" \
+"./main/main.obj" \
+"./src/EEPROM_functions.obj" \
+"./src/adc_functions.obj" \
+"./src/debug_functions.obj" \
+"./src/eeprom.obj" \
+"./src/lcd_functions.obj" \
+"./src/timer_functions.obj" \
+"./src/touch.obj" \
+"./src/uartDMA.obj" \
 "../tm4c1294ncpdt.cmd" \
 $(GEN_CMDS__FLAG) \
 -llibc.a \
@@ -28,7 +34,13 @@ RMDIR := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
+-include docu/subdir_vars.mk
+-include main/subdir_vars.mk
+-include src/subdir_vars.mk
 -include subdir_rules.mk
+-include docu/subdir_rules.mk
+-include main/subdir_rules.mk
+-include src/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -159,8 +171,8 @@ BP_TMR_sensor_array.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "Interrupt_handler.obj" "configuration.obj" "fonts.obj" "functions.obj" "lcd_functions.obj" "main.obj" "tm4c1294ncpdt_startup_ccs.obj" "write_memory.obj" 
-	-$(RM) "Interrupt_handler.d" "configuration.d" "fonts.d" "functions.d" "lcd_functions.d" "main.d" "tm4c1294ncpdt_startup_ccs.d" "write_memory.d" 
+	-$(RM) "tm4c1294ncpdt_startup_ccs.obj" "docu/ADC0IntHandlerDoku.obj" "docu/UART0IntHandlerDoku.obj" "docu/mainDoku.obj" "docu/timer0InterruptDoku.obj" "main/main.obj" "src/EEPROM_functions.obj" "src/adc_functions.obj" "src/debug_functions.obj" "src/eeprom.obj" "src/lcd_functions.obj" "src/timer_functions.obj" "src/touch.obj" "src/uartDMA.obj" 
+	-$(RM) "tm4c1294ncpdt_startup_ccs.d" "docu/ADC0IntHandlerDoku.d" "docu/UART0IntHandlerDoku.d" "docu/mainDoku.d" "docu/timer0InterruptDoku.d" "main/main.d" "src/EEPROM_functions.d" "src/adc_functions.d" "src/debug_functions.d" "src/eeprom.d" "src/lcd_functions.d" "src/timer_functions.d" "src/touch.d" "src/uartDMA.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
