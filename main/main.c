@@ -15,12 +15,14 @@
 
 /*****************************  # defines #   ***********************************/
 #define CLOCK_FREQ ( 120000000 )                        // 120 MHz clock freq.
-#define LCD5INCH
+//#define LCD5INCH
 //#define EEPROM_INIT          // uncomment to init settings with default values
 //#define DEBUG
 
 /*****************************  # global variables #   **************************/
 static char * command;
+
+uint16_t xpos, ypos;
 static enum CommandFromTouch commandFromTouch;
 static TMRSensorData * sensorData;
 static Settings * settings;
@@ -47,6 +49,7 @@ void main(void)
     ConfigureUART2(SysClock);
     configureTimer0(SysClock);
     configureEEPROM();
+    configureTouch();
 
     // if defined: initialize EEPROM settings with default values.
 #ifdef EEPROM_INIT
@@ -63,8 +66,6 @@ void main(void)
 #else
     configureLCD7Inch(SysClock, (COLOR)settings->backgroundColor);
 #endif
-
-    menu();
 
     IntMasterEnable();
 
@@ -103,7 +104,14 @@ void Timer0InterruptHandler(void)
         drawDisplay7Inch(&sensorData->arrows);
     #endif
 
-    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
+    // get Touch Coordinates
+    touchWrite(0xD0);   // command byte for xpos request
+    xpos = touchRead(); // read xpos
+    touchWrite(0x90);   // command byte for ypos request
+    ypos = touchRead(); // read ypos
+
+    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength,
+               sensorData->maxAnalogValue, xpos, ypos);
 
     // Reads touch screen status. Returns command information and
     // the command itself as a pointer.

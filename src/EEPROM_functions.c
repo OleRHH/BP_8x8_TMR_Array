@@ -19,6 +19,7 @@ Settings * initSettings(void)
     settings->adcAVG = true;
     settings->backgroundColor = 0x00FFFFFF;
     settings->motorIncrement = 100;
+//    settings->xpos =
 
     return settings;
 

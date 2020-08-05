@@ -39,8 +39,8 @@
 #define MIN_LENGTH_FOR_ARROW  1
 #define GRID_OFFSET_X_5_INCH ( 30 )
 #define GRID_OFFSET_Y_5_INCH ( 20 )
-#define GRID_OFFSET_X_7_INCH ( 320 )
-#define GRID_OFFSET_Y_7_INCH ( 30 )
+#define GRID_OFFSET_X_7_INCH ( 345 )
+#define GRID_OFFSET_Y_7_INCH ( 35 )
 
 //#define GRID_OFFSET_X_7_INCH ( 200 )
 //#define GRID_OFFSET_Y_7_INCH ( 50 )
@@ -51,6 +51,7 @@ void writeCommand(unsigned char);
 void writeCmdData(unsigned char);
 void writeData(COLOR);
 void writePosition(uint16_t, uint16_t, uint16_t, uint16_t);
+void generateColors(void);  // create the color codes for colored arrows
 
 void writeLine(short, short, short, short, COLOR, uint16_t);
 void writeLine0Degree  (short, short, short, short, COLOR);
@@ -66,17 +67,132 @@ void writeLineQuadrant3_II(short, short, short, short, double, COLOR);  // 180°
 void writeLineQuadrant4_I (short, short, short, short, double, COLOR);  // 270° < degree < 360°
 void writeLineQuadrant4_II(short, short, short, short, double, COLOR);  // 270° < degree < 360°
 
-void writeChar(uint16_t, COLOR);
-void printString(char *, uint16_t, uint16_t, COLOR);
-void generateColors(void);
+void drawRectangle(short, short, short, short, COLOR);
+
+
+void writeChar(uint16_t, COLOR, COLOR);
+void printString(char *, uint16_t, uint16_t, COLOR, COLOR);
+void setFrame(COLOR);
 
 /**************************  # global variables #    ************************/
-uint16_t offset = 0;
-
 COLOR backColor;
+COLOR backMenu = (COLOR)GREEN;
+COLOR backImgStart = (COLOR)GREEN;
+COLOR backImgStop  = (COLOR)RED;
+COLOR backImgLeft  = (COLOR)YELLOW;
+COLOR backImgRight = (COLOR)BLUE;
 
 int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
+
+
+
+
+/***************************  drawRectangle()   ********************************/
+// Draws rectangles with specified color.                                      //
+/****************************************************************************/
+void drawRectangle(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+{
+    uint32_t start, stop;
+
+    stop = (1+stop_x - start_x) * (1+stop_y - start_y);
+
+    writePosition(start_x, start_y, stop_x, stop_y);
+    writeCommand(0x2C);                        // start writing
+
+    for (start = 0; start < stop; start++)
+    {
+        GPIO_PORTM_DATA_R = color.red;
+        GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+        GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+        GPIO_PORTM_DATA_R = color.green;
+        GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+        GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+        GPIO_PORTM_DATA_R = color.blue;
+        GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+        GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+    }
+}
+
+
+/****************************  setFrame()  **********************************/
+// draws nice lines for a stylish, modern and inovative display design**@   //
+/****************************************************************************/
+#define DIMENSIONS  ( 96 )
+#define PIXEL_COUNT ( DIMENSIONS * DIMENSIONS )
+#define OFFSET_IMG  ( DIMENSIONS - 1 )
+#define EDGE ( 9 )
+
+extern unsigned char imgArrayStopButton[PIXEL_COUNT];
+extern unsigned char imgArrayStartButton[PIXEL_COUNT];
+extern unsigned char imgArrayArrowLButton[PIXEL_COUNT];
+extern unsigned char imgArrayArrowRButton[PIXEL_COUNT];
+
+void writeArray(unsigned char *imgArray, short offsetX, short offsetY, COLOR color)
+{
+    int pixel;
+    short stopX, stopY;
+
+    stopX = offsetX + OFFSET_IMG;
+    stopY = offsetY + OFFSET_IMG;
+
+    drawRectangle(offsetX - EDGE, offsetY - EDGE, EDGE + stopX, EDGE + stopY, color);
+
+    drawRectangle(offsetX - EDGE, offsetY - EDGE, EDGE + stopX, EDGE + stopY, color);
+
+    writePosition(offsetX, offsetY, stopX, stopY);
+    writeCommand(0x2C);                        // start writing
+
+    for (pixel = 0; pixel < PIXEL_COUNT; pixel++)
+    {
+        if(imgArray[pixel] > 100)
+        {
+            GPIO_PORTM_DATA_R = color.red;
+            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+            GPIO_PORTM_DATA_R = color.green;
+            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+            GPIO_PORTM_DATA_R = color.blue;
+            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+        }
+        else
+        {
+            GPIO_PORTM_DATA_R = 0x00;
+            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+        }
+    }
+}
+
+
+/****************************************************************************/
+void setFrame(COLOR color)
+{
+    drawRectangle(0, 0, 299, 274, (COLOR)BLACK); // background motor control
+    drawRectangle(0, 278, 299, 479, backMenu); // background infos
+
+    drawRectangle(300, 0, 303, 479, (COLOR)BLUE); // spacer
+    drawRectangle(180, 278, 182, 479, (COLOR)BLUE); // little spacer
+    drawRectangle(0, 275, 300, 278, (COLOR)BLUE);
+    drawRectangle(0, 340, 300, 343, (COLOR)BLUE);
+    drawRectangle(0, 395, 300, 398, (COLOR)BLUE);
+    drawRectangle(0, 435, 300, 438, (COLOR)BLUE);
+
+    // 1.
+    writeArray(imgArrayStartButton, 25, 20, backImgStart);
+    // 2.
+    writeArray(imgArrayStopButton, 170, 20, backImgStop);
+    // 3.
+    writeArray(imgArrayArrowLButton, 25, 155, backImgLeft);
+    // 4.
+    writeArray(imgArrayArrowRButton, 170, 155, backImgRight);
+}
 
 
 /***************************  writeInfos()   ********************************/
@@ -84,52 +200,74 @@ int16_t oldDiffCosResults[8][8];
 // Infos are: absolute or relative arrow mode, maximum measured analog,     //
 // arrow max length.                                                        //
 /****************************************************************************/
-void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength, uint16_t maxAnalogValue)
+uint16_t xposA[20], yposA[20];
+void writeInfos(bool relative, bool adcAVG, uint16_t maxArrowLength,
+                uint16_t maxAnalogValue, uint16_t xpos, uint16_t ypos)
 {
-    char charValue[100];
     static bool old = true;
+    static int index = 0;
+    int pos, xposAvg = 0, yposAvg = 0;
+    char charValue[100];
+    pos = (index++)%20;
+    xposA[pos] = xpos;
+    yposA[pos] = ypos;
+
+    for(pos = 0; pos < 20; pos++)
+    {
+        xposAvg += xposA[pos];
+        yposAvg += yposA[pos];
+    }
+    xposAvg /= 20;
+    yposAvg /= 20;
 
     if(old != relative)
     {
         old = relative;
         setLCDBackgroundColor(backColor);
     }
+
+    printString("max arrow", 290, 10, (COLOR)BLACK, backMenu);
+    printString("length", 310, 10, (COLOR)BLACK, backMenu);
+    sprintf(charValue, "x: %.4d", xposAvg);
+    printString(charValue, 290, 200, (COLOR)BLACK, backMenu);
+    sprintf(charValue, "y: %.4d", yposAvg);
+    printString(charValue, 310, 200, (COLOR)BLACK, backMenu);
+
+    printString("max measured", 350, 10, (COLOR)BLACK, backMenu);
+    printString("analog value", 370, 10, (COLOR)BLACK, backMenu);
+    sprintf(charValue, "%.3d", maxAnalogValue);
+    printString(charValue, 360, 220, (COLOR)BLACK, backMenu);
+
     if(relative == true)
     {
-        printString("relative:  true", 10, 300, (COLOR)BLACK);
-
-        sprintf(charValue, "length: %.3d", maxArrowLength);
-        printString(charValue, 40, 300, (COLOR)BLACK);
-
-        sprintf(charValue, "max analog: %.3d", maxAnalogValue);
-        printString(charValue, 70, 300, (COLOR)BLACK);
+        printString("scaling", 410, 10, (COLOR)BLACK, backMenu);
+        printString("relative", 410, 190, (COLOR)BLACK, backMenu);
     }
+
     else
     {
-        printString("relative: false", 10, 300, (COLOR)BLACK);
-
-        sprintf(charValue, "length: %.3d", maxArrowLength);
-        printString(charValue, 40, 300, (COLOR)BLACK);
-
-        sprintf(charValue, "max analog: %.3d", maxAnalogValue);
-        printString(charValue, 70, 300, (COLOR)BLACK);
-
         if(maxAnalogValue > maxArrowLength)
         {
-            printString("Clipping!", 100, 300, (COLOR)BLACK);
+            printString("clipping!", 100, 15, (COLOR)BLACK, backMenu);
         }
         else
         {
-            printString("Clipping!", 100, 300, backColor);
+            printString("clipping!", 100, 15, backColor, backMenu);
         }
+
+        printString("scaling", 410, 15, (COLOR)BLACK, backMenu);
+        printString("absolute", 410, 190, (COLOR)BLACK, backMenu);
     }
+
     if(adcAVG == false)
     {
-        printString("Oversampling off", 250, 280, (COLOR)BLACK);
+        printString("hardware avg", 450, 15, (COLOR)BLACK, backMenu);
+        printString("off", 450, 220, (COLOR)BLACK, backMenu);
     }
     else
     {
-        printString("Oversampling on ", 250, 280, (COLOR)BLACK);
+        printString("hardware avg", 450, 15, (COLOR)BLACK, backMenu);
+        printString("on", 450, 220, (COLOR)BLACK, backMenu);
     }
 }
 
@@ -145,54 +283,10 @@ enum CommandFromTouch readTouchscreen(char * command)
 }
 
 
-/**************************  generateColors()   ****************************/
-// if option activated, the arrows have different colors in relation        //
-// to their length. The color goes from dark blue for small arrows to       //
-// red for long arrows.                                                     //
-/****************************************************************************/
-void generateColors(void)
-{
-    int i, val = 100, red, green, blue;
-
-    for(i = 0; i < 768; i++)
-    {
-        if(val < 256){
-            red = 0;
-            blue = 0;
-            blue = val;
-        }
-        else if(val < 512)
-        {
-            if(val > 250 && val < 400) val++;
-            red = 0;
-            green = val - 256;
-            blue = 511 - val;
-        }
-        else if(val < 768)
-        {
-            if(val < 680) val++;
-            red = val - 512;
-            green = 255;
-            blue = 0;
-        }
-        else if(val < 1024)
-        {
-            red = 255;
-            green = 1023 - val;
-            blue = 0;
-        }
-        color[i].red = red;
-        color[i].green = green;
-        color[i].blue = blue;
-        val++;
-    }
-}
-
-
 /****************************  printString()   *****************************/
 // writes a string to the given position on the LD-Display                  //
 /****************************************************************************/
-void printString(char *text, uint16_t row, uint16_t column, COLOR color)
+void printString(char *text, uint16_t row, uint16_t column, COLOR color, COLOR backcolor)
 {
     uint16_t letter, numLetter, lv;
     uint16_t length = strlen(text);
@@ -209,7 +303,7 @@ void printString(char *text, uint16_t row, uint16_t column, COLOR color)
         {
             letter = (font_12_16[text[numLetter]][lv + 1] << 4)
                     | (font_12_16[text[numLetter]][lv] >> 4);
-            writeChar(letter, color);
+            writeChar(letter, color, backcolor);
         }
         columnStart += FONT_WIDTH_BIG;
         columnStop  += FONT_WIDTH_BIG;
@@ -221,7 +315,7 @@ void printString(char *text, uint16_t row, uint16_t column, COLOR color)
 // helper function for printString():                                      //
 // writes a single letter with height 12 pixel                              //
 /****************************************************************************/
-void writeChar(uint16_t letter, COLOR color)
+void writeChar(uint16_t letter, COLOR color, COLOR backcolor)
 {
     uint16_t lv;
 
@@ -237,13 +331,13 @@ void writeChar(uint16_t letter, COLOR color)
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
         } else {
-            GPIO_PORTM_DATA_R = backColor.red;
+            GPIO_PORTM_DATA_R = backcolor.red;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-            GPIO_PORTM_DATA_R = backColor.green;
+            GPIO_PORTM_DATA_R = backcolor.green;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-            GPIO_PORTM_DATA_R = backColor.blue;
+            GPIO_PORTM_DATA_R = backcolor.blue;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
         }
@@ -306,25 +400,6 @@ void setLCDBackgroundColor7(COLOR backcolor)
 }
 
 
-/***********************  writeRectangle()   ********************************/
-// Writes a rectangle as frame for the arrow field on the display.          //
-/****************************************************************************/
-void drawFrame(void)
-{
-    // write the frame for the Array Display
-//    writeLine(80, 10, 720, 10, (COLOR)YELLOW, 0);
-//    writeLine(80, 470, 720, 470, (COLOR)YELLOW, 0);
-//    writeLine(80, 10, 80, 470, (COLOR)YELLOW, 0);
-//    writeLine(720, 10, 720, 470, (COLOR)YELLOW, 0);
-
-    // write the frame for the 7 Inch Array Display
-//    write_line(285, 10, 780, 10, (COLOR) 0x00FF00, 0);
-//    write_line(285, 470, 780, 470, (COLOR) 0x00FF00, 0);
-//    write_line(285, 10, 285, 470, (COLOR) 0x00FF00, 0);
-//    write_line(780, 10, 780, 470, (COLOR) 0x00FF00, 0);
-}
-
-
 /**************************  drawDisplay5Inch()   ***************************/
 // draws all arrows to the 5 inch LC-Display.                               //
 /****************************************************************************/
@@ -356,7 +431,6 @@ void drawDisplay5Inch(struct arrows * arrow)
             stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + arrow->dCos[m][n];
             stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + arrow->dSin[m][n];
 
-//            writeLine(start.x, start.y, stop.x, stop.y, (COLOR)0x00, WITH_ARROW);
             writeLine(start.x, start.y, stop.x, stop.y, color[arrow->arrowLength[m][n]], WITH_ARROW);
             oldDiffCosResults[m][n] = arrow->dCos[m][n];
             oldDiffSinResults[m][n] = arrow->dSin[m][n];
@@ -379,7 +453,7 @@ void drawDisplay7Inch(struct arrows * arrow)
         for(n = 0; n <= 7; n++)
         {
             // I. delete old arrows
-            start.x = n * 60 + GRID_OFFSET_X_7_INCH;
+            start.x = n * 58 + GRID_OFFSET_X_7_INCH;
             start.y = m * 60 + GRID_OFFSET_Y_7_INCH;
             stop.x  = start.x + oldDiffCosResults[m][n];
             stop.y  = start.y + oldDiffSinResults[m][n];
@@ -393,10 +467,9 @@ void drawDisplay7Inch(struct arrows * arrow)
             writeLine(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
 
             // III. write new arrows
-            stop.x  = n * 60 + GRID_OFFSET_X_7_INCH + arrow->dCos[m][n];
+            stop.x  = n * 58 + GRID_OFFSET_X_7_INCH + arrow->dCos[m][n];
             stop.y  = m * 60 + GRID_OFFSET_Y_7_INCH + arrow->dSin[m][n];
 
-//            writeLine(start.x, start.y, stop.x, stop.y, (COLOR)0x00, WITH_ARROW);
             writeLine(start.x, start.y, stop.x, stop.y, color[arrow->arrowLength[m][n]], WITH_ARROW);
             oldDiffCosResults[m][n] = arrow->dCos[m][n];
             oldDiffSinResults[m][n] = arrow->dSin[m][n];
@@ -443,10 +516,6 @@ void writeData(COLOR color)
 /******************************************************************************************************/
 void writePosition(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uint16_t point2_y)
 {
-	// offset: 1x272 or 2x272 or 3x272 => points to screen 1 or 2 or 3
-    point1_y += offset;
-    point2_y += offset;
-
     writeCommand(0x2A);                // Set page address (x-axis)
     writeCmdData(point1_x >> 8);      // Set start page address                HB
     writeCmdData(point1_x);           //                                       LB
@@ -572,7 +641,6 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
                     if(arrowOption == WITH_ARROW && delta_x > MIN_LENGTH_FOR_ARROW)
                     {
-                        // TODO: arrows
                         angle = atan2(delta_y, delta_x);
                         //                        printf("%lf\n", angle);
                         writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
@@ -588,7 +656,6 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
                     if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
-                        // TODO: arrows
                         angle = 1.571 - atan(gain);
                         writeLine(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
@@ -610,7 +677,6 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
                     if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
-                        // TODO: arrows
                         angle = atan(gain);
                         writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE - angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE - angle), color, NO_ARROW);// upper arrow line
@@ -625,7 +691,6 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
                     if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
-                        // TODO: arrows
                         angle = 1.571 - atan(gain);
                         writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
@@ -643,7 +708,6 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
                     if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
-                        // TODO: arrows
                         angle = atan(gain);
                         writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
@@ -658,7 +722,6 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
                     if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
-                        // TODO: arrows
                         angle = 1.571 - atan(gain);
                         writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
@@ -919,6 +982,51 @@ void writeLineQuadrant4_II(short start_x, short start_y, short stop_x, short sto
     }
 }
 
+
+/**************************  generateColors()   ****************************/
+// if option activated, the arrows have different colors in relation        //
+// to their length. The color goes from dark blue for small arrows to       //
+// red for long arrows.                                                     //
+/****************************************************************************/
+void generateColors(void)
+{
+    int i, val = 100, red, green, blue;
+
+    for(i = 0; i < 768; i++)
+    {
+        if(val < 256){
+            red = 0;
+            blue = 0;
+            blue = val;
+        }
+        else if(val < 512)
+        {
+            if(val > 250 && val < 400) val++;
+            red = 0;
+            green = val - 256;
+            blue = 511 - val;
+        }
+        else if(val < 768)
+        {
+            if(val < 680) val++;
+            red = val - 512;
+            green = 255;
+            blue = 0;
+        }
+        else if(val < 1024)
+        {
+            red = 255;
+            green = 1023 - val;
+            blue = 0;
+        }
+        color[i].red = red;
+        color[i].green = green;
+        color[i].blue = blue;
+        val++;
+    }
+}
+
+
 /******************************************************************************************************/
 // LCD Panel initialize:
 void configureLCD5Inch(uint32_t SysClock, COLOR backgroundColor) {
@@ -1017,7 +1125,7 @@ void configureLCD5Inch(uint32_t SysClock, COLOR backgroundColor) {
 
     generateColors();
     setLCDBackgroundColor(backgroundColor);
-    drawFrame();
+    setFrame((COLOR)BLACK);
 }
 
 
@@ -1144,5 +1252,5 @@ void configureLCD7Inch(uint32_t SysClock, COLOR backgroundColor) {
 
     generateColors();
     setLCDBackgroundColor7(backgroundColor);
-    drawFrame();
+    setFrame((COLOR)BLACK);
 }

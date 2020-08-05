@@ -19,22 +19,22 @@ typedef union color
     int32_t all;
     struct
     {
-        char red;
-        char green;
         char blue;
+        char green;
+        char red;
     };
 } COLOR;
 
 // enum colors
 enum colors
 {
-    BLACK   = 0x000000,
-    RED     = 0x0000FF,
-    GREEN   = 0x00FF00,
-    YELLOW  = 0x00FFFF,
-    BLUE    = 0xFF0000,
-    WHITE   = 0xFFFFFF,
-    GREY    = 0x505050,
+    BLACK   = 0x00000000,
+    RED     = 0x00FF0000,
+    GREEN   = 0x0000FF00,
+    YELLOW  = 0x00FFFF00,
+    BLUE    = 0x000000FF,
+    WHITE   = 0x00FFFFFF,
+    GREY    = 0x00AAAAAA,
 };
 
 enum CommandFromTouch
@@ -70,7 +70,7 @@ void setLCDBackgroundColor7(COLOR);
 void drawDisplay5Inch(struct arrows *);
 void drawDisplay7Inch(struct arrows *);
 
-void writeInfos(bool, bool, uint16_t, uint16_t);
+void writeInfos(bool, bool, uint16_t, uint16_t, uint16_t, uint16_t);
 enum CommandFromTouch readTouchscreen(char *);
 
 void writeCommand(unsigned char);
