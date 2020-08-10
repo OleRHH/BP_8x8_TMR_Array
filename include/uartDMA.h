@@ -18,11 +18,11 @@ void ConfigureUART2(uint32_t);
 void configureUartUDMA(void);
 void prepareNextReceiveDMA(void);
 void sendUARTDMA(char *);
-void sendCommandToMotor(char *, uint16_t);
+void sendRawCommandToMotor(char *);
+void sendCommandToMotor(uint16_t);
 uint32_t receiveDataFromMotor(void);
 char * getUART0RxData(void);
-bool getRelativeAbsoluteSetting(void);
-uint16_t getMaxArrowLength(void);
+uint16_t getMaxArrowLengthUART(void);
 unsigned int UARTGetIntStatus(void);
 void UART0ClearInterrupt(unsigned int interruptStatus);
 

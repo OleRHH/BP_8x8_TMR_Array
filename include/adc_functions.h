@@ -31,12 +31,12 @@ typedef struct {
 
 
 /*********************  # public Prototypes #   ****************************/
-TMRSensorData * configureADC(void);
+TMRSensorData * configureADC(bool);
 void storeArraySensorData(uint16_t);
 void computeArrows(bool, uint16_t, TMRSensorData *);
 void startADConversion(void);
 void adcIntClear(void);
-bool getADCHardwareAveraging(char);
+bool setADCHardwareAveraging(bool);
 void setMultiplexer(uint16_t step);
 
 // interrupt handler for ADC 0. Needs to be implemented in project.

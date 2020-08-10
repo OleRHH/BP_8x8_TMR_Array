@@ -15,17 +15,16 @@
 
 /*****************************  # defines #   ***********************************/
 #define CLOCK_FREQ ( 120000000 )                        // 120 MHz clock freq.
-#define LCD5INCH
+//#define LCD5INCH
 //#define EEPROM_INIT          // uncomment to init settings with default values
 //#define DEBUG
 
 /*****************************  # global variables #   **************************/
-static char * command;
-static enum CommandFromTouch commandFromTouch;
+uint16_t xpos, ypos;
 static TMRSensorData * sensorData;
 static Settings * settings;
 
-extern void menu(void);
+
 /***********************  main() function  **************************************/
 /* the main() function initializes the hardware components and sets the         */
 /* LC-Display background color to white.                                        */
@@ -39,14 +38,9 @@ void main(void)
     // disable all interrupts during setup
     IntMasterDisable();
 
-    // Configure the GPIO, ADC, UART, EEPROM and Timer peripheries.
+#ifdef DEBUG
     configureDebugGPIO();
-    sensorData = configureADC();
-    configureUartUDMA();
-    ConfigureUART0(SysClock);
-    ConfigureUART2(SysClock);
-    configureTimer0(SysClock);
-    configureEEPROM();
+#endif
 
     // if defined: initialize EEPROM settings with default values.
 #ifdef EEPROM_INIT
@@ -55,7 +49,16 @@ void main(void)
 #endif
 
     // Load stored settings from EEPROM.
+    configureEEPROM();
     settings = loadSettingsFromEEPROM();
+
+    // Configure the GPIO, ADC, UART, EEPROM and Timer peripheries.
+    sensorData = configureADC(settings->adcAVG);
+    configureUartUDMA();
+    ConfigureUART0(SysClock);
+    ConfigureUART2(SysClock);
+    configureTimer0(SysClock);
+    configureTouch();
 
     // This program works with a 5'' or 7'' display. If defined: 5''
 #ifdef LCD5INCH
@@ -64,7 +67,9 @@ void main(void)
     configureLCD7Inch(SysClock, (COLOR)settings->backgroundColor);
 #endif
 
-    menu();
+    writeInfo(MAX_ARROW_LENGTH, (void *)&settings->maxArrowLength);
+    writeInfo(SCALING, (void *)&settings->relative);
+    writeInfo(HARDW_AVG, (void *)&settings->adcAVG);
 
     IntMasterEnable();
 
@@ -73,8 +78,139 @@ void main(void)
     // 1. Timer0InterruptHandler(): gets periodically called every 100 ms.
     // 2. UART0InterruptHandler():  gets called on UART0 data receive.
     // 3. ADC1InterruptHandler():   gets called when ADC complete.
+    // 4. TouchInterruptHandler():  gets called when display is touched.
     while(1)
     {
+    }
+}
+
+
+//#define DEBUG
+/***********************  Touc Interrupt handler  *******************************/
+/* An GPIO edge interrupt occures when the touch screen is pressed.             */
+/********************************************************************************/
+void TouchInterruptHandler(void)
+{
+    uint16_t item;
+    GPIOIntClear(GPIO_PORTF_AHB_BASE, GPIO_PIN_4);
+
+    IntMasterDisable();
+
+    // Reads touch screen status.
+    item = touchGetItem(&xpos, &ypos);
+
+#ifdef DEBUG
+    uint32_t position = (uint32_t)xpos << 16 | ypos;
+    writeInfo(POS_DEBUG, (void *)&position);
+#endif
+
+    // check what (or if) a button was pressed
+    switch(item)
+    {
+    case  LEFT_BUTTON:
+        sendCommandToMotor(LEFT_BUTTON);
+        break;
+
+    case RIGHT_BUTTON:
+        sendCommandToMotor(RIGHT_BUTTON);
+        break;
+
+    case  STOP_BUTTON:
+        sendCommandToMotor(STOP_BUTTON);
+        break;
+
+    case START_BUTTON:
+        sendCommandToMotor(START_BUTTON);
+        break;
+
+    case ARROW_LENGTH_BUTTON:
+        saveSettingsToEEPROM(settings);
+        writeInfo(MAX_ARROW_LENGTH, (void *)&settings->maxArrowLength);
+        break;
+
+    case SCALING_BUTTON:
+        // toggle setting relative <-> absolute
+        settings->relative = (settings->relative ? false:true);
+        saveSettingsToEEPROM(settings);
+        writeInfo(SCALING, (void *)&settings->relative);
+        break;
+
+    case HARDW_AVG_BUTTON:
+        // toggle setting on <-> off
+        settings->adcAVG = setADCHardwareAveraging(settings->adcAVG);
+        saveSettingsToEEPROM(settings);
+        writeInfo(HARDW_AVG, (void *)&settings->adcAVG);
+        break;
+    }
+
+    IntMasterEnable();
+}
+
+
+/***********************  UART0 Interrupt handler  ******************************/
+/* Communication via RS232 interface with the PC. The PC sends commands. The    */
+/* MCU sends Sensor-Array data. More options like sending Stepper-Motor         */
+/* telemetery could also be implemented.                                        */
+/* 'char UART0receive[8]' contains commands from PC. They are always 8 bytes.   */
+/* The type of command depends on the value of the first byte.                  */
+/********************************************************************************/
+void UART0InterruptHandler(void)
+{
+    // Read the interrupt status of the UART0 peripherie.
+    uint32_t interruptStatus = UARTGetIntStatus();
+
+    // Clear any pending status. We are expecting a uDMA Receive Interrupt
+    UART0ClearInterrupt(interruptStatus);
+
+    // Message (8 bytes) from Pc received (via UDMA receive)
+    if( interruptStatus & DMA_RX_INTERRUPT)
+    {
+        // pointer to a char string that is defined as UART0receive[8] in uartDMA.c
+        char * UART0receive = getUART0RxData();
+
+        // setup DMA for next receive
+        prepareNextReceiveDMA();
+
+
+        // byte 0 contains the type of command from Pc:
+        switch (UART0receive[0])
+        {
+        // send array data via RS-232 to a PC (matlab)
+        case '0':
+            sendUARTDMA(sensorData->resultsForUARTSend);
+            break;
+
+        // set arrow size.
+        case '1':
+            settings->maxArrowLength = getMaxArrowLengthUART();
+            writeInfo(SCALING, (void *)&settings->relative);
+            writeInfo(MAX_ARROW_LENGTH, (void *)&settings->maxArrowLength);
+            saveSettingsToEEPROM(settings);
+            break;
+
+            // set arrow relative/absolute scaling mode
+        case '2':
+            settings->relative = (settings->relative ? false:true);
+            writeInfo(SCALING, (void *)&settings->relative);
+            saveSettingsToEEPROM(settings);
+            break;
+
+        // set hardware averaging on/off
+        case '3':
+            settings->adcAVG = setADCHardwareAveraging((UART0receive[1] == '1'));
+            writeInfo(HARDW_AVG, (void *)&settings->adcAVG);
+            saveSettingsToEEPROM(settings);
+            break;
+
+        // commands for the stepper-motor are being past forwarded to UART2.
+        case '4':
+            sendRawCommandToMotor(UART0receive);
+            break;
+
+        // todo: additional commands from UART here, if desired.
+        case '5':
+            break;
+        }
     }
 }
 
@@ -95,7 +231,7 @@ void Timer0InterruptHandler(void)
 
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
-    // the program.
+    // the project.
 
     #ifdef LCD5INCH
         drawDisplay5Inch(&sensorData->arrows);
@@ -103,20 +239,7 @@ void Timer0InterruptHandler(void)
         drawDisplay7Inch(&sensorData->arrows);
     #endif
 
-    writeInfos(settings->relative, settings->adcAVG, settings->maxArrowLength, sensorData->maxAnalogValue);
-
-    // Reads touch screen status. Returns command information and
-    // the command itself as a pointer.
-    commandFromTouch = readTouchscreen(command);
-
-    // Commands for the motor could be: start, stop, left, right and so on.
-    // It can originate from the touch screen or UART0.
-    switch(commandFromTouch)
-    {
-        noNewCommand:           break;
-//        enterSettings:          settings(command); break;
-        newCommandForMotor:     sendCommandToMotor(command, 9); break;
-    }
+    writeInfo(ANALOG_VALUE, (void *)&sensorData->maxAnalogValue);
 
     // Start sensorData-array ad-conversion. This starts the first of 16 ADC
     // read bursts. The other 15 bursts will be triggered in ADC1InterruptHandler().
@@ -166,58 +289,5 @@ void ADC1InterruptHandler(void)
         step = 0;
         // reset digital multiplexer inputs
         setMultiplexer(step);
-    }
-}
-
-
-/***********************  UART0 Interrupt handler  ******************************/
-/* Communication via RS232 interface with the PC. The PC sends commands. The    */
-/* MCU sends Sensor-Array data. More options like sending Stepper-Motor         */
-/* temetery could also be implemented in the future.                            */
-/* 'char UART0receive[8]' contains commands from PC. They are always 8 bytes.   */
-/* The type of command depends on the value of the first byte.                  */
-/********************************************************************************/
-void UART0InterruptHandler(void)
-{
-
-    // Read the interrupt status of the UART0 peripherie.
-    uint32_t interruptStatus = UARTGetIntStatus();
-
-    // Clear any pending status. We are expecting a uDMA Receive Interrupt
-    UART0ClearInterrupt(interruptStatus);
-
-    // Message (8 bytes) from Pc received (via UDMA receive)
-    if( interruptStatus & DMA_RX_INTERRUPT)
-    {
-        // pointer to a char string that is defined as UART0receive[8] in uartDMA.c
-        char * UART0receive = getUART0RxData();
-
-        // setup DMA for next receive
-        prepareNextReceiveDMA();
-
-
-        // byte 0 contains the type of command from Pc:
-        switch (UART0receive[0])
-        {
-        // send array data via RS-232 to a PC (matlab)
-        case '0':   sendUARTDMA(sensorData->resultsForUARTSend); break;
-
-        // set arrow relative/absolute and set arrow size.
-        case '1':   settings->relative = getRelativeAbsoluteSetting();
-                    settings->maxArrowLength = getMaxArrowLength();
-                    saveSettingsToEEPROM(settings);
-                    break;
-
-        // commands for the stepper-motor are being past forwarded to UART2.
-        case '2':   sendCommandToMotor(UART0receive, 8); break;
-
-        // hardware averaging enabled/disabled
-        case '3':   settings->adcAVG = getADCHardwareAveraging(UART0receive[1]);
-                    saveSettingsToEEPROM(settings);
-                    break;
-
-        // todo: additional commands from UART here, if desired.
-        case '4': break;
-        }
     }
 }

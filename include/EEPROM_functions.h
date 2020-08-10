@@ -19,6 +19,8 @@ typedef struct
     uint16_t maxArrowLength;
     int32_t backgroundColor;
     int32_t motorIncrement;
+    uint16_t xpos;
+    uint16_t ypos;
 } Settings;
 
 Settings * initSettings(void);
