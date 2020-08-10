@@ -50,21 +50,7 @@ char * getUART0RxData(void)
 
 
 /********************************************************************************/
-bool getRelativeAbsoluteSetting(void)
-{
-    bool setting = false;
-
-    if(UART0receive[1] == '1')
-    {
-        setting = true;
-    }
-
-    return setting;
-}
-
-
-/********************************************************************************/
-uint16_t getMaxArrowLength(void)
+uint16_t getMaxArrowLengthUART(void)
 {
     return ( UART0receive[4]<<24 | UART0receive[5]<<16
            | UART0receive[6]<<8 | UART0receive[7] );
@@ -102,10 +88,10 @@ void sendUARTDMA(char * resultsForUARTSend)
 
 
 /********************************************************************************/
-void sendCommandToMotor(char * data, uint16_t size)
+void sendRawCommandToMotor(char * data)
 {
-    // the data structure to the stepper-motor is always 9 bytes.
-    // last byte is a checksum. See datasheet Trinamic TMCM-1141 for details.
+    // the data structure to the stepper-motor is always 9 bytes: 8 data bytes +
+    // last byte checksum. See datasheet Trinamic TMCM-1141 for details.
 
     uint16_t i;
     uint16_t checksum = 1;
@@ -117,6 +103,35 @@ void sendCommandToMotor(char * data, uint16_t size)
         checksum += data[i];
     }
     stepperMotorCommand[8] = checksum;
+
+    // send command to stepper-motor via RS-485 (UART2)
+    for(i = 0; i < 9; i++)
+    {
+        UARTCharPutNonBlocking(UART2_BASE, stepperMotorCommand[i]);
+    }
+}
+
+
+/********************************************************************************/
+void sendCommandToMotor(uint16_t command)
+{
+    // the data structure to the stepper-motor is always 9 bytes: 8 data bytes +
+    // last byte checksum. See datasheet Trinamic TMCM-1141 for details.
+
+    uint16_t i;
+    char stepperMotorCommand[9] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xFF, 0x00 };
+
+    switch(command)
+    {
+    case 1: stepperMotorCommand[1] = 1; break;
+    case 2: stepperMotorCommand[1] = 2; break;
+    case 3: stepperMotorCommand[1] = 3; break;
+    }
+
+    for(i = 0; i < 8; i++)
+    {
+        stepperMotorCommand[8] += stepperMotorCommand[i];
+    }
 
     // send command to stepper-motor via RS-485 (UART2)
     for(i = 0; i < 9; i++)

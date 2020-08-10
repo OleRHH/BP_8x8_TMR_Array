@@ -7,6 +7,11 @@
 #ifndef LCD_FUNCTIONS_H_
 #define LCD_FUNCTIONS_H_
 
+#define ANALOG_VALUE ( 1 )
+#define MAX_ARROW_LENGTH ( 2 )
+#define SCALING ( 3 )
+#define HARDW_AVG ( 4 )
+#define POS_DEBUG ( 5 )
 
 /*****************************  # Includes #   ****************************/
 #include <stdbool.h>
@@ -37,13 +42,6 @@ enum colors
     GREY    = 0x00AAAAAA,
 };
 
-enum CommandFromTouch
-{
-    noNewCommand = 0,
-    enterSettings = 1,
-    newCommandForMotor = 2,
-};
-
 struct arrows {
     int16_t dSin[8][8];
     int16_t dCos[8][8];
@@ -58,6 +56,11 @@ typedef struct
     uint16_t y;
 } point;
 
+typedef struct
+{
+    int16_t x;
+    int16_t y;
+} coordinates;
 COLOR color[768];
 
 /**************************  # public Prototypes #   **********************/
@@ -70,8 +73,7 @@ void setLCDBackgroundColor7(COLOR);
 void drawDisplay5Inch(struct arrows *);
 void drawDisplay7Inch(struct arrows *);
 
-void writeInfos(bool, bool, uint16_t, uint16_t, uint16_t, uint16_t);
-enum CommandFromTouch readTouchscreen(char *);
+void writeInfo(uint16_t, void *);
 
 void writeCommand(unsigned char);
 void writePosition(uint16_t, uint16_t, uint16_t, uint16_t);

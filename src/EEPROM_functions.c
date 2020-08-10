@@ -72,6 +72,4 @@ void configureEEPROM(void)
     SysCtlPeripheralEnable(SYSCTL_PERIPH_EEPROM0);
     // EEPROMInit - if not called may lead to dataloss
     EEPROMInit();
-    // EEPROMMassErase - Erases the EEPROM leaving it to divece factory default conditions
-    //EEPROMMassErase();
 }

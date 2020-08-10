@@ -84,18 +84,27 @@ void setMultiplexer(uint16_t step)
 
 
 /********************************************************************************/
-bool getADCHardwareAveraging(char command)
-{
-    bool status = false;
+// Toogles the hardware averaging feature.
 
-    if(command == '1')
+/********************************************************************************/
+bool setADCHardwareAveraging(bool adcAVG)
+{
+    if(adcAVG == true)
     {
-        // set hardware adcAVG for better resolution
+    // disable hardware adcAVG for better resolution.
+        ADCHardwareOversampleConfigure(ADC0_BASE, 1);
+        ADCHardwareOversampleConfigure(ADC1_BASE, 1);
+        adcAVG = false;
+    }
+    else
+    {
+    // enable hardware adcAVG for better speed.
         ADCHardwareOversampleConfigure(ADC0_BASE, 64);
         ADCHardwareOversampleConfigure(ADC1_BASE, 64);
-        status = true;
+        adcAVG = true;
     }
-    return status;
+
+    return adcAVG;
 }
 
 
@@ -253,7 +262,7 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
 /* They are multiplexed to 16 analog inputs.                                    */
 /* So there are 16 analog inputs to be measured simultaneously                  */
 /********************************************************************************/
-TMRSensorData *  configureADC(void)
+TMRSensorData * configureADC(bool adcAVG)
 {
     // enable clock for peripheries
     SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
@@ -263,9 +272,18 @@ TMRSensorData *  configureADC(void)
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0));
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC1));
 
-    // set hardware adcAVG for better resolution
-    ADCHardwareOversampleConfigure(ADC0_BASE, 64);
-    ADCHardwareOversampleConfigure(ADC1_BASE, 64);
+    if(adcAVG == true)
+    {
+        // enable hardware adcAVG for better resolution.
+        ADCHardwareOversampleConfigure(ADC0_BASE, 64);
+        ADCHardwareOversampleConfigure(ADC1_BASE, 64);
+    }
+    else
+    {
+        // disable hardware adcAVG for better speed.
+        ADCHardwareOversampleConfigure(ADC0_BASE, 1);
+        ADCHardwareOversampleConfigure(ADC1_BASE, 1);
+    }
 
     // ADC, sample sequencer, trigger processor, priority
     ADCSequenceConfigure(ADC0_BASE,0, ADC_TRIGGER_PROCESSOR, 0);
