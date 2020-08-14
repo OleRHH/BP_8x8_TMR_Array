@@ -23,7 +23,7 @@
 /*****************************  # global variables #   **************************/
 uint16_t xpos, ypos;
 static TMRSensorData * sensorData;
-//static Settings * settings;
+//static Setup * settings;
 
 struct Setup
 {
@@ -39,9 +39,9 @@ struct Setup
     COLOR backColorImgLeft;
     COLOR backColorImgRight;
     COLOR testcolor;
-} settings;
+} settings; //setup;
 
-int32_t testcolor = 0x00ffffff;
+//setup * settings;
 
 void initROM(void);
 /***********************  main() function  **************************************/
@@ -166,7 +166,7 @@ void TouchInterruptHandler(void)
     case HARDW_AVG_BUTTON:
         settings.adcAVG = setADCHardwareAveraging(settings.adcAVG);
         writeInfo(HARDW_AVG, (void *)&settings.adcAVG);
-        saveSettingsToEEPROM(&settings, sizeof(Settings));
+        saveSettingsToEEPROM(&settings, sizeof(settings));
         break;
     }
 
@@ -212,21 +212,21 @@ void UART0InterruptHandler(void)
             settings.maxArrowLength = getMaxArrowLengthUART();
             writeInfo(SCALING, &settings.relative);
             writeInfo(MAX_ARROW_LENGTH, &settings.maxArrowLength);
-            saveSettingsToEEPROM(&settings, sizeof(Settings));
+            saveSettingsToEEPROM(&settings, sizeof(settings));
             break;
 
             // set arrow relative/absolute scaling mode
         case '2':
             settings.relative = (settings.relative ? false:true);
             writeInfo(SCALING, &settings.relative);
-            saveSettingsToEEPROM(&settings, sizeof(Settings));
+            saveSettingsToEEPROM(&settings, sizeof(settings));
             break;
 
         // set hardware averaging on/off
         case '3':
             settings.adcAVG = setADCHardwareAveraging((UART0receive[1] == '1'));
             writeInfo(HARDW_AVG, &settings.adcAVG);
-            saveSettingsToEEPROM(&settings, sizeof(Settings));
+            saveSettingsToEEPROM(&settings, sizeof(settings));
             break;
 
         // commands for the stepper-motor are being past forwarded to UART2.
