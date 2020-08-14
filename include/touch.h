@@ -22,7 +22,8 @@
 #include <driverlib/gpio.h>
 /*********************  # public Prototypes #   ***************************/
 void configureTouch(void);
-uint16_t touchGetItem(uint16_t *, uint16_t *);
+uint16_t touchGetMenuItem(uint16_t *, uint16_t *);
+uint16_t touchGetArrowLength(uint16_t, uint16_t *, uint16_t *);
 
 extern void TouchInterruptHandler(void);
 

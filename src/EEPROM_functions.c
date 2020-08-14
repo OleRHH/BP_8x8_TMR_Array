@@ -19,17 +19,36 @@ Settings * initSettings(void)
     settings->adcAVG = true;
     settings->backgroundColor = 0x00FFFFFF;
     settings->motorIncrement = 100;
-//    settings->xpos =
 
     return settings;
-
 }
 
 
 /********************  loadSettingsFromEEPROM()   ***************************/
 // Loads the settings structure from EEPROM.                                //
 /****************************************************************************/
-Settings * loadSettingsFromEEPROM(void)
+void loadSettingsFromEEPROM(void * data, uint32_t byteCount)
+{
+    EEPROMRead( (uint32_t *) data, 0x00, byteCount);
+}
+
+
+/********************  saveSettingsToEEPROM()   *****************************/
+// Saves the settings structure in EEPROM.                                  //
+/****************************************************************************/
+void saveSettingsToEEPROM(void * data, uint32_t byteCount)
+{
+    EEPROMProgram( (uint32_t *) data, 0x00, byteCount);
+}
+
+
+
+
+
+/********************  loadSettingsFromEEPROM()   ***************************/
+// Loads the settings structure from EEPROM.                                //
+/****************************************************************************/
+Settings * loadSettingsFromEEPROM2(void)
 {
     Settings * settings = &setting;
     uint32_t settings_array_s[6];
@@ -50,7 +69,7 @@ Settings * loadSettingsFromEEPROM(void)
 /********************  saveSettingsToEEPROM()   *****************************/
 // Saves the settings structure in EEPROM.                                  //
 /****************************************************************************/
-void saveSettingsToEEPROM(Settings * settings)
+void saveSettingsToEEPROM2(Settings * settings)
 {
     uint32_t settings_array_s[6] = { settings->relative,
                                      settings->coloredArrows,

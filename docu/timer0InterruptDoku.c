@@ -10,7 +10,7 @@ void Timer0InterruptHandler(void)
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
     // the program.
-    drawDisplay(backColor);
+    drawDisplay(backColorArrowWindow);
 
     // Read touch screen informations. Returns true if new command is available.
     newCommandForMotor = readTouchscreen(motorCommand);

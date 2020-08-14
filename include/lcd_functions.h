@@ -65,14 +65,14 @@ COLOR color[768];
 
 /**************************  # public Prototypes #   **********************/
 void ConfigureGPIO(void);
-void configureLCD5Inch(uint32_t, COLOR);
-void configureLCD7Inch(uint32_t, COLOR);
+void configureLCD5Inch(uint32_t);
+void configureLCD7Inch(uint32_t);
+void setDisplayLayout(COLOR);
 
-void setLCDBackgroundColor(COLOR);
-void setLCDBackgroundColor7(COLOR);
 void drawDisplay5Inch(struct arrows *);
 void drawDisplay7Inch(struct arrows *);
-
+void drawArrowLengthMenu(void);
+void setArrowWindowBackground(COLOR);
 void writeInfo(uint16_t, void *);
 
 void writeCommand(unsigned char);

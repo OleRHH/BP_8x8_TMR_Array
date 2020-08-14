@@ -53,7 +53,7 @@ void writeCmdData(unsigned char);
 void writeData(COLOR);
 void writePosition(uint16_t, uint16_t, uint16_t, uint16_t);
 void generateColors(void);  // create the color codes for colored arrows
-void setLCD7inchHardware(uint32_t);
+void configureLCD7Inch(uint32_t);
 
 void writeLine(short, short, short, short, COLOR, uint16_t);
 void writeLine0Degree  (short, short, short, short, COLOR);
@@ -71,19 +71,22 @@ void writeLineQuadrant4_II(short, short, short, short, double, COLOR);  // 270°
 
 void drawRectangle(short, short, short, short, COLOR);
 
+void setLCDBackgroundColor(COLOR);
+void setLCDBackgroundColor7(COLOR);
+
 void writeChar(uint16_t, COLOR, COLOR);
 void writeButton(unsigned char *, short, short, COLOR);
 void printString(char *, uint16_t, uint16_t, COLOR, COLOR);
-void setDisplayLayout(COLOR);
 
 
 /*****************************  # global variables #    *************************/
-COLOR backColor;
-COLOR backMenu = (COLOR)GREEN;
-COLOR backImgStart = (COLOR)GREEN;
-COLOR backImgStop  = (COLOR)RED;
-COLOR backImgLeft  = (COLOR)YELLOW;
-COLOR backImgRight = (COLOR)BLUE;
+//struct backColor
+COLOR backColorArrowWindow = (COLOR)WHITE;
+COLOR backColorTable = (COLOR)GREEN;
+COLOR backColorImgStart = (COLOR)GREEN;
+COLOR backColorImgStop  = (COLOR)RED;
+COLOR backColorImgLeft  = (COLOR)YELLOW;
+COLOR backColorImgRight = (COLOR)BLUE;
 
 int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
@@ -96,13 +99,50 @@ extern unsigned char imgArrayArrowLButton[PIXEL_COUNT];
 extern unsigned char imgArrayArrowRButton[PIXEL_COUNT];
 
 
+/***************************  drawArrowLengthMenu()  ****************************/
+// draws the 'Change max. arrow size' menu: background, lines and words.        //
 /********************************************************************************/
-void configureLCD7Inch(uint32_t SysClock, COLOR backgroundColor)
+void drawArrowLengthMenu(void)
 {
-    setLCD7inchHardware(SysClock);
-    generateColors();
-    setLCDBackgroundColor7(backgroundColor);
-    setDisplayLayout((COLOR)BLACK);
+    uint16_t m, n, value = 10;
+    char charValue[10];
+
+    // the rectangle is the background to the menu
+    drawRectangle(50, 50, 456, 456, (COLOR)YELLOW);  // background motor buttons
+
+    // the following rectangles are the big lines that build the grid.
+    drawRectangle( 48, 48,  49, 458, (COLOR)BLUE);   // spacer
+    drawRectangle(150, 50, 151, 458, (COLOR)BLUE);   // spacer
+    drawRectangle(252, 50, 253, 458, (COLOR)BLUE);   // spacer
+    drawRectangle(354, 50, 355, 458, (COLOR)BLUE);   // spacer
+    drawRectangle(456, 48, 457, 458, (COLOR)BLUE);   // spacer
+
+    drawRectangle(50, 48, 456, 49, (COLOR)BLUE);     // spacer
+    drawRectangle(50, 150, 456, 151, (COLOR)BLUE);   // spacer
+    drawRectangle(50, 252, 456, 253, (COLOR)BLUE);   // spacer
+    drawRectangle(50, 354, 456, 355, (COLOR)BLUE);   // spacer
+    drawRectangle(50, 457, 456, 458, (COLOR)BLUE);   // spacer
+
+    // now the available number choices are being printed out on the menu.
+    for(m = 0; m < 4; m++)
+    {
+        for(n = 0; n < 4; n++)
+        {
+            sprintf(charValue, "%.2d", value);
+            printString(charValue, 95 + 100 * m, 90 + 100 * n, (COLOR)BLACK, backColorTable);
+            value += 10;
+        }
+    }
+}
+
+
+/******************************  drawArrowWindow()  ************************************/
+// draws nice lines for a stylish, modern and inovative display design**@       //
+/********************************************************************************/
+void setArrowWindowBackground(COLOR BackColorArrowWindow)
+{
+    backColorArrowWindow = BackColorArrowWindow;
+    drawRectangle(0, 0, 506, 479, backColorArrowWindow);
 }
 
 
@@ -111,8 +151,13 @@ void configureLCD7Inch(uint32_t SysClock, COLOR backgroundColor)
 /********************************************************************************/
 void setDisplayLayout(COLOR color)
 {
+    backColorArrowWindow = color;
+//    writePosition(0, 0, 506, 479);
+    setArrowWindowBackground(backColorArrowWindow);
+//    drawRectangle(0, 0, 506, 479, backColorArrowWindow);
+
     drawRectangle(510, 0, 799, 274, (COLOR)BLACK);  // background motor control
-    drawRectangle(510, 278, 799, 479, backMenu);    // background infos
+    drawRectangle(510, 278, 799, 479, backColorTable);    // background infos
 
     drawRectangle(507, 0, 510, 479, (COLOR)BLUE);   // spacer
     drawRectangle(680, 278, 682, 479, (COLOR)BLUE); // little spacer
@@ -122,23 +167,24 @@ void setDisplayLayout(COLOR color)
     drawRectangle(510, 440, 799, 443, (COLOR)BLUE);
 
     // 1.
-    writeButton(imgArrayArrowLButton, 540, 20, backImgStart);
+    writeButton(imgArrayArrowLButton, 540, 20, backColorImgStart);
     // 2.
-    writeButton(imgArrayArrowRButton, 680, 20, backImgStart);
+    writeButton(imgArrayArrowRButton, 680, 20, backColorImgStart);
     // 3.
-    writeButton(imgArrayStopButton, 540, 150, backImgStop);
+    writeButton(imgArrayStopButton, 540, 150, backColorImgStop);
     // 4.
-    writeButton(imgArrayStartButton, 680, 150, backImgRight);
+    writeButton(imgArrayStartButton, 680, 150, backColorImgRight);
 
-    printString("max measured", 285, 520, (COLOR)BLACK, backMenu);
-    printString("analog value", 305, 520, (COLOR)BLACK, backMenu);
+    printString("max measured", 285, 520, (COLOR)BLACK, backColorTable);
+    printString("analog value", 305, 520, (COLOR)BLACK, backColorTable);
 
-    printString("max arrow", 340, 520, (COLOR)BLACK, backMenu);
-    printString("length", 360, 520, (COLOR)BLACK, backMenu);
+    printString("max arrow", 340, 520, (COLOR)BLACK, backColorTable);
+    printString("length", 360, 520, (COLOR)BLACK, backColorTable);
 
-    printString("scaling", 410, 520, (COLOR)BLACK, backMenu);
+    printString("scaling", 410, 520, (COLOR)BLACK, backColorTable);
 
-    printString("hardware avg", 450, 520, (COLOR)BLACK, backMenu);
+    printString("hardware avg", 450, 520, (COLOR)BLACK, backColorTable);
+
 }
 
 
@@ -171,9 +217,11 @@ void writeButton(unsigned char *imgArray, short offsetX, short offsetY, COLOR co
             GPIO_PORTM_DATA_R = color.red;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+
             GPIO_PORTM_DATA_R = color.green;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+
             GPIO_PORTM_DATA_R = color.blue;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
@@ -181,10 +229,13 @@ void writeButton(unsigned char *imgArray, short offsetX, short offsetY, COLOR co
         else
         {
             GPIO_PORTM_DATA_R = 0x00;
+
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
         }
@@ -205,25 +256,25 @@ void writeInfo(uint16_t info, void * value)
     {
     case ANALOG_VALUE:
         sprintf(charValue, "%.3d", *(uint16_t *)value);
-        printString(charValue, 295, 720, (COLOR)BLACK, backMenu);
+        printString(charValue, 295, 720, (COLOR)BLACK, backColorTable);
         break;
     case MAX_ARROW_LENGTH:
         sprintf(charValue, "%.3d", *(uint16_t *)value);
-        printString(charValue, 350, 720, (COLOR)BLACK, backMenu);
+        printString(charValue, 350, 720, (COLOR)BLACK, backColorTable);
         break;
     case SCALING:
         (*(bool *)value) ?  sprintf(charValue, "relative") : sprintf(charValue, "absolute");
-        printString(charValue, 410, 690, (COLOR)BLACK, backMenu);
+        printString(charValue, 410, 690, (COLOR)BLACK, backColorTable);
         break;
     case HARDW_AVG:
         (*(bool *)value) ?  sprintf(charValue, " on") : sprintf(charValue, "off");
-        printString(charValue, 450, 720, (COLOR)BLACK, backMenu);
+        printString(charValue, 450, 720, (COLOR)BLACK, backColorTable);
         break;
     case POS_DEBUG:
         sprintf(charValue, "x: %.4d", (*(uint32_t *)value) >> 16);
-        printString(charValue, 290, 700, (COLOR)BLACK, backMenu);
+        printString(charValue, 290, 700, (COLOR)BLACK, backColorTable);
         sprintf(charValue, "y: %.4d", (*(uint16_t *)value));
-        printString(charValue, 310, 700, (COLOR)BLACK, backMenu);
+        printString(charValue, 310, 700, (COLOR)BLACK, backColorTable);
         break;
     }
 }
@@ -298,21 +349,21 @@ void writeChar(uint16_t letter, COLOR color, COLOR backcolor)
 void setLCDBackgroundColor(COLOR backcolor)
 {
     uint32_t count = 0;
-    backColor = backcolor;
+    COLOR colorArrowWindow = backcolor;
 
     writePosition(0, 0, 479, 271);
     writeCommand(0x2C);
 
     while (count++ < 130560) {
-        GPIO_PORTM_DATA_R = backColor.red;       // Write data byte
+        GPIO_PORTM_DATA_R = colorArrowWindow.red;       // Write data byte
         GPIO_PORTQ_DATA_R = 0x15;            // Chip select = 0, Write state = 0
         GPIO_PORTQ_DATA_R = 0x1F;            // Initial state
 
-        GPIO_PORTM_DATA_R = backColor.green;    // Write data byte
+        GPIO_PORTM_DATA_R = colorArrowWindow.green;    // Write data byte
         GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
         GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
 
-        GPIO_PORTM_DATA_R = backColor.blue;     // Write data byte
+        GPIO_PORTM_DATA_R = colorArrowWindow.blue;     // Write data byte
         GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
         GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
     }
@@ -325,21 +376,21 @@ void setLCDBackgroundColor(COLOR backcolor)
 void setLCDBackgroundColor7(COLOR backcolor)
 {
     uint32_t count = 0;
-    backColor = backcolor;
+    COLOR colorArrowWindow = backcolor;
 
-    writePosition(0, 0, 799, 479);
+    writePosition(0, 0, 506, 479);
     writeCommand(0x2C);
 
-    while (count++ < 384000) {
-        GPIO_PORTM_DATA_R = backColor.red;       // Write data byte
+    while (count++ < 243360) {
+        GPIO_PORTM_DATA_R = colorArrowWindow.red;       // Write data byte
         GPIO_PORTQ_DATA_R = 0x15;            // Chip select = 0, Write state = 0
         GPIO_PORTQ_DATA_R = 0x1F;            // Initial state
 
-        GPIO_PORTM_DATA_R = backColor.green;    // Write data byte
+        GPIO_PORTM_DATA_R = colorArrowWindow.green;    // Write data byte
         GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
         GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
 
-        GPIO_PORTM_DATA_R = backColor.blue;     // Write data byte
+        GPIO_PORTM_DATA_R = colorArrowWindow.blue;     // Write data byte
         GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
         GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
     }
@@ -364,7 +415,7 @@ void drawDisplay5Inch(struct arrows * arrow)
             stop.x  = start.x + oldDiffCosResults[m][n];
             stop.y  = start.y + oldDiffSinResults[m][n];
 
-            writeLine(start.x, start.y, stop.x, stop.y, backColor, WITH_ARROW);
+            writeLine(start.x, start.y, stop.x, stop.y, backColorArrowWindow, WITH_ARROW);
 
             // II. write grid cross
             stop.x  = start.x;
@@ -407,7 +458,7 @@ void drawDisplay7Inch(struct arrows * arrow)
             stop.x  = start.x + oldDiffCosResults[m][n];
             stop.y  = start.y + oldDiffSinResults[m][n];
 
-            writeLine(start.x, start.y, stop.x, stop.y, backColor, WITH_ARROW);
+            writeLine(start.x, start.y, stop.x, stop.y, backColorArrowWindow, WITH_ARROW);
 
             // III: write grid cross
             stop.x  = start.x;
@@ -1030,7 +1081,7 @@ void writePosition(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uint
 
 /********************************************************************************/
 // LCD Panel initialize:
-void configureLCD5Inch(uint32_t SysClock, COLOR backgroundColor) {
+void configureLCD5Inch(uint32_t SysClock) {
     uint32_t value;
 
     // Set Port L  0-4: Multiplexer address output for 8x8 Array
@@ -1124,15 +1175,11 @@ void configureLCD5Inch(uint32_t SysClock, COLOR backgroundColor) {
 //    writeCmdData(0b00000001);          // flip vertical
 
     writeCommand(0x29);                // Set display on
-
-    generateColors();
-    setLCDBackgroundColor(backgroundColor);
-    setDisplayLayout((COLOR)BLACK);
 }
 
 
 /********************************************************************************/
-void setLCD7inchHardware(uint32_t SysClock)
+void configureLCD7Inch(uint32_t SysClock)
 {
     // Set Port L  0-4: Multiplexer address output for 8x8 Array
     // Pin 3 = D; Pin 2 = C; Pin 1 = B; Pin 0 = A; Pin 4 = nD
@@ -1241,4 +1288,6 @@ void setLCD7inchHardware(uint32_t SysClock)
     writeCmdData(0x00);
 
     writeCommand(SET_DISPLAY_ON);           // Set display on
+
+    generateColors();
 }

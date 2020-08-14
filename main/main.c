@@ -15,6 +15,7 @@
 
 /*****************************  # defines #   ***********************************/
 #define CLOCK_FREQ ( 120000000 )                        // 120 MHz clock freq.
+#define RANDOM_NUMBER 252383587
 //#define LCD5INCH
 //#define EEPROM_INIT          // uncomment to init settings with default values
 //#define DEBUG
@@ -22,9 +23,27 @@
 /*****************************  # global variables #   **************************/
 uint16_t xpos, ypos;
 static TMRSensorData * sensorData;
-static Settings * settings;
+//static Settings * settings;
 
+struct Setup
+{
+    uint32_t ROMisInitialized;
+    bool relative;
+    bool adcAVG;
+    bool coloredArrows;
+    uint16_t maxArrowLength;
+    COLOR backColorArrowWindow;
+    COLOR backColorTable;
+    COLOR backColorImgStart;
+    COLOR backColorImgStop;
+    COLOR backColorImgLeft;
+    COLOR backColorImgRight;
+    COLOR testcolor;
+} settings;
 
+int32_t testcolor = 0x00ffffff;
+
+void initROM(void);
 /***********************  main() function  **************************************/
 /* the main() function initializes the hardware components and sets the         */
 /* LC-Display background color to white.                                        */
@@ -35,6 +54,7 @@ void main(void)
     uint32_t SysClock = SysCtlClockFreqSet( (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN
                             | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), CLOCK_FREQ);
 
+
     // disable all interrupts during setup
     IntMasterDisable();
 
@@ -44,16 +64,16 @@ void main(void)
 
     // if defined: initialize EEPROM settings with default values.
 #ifdef EEPROM_INIT
-    settings = initSettings();
-    saveSettingsToEEPROM(settings);
+    initROM();
+    saveSettingsToEEPROM(&settings, sizeof(settings));
 #endif
 
-    // Load stored settings from EEPROM.
+    // configure EEPROM and load stored settings.
     configureEEPROM();
-    settings = loadSettingsFromEEPROM();
+    loadSettingsFromEEPROM(&settings, sizeof(settings));
 
-    // Configure the GPIO, ADC, UART, EEPROM and Timer peripheries.
-    sensorData = configureADC(settings->adcAVG);
+    // Configure the ADC, UART, Timer  and Touch peripheries.
+    sensorData = configureADC(settings.adcAVG);
     configureUartUDMA();
     ConfigureUART0(SysClock);
     ConfigureUART2(SysClock);
@@ -62,14 +82,15 @@ void main(void)
 
     // This program works with a 5'' or 7'' display. If defined: 5''
 #ifdef LCD5INCH
-    configureLCD5Inch(SysClock, (COLOR)settings->backgroundColor);
+    configureLCD5Inch(SysClock);
 #else
-    configureLCD7Inch(SysClock, (COLOR)settings->backgroundColor);
+    configureLCD7Inch(SysClock);
+    setDisplayLayout(settings.backColorArrowWindow);
 #endif
 
-    writeInfo(MAX_ARROW_LENGTH, (void *)&settings->maxArrowLength);
-    writeInfo(SCALING, (void *)&settings->relative);
-    writeInfo(HARDW_AVG, (void *)&settings->adcAVG);
+    writeInfo(MAX_ARROW_LENGTH, (void *)&settings.maxArrowLength);
+    writeInfo(SCALING, (void *)&settings.relative);
+    writeInfo(HARDW_AVG, (void *)&settings.adcAVG);
 
     IntMasterEnable();
 
@@ -94,15 +115,10 @@ void TouchInterruptHandler(void)
     uint16_t item;
     GPIOIntClear(GPIO_PORTF_AHB_BASE, GPIO_PIN_4);
 
-    IntMasterDisable();
+    timerInterruptDisable();
 
-    // Reads touch screen status.
-    item = touchGetItem(&xpos, &ypos);
-
-#ifdef DEBUG
-    uint32_t position = (uint32_t)xpos << 16 | ypos;
-    writeInfo(POS_DEBUG, (void *)&position);
-#endif
+    // Read touch screen status.
+    item = touchGetMenuItem(&xpos, &ypos);
 
     // check what (or if) a button was pressed
     switch(item)
@@ -124,26 +140,37 @@ void TouchInterruptHandler(void)
         break;
 
     case ARROW_LENGTH_BUTTON:
-        saveSettingsToEEPROM(settings);
-        writeInfo(MAX_ARROW_LENGTH, (void *)&settings->maxArrowLength);
+        drawArrowLengthMenu();
+        settings.maxArrowLength = touchGetArrowLength(settings.maxArrowLength, &xpos, &ypos);
+        setDisplayLayout(settings.backColorArrowWindow);
+        writeInfo(MAX_ARROW_LENGTH, (void *)&settings.maxArrowLength);
+        writeInfo(SCALING, (void *)&settings.relative);
+        writeInfo(HARDW_AVG, (void *)&settings.adcAVG);
+        writeInfo(MAX_ARROW_LENGTH, (void *)&settings.maxArrowLength);
+
+    #ifdef DEBUG
+        uint32_t position = (uint32_t)xpos << 16 | ypos;
+        writeInfo(POS_DEBUG, (void *)&position);
+    #endif
+        saveSettingsToEEPROM(&settings, sizeof(settings));
         break;
 
+    // toggle setting scaling: relative <-> absolute
     case SCALING_BUTTON:
-        // toggle setting relative <-> absolute
-        settings->relative = (settings->relative ? false:true);
-        saveSettingsToEEPROM(settings);
-        writeInfo(SCALING, (void *)&settings->relative);
+        settings.relative = settings.relative ? false:true;
+        writeInfo(SCALING, (void *)&settings.relative);
+        saveSettingsToEEPROM(&settings, sizeof(settings));
         break;
 
+    // toggle setting hardware averaging: on <-> off
     case HARDW_AVG_BUTTON:
-        // toggle setting on <-> off
-        settings->adcAVG = setADCHardwareAveraging(settings->adcAVG);
-        saveSettingsToEEPROM(settings);
-        writeInfo(HARDW_AVG, (void *)&settings->adcAVG);
+        settings.adcAVG = setADCHardwareAveraging(settings.adcAVG);
+        writeInfo(HARDW_AVG, (void *)&settings.adcAVG);
+        saveSettingsToEEPROM(&settings, sizeof(Settings));
         break;
     }
 
-    IntMasterEnable();
+    timerInterruptEnable();
 }
 
 
@@ -182,24 +209,24 @@ void UART0InterruptHandler(void)
 
         // set arrow size.
         case '1':
-            settings->maxArrowLength = getMaxArrowLengthUART();
-            writeInfo(SCALING, (void *)&settings->relative);
-            writeInfo(MAX_ARROW_LENGTH, (void *)&settings->maxArrowLength);
-            saveSettingsToEEPROM(settings);
+            settings.maxArrowLength = getMaxArrowLengthUART();
+            writeInfo(SCALING, &settings.relative);
+            writeInfo(MAX_ARROW_LENGTH, &settings.maxArrowLength);
+            saveSettingsToEEPROM(&settings, sizeof(Settings));
             break;
 
             // set arrow relative/absolute scaling mode
         case '2':
-            settings->relative = (settings->relative ? false:true);
-            writeInfo(SCALING, (void *)&settings->relative);
-            saveSettingsToEEPROM(settings);
+            settings.relative = (settings.relative ? false:true);
+            writeInfo(SCALING, &settings.relative);
+            saveSettingsToEEPROM(&settings, sizeof(Settings));
             break;
 
         // set hardware averaging on/off
         case '3':
-            settings->adcAVG = setADCHardwareAveraging((UART0receive[1] == '1'));
-            writeInfo(HARDW_AVG, (void *)&settings->adcAVG);
-            saveSettingsToEEPROM(settings);
+            settings.adcAVG = setADCHardwareAveraging((UART0receive[1] == '1'));
+            writeInfo(HARDW_AVG, &settings.adcAVG);
+            saveSettingsToEEPROM(&settings, sizeof(Settings));
             break;
 
         // commands for the stepper-motor are being past forwarded to UART2.
@@ -236,10 +263,12 @@ void Timer0InterruptHandler(void)
     #ifdef LCD5INCH
         drawDisplay5Inch(&sensorData->arrows);
     #else
-        drawDisplay7Inch(&sensorData->arrows);
+        drawDisplay7Inch((void *)&sensorData->arrows);
     #endif
 
+    #ifndef DEBUG
     writeInfo(ANALOG_VALUE, (void *)&sensorData->maxAnalogValue);
+    #endif
 
     // Start sensorData-array ad-conversion. This starts the first of 16 ADC
     // read bursts. The other 15 bursts will be triggered in ADC1InterruptHandler().
@@ -252,7 +281,7 @@ void Timer0InterruptHandler(void)
 
 
 /***********************  ADC Interrupt handler  ********************************/
-/* captures the analog sensorData array signals without busy waiting.               */
+/* captures the analog sensorData array signals without busy waiting.           */
 /* The digitized signals are being processed at the end.                        */
 /********************************************************************************/
 void ADC1InterruptHandler(void)
@@ -284,10 +313,37 @@ void ADC1InterruptHandler(void)
     else
     {
         // process arrow length and store results to be later drawn on LCD.
-        computeArrows(settings->relative, settings->maxArrowLength, sensorData);
+        computeArrows(settings.relative, settings.maxArrowLength, sensorData);
         // reset step counter for next use
         step = 0;
         // reset digital multiplexer inputs
         setMultiplexer(step);
     }
 }
+
+
+/***************************  initROM()  ****************************************/
+/* A new MCU has no saved settings and needs to be initialized with default     */
+/* values. This function is called on every startup and checks if the first     */
+/* 4 bytes contain a per Macro defined number RANDOM_NUMBER. If so, the EEPROM  */
+/* has already been initialized. If not it will be initialized.                 */
+/********************************************************************************/
+void initROM(void)
+{
+//    setup->ROMisInitialized = RANDOM_NUMBER;
+
+    settings.relative = true;
+    settings.coloredArrows = true;
+    settings.maxArrowLength = 40;
+    settings.adcAVG = true;
+    settings.backColorArrowWindow = (COLOR)WHITE;
+    settings.backColorTable = (COLOR)GREEN;
+    settings.backColorImgStart = (COLOR)GREEN;
+    settings.backColorImgStop  = (COLOR)RED;
+    settings.backColorImgLeft  = (COLOR)YELLOW;
+    settings.backColorImgRight = (COLOR)BLUE;
+    settings.testcolor = (COLOR)WHITE;
+
+}
+
+
