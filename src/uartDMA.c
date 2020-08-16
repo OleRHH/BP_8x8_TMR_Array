@@ -145,7 +145,7 @@ void sendCommandToMotor(uint16_t command)
 /* receive telemetry data from stepper-motor via RS485 */
 void UART2IntHandler(void)
 {
-    static uint32_t positionData;
+    volatile uint32_t positionData;
 
     uint32_t UIstatus = UARTIntStatus(UART2_BASE, true);    // Get the interrupt status.
     UARTIntClear(UART2_BASE, UIstatus);

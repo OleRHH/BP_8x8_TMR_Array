@@ -7,7 +7,7 @@
 #ifndef LCD_FUNCTIONS_H_
 #define LCD_FUNCTIONS_H_
 
-#define ANALOG_VALUE ( 1 )
+#define MAX_ANALOG_VALUE ( 1 )
 #define MAX_ARROW_LENGTH ( 2 )
 #define SCALING ( 3 )
 #define HARDW_AVG ( 4 )
@@ -18,8 +18,8 @@
 #include <stdint.h>
 
 
-/*****************************  # typedefs #   *****************************/
-typedef union color
+/*******************  # typedefs, enums and structs #   *******************/
+typedef union Color
 {
     int32_t all;
     struct
@@ -28,9 +28,9 @@ typedef union color
         char green;
         char red;
     };
-} COLOR;
+} color;
 
-// enum colors
+// some predefined basic colors
 enum colors
 {
     BLACK   = 0x00000000,
@@ -52,30 +52,53 @@ struct arrows {
 // todo: this concept wasn't fully implemented
 typedef struct
 {
-    uint16_t x;
-    uint16_t y;
-} point;
-
-typedef struct
-{
     int16_t x;
     int16_t y;
 } coordinates;
-COLOR color[768];
+
+typedef struct
+{
+    bool relative;
+    bool adcAVG;
+    uint16_t maxArrowLength;
+
+    bool coloredArrows;
+    color backColorArrowWindow;
+    color arrowColor;
+    color gridColor;
+
+    color backColorTable;
+    color backColorMotor;
+    color backColorArrowLengthMenu;
+    color backColorImgStart;
+    color backColorImgStop;
+    color backColorImgLeft;
+    color backColorImgRight;
+    color spacerColor;
+    color fontColor;
+} Setup;
+
+
+typedef struct
+{
+  uint16_t setupNo;
+  Setup setup[4];
+} Settings;
 
 /**************************  # public Prototypes #   **********************/
-void ConfigureGPIO(void);
 void configureLCD5Inch(uint32_t);
-void configureLCD7Inch(uint32_t);
-void setDisplayLayout(COLOR);
+Setup * configureLCD(uint32_t, Settings *);
+void configureLCDHardware(uint32_t);
+Setup * setLCDLayout(uint16_t, Settings *);
+void drawDisplayLayout(void);
 
-void drawDisplay5Inch(struct arrows *);
 void drawDisplay7Inch(struct arrows *);
 void drawArrowLengthMenu(void);
-void setArrowWindowBackground(COLOR);
-void writeInfo(uint16_t, void *);
+void writeInfo(uint16_t);
+void writeMaxAnalogValue(uint16_t);
 
-void writeCommand(unsigned char);
-void writePosition(uint16_t, uint16_t, uint16_t, uint16_t);
+bool getAdcAVG(void);
+bool getScaling(void);
+uint16_t getmaxArrow(void);
 
 #endif /* LCD_FUNCTIONS_H_ */

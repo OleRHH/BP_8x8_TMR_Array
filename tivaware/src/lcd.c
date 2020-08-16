@@ -808,10 +808,10 @@ LCDIDDDMAWrite(uint32_t ui32Base, uint32_t ui32CS, const uint32_t *pui32Data,
 //! display that outputs 4 pixels on each pixel clock.
 //! - \b RASTER_FMT_PASSIVE_MONO_8PIX selects a monochrome, passive matrix
 //! display that outputs 8 pixels on each pixel clock.
-//! - \b RASTER_FMT_PASSIVE_COLOR_12BIT selects a passive matrix display
+//! - \b RASTER_FMT_PASSIVE_color_12BIT selects a passive matrix display
 //! and uses a 12bpp frame buffer.  The palette is bypassed and 12-bit pixel
 //! data is sent to the grayscaler for the display.
-//! - \b RASTER_FMT_PASSIVE_COLOR_16BIT selects a passive matrix display
+//! - \b RASTER_FMT_PASSIVE_color_16BIT selects a passive matrix display
 //! and uses a 16bpp frame buffer with pixels in 5:6:5 format.  Only the 4
 //! most significant bits of each color component are sent to the grayscaler
 //! for the display.
@@ -857,8 +857,8 @@ LCDRasterConfigSet(uint32_t ui32Base, uint32_t ui32Config,
                             RASTER_FMT_PASSIVE_MONO_4PIX |
                             RASTER_FMT_PASSIVE_MONO_8PIX |
                             RASTER_FMT_PASSIVE_PALETTIZED |
-                            RASTER_FMT_PASSIVE_COLOR_12BIT |
-                            RASTER_FMT_PASSIVE_COLOR_16BIT |
+                            RASTER_FMT_PASSIVE_color_12BIT |
+                            RASTER_FMT_PASSIVE_color_16BIT |
                             RASTER_ACTVID_DURING_BLANK |
                             RASTER_NIBBLE_MODE_ENABLED |
                             RASTER_LOAD_DATA_ONLY |
