@@ -35,8 +35,6 @@
 #define ARROW_ANGLE     0.7
 #define ARROW_LENGTH    5
 #define MIN_LENGTH_FOR_ARROW  1
-#define GRID_OFFSET_X_5_INCH ( 30 )
-#define GRID_OFFSET_Y_5_INCH ( 20 )
 #define GRID_OFFSET_X_7_INCH ( 50 )
 #define GRID_OFFSET_Y_7_INCH ( 35 )
 
@@ -48,45 +46,42 @@
 
 
 /*****************************  # intern prototypes #   *************************/
+void generateColors(void);  // create the color codes for colored arrows
+void setLCDBackgroundColor7(color);
 void writeCommand(unsigned char);
 void writeCmdData(unsigned char);
-void writeData(COLOR);
+void writeData(color);
+
 void writePosition(uint16_t, uint16_t, uint16_t, uint16_t);
-void generateColors(void);  // create the color codes for colored arrows
-void setLCD7inchHardware(uint32_t);
+void writeButton(unsigned char *, short, short, color);
 
-void writeLine(short, short, short, short, COLOR, uint16_t);
-void writeLine0Degree  (short, short, short, short, COLOR);
-void writeLine90Degree (short, short, short, short, COLOR);
-void writeLine180Degree(short, short, short, short, COLOR);
-void writeLine270Degree(short, short, short, short, COLOR);
-void writeLineQuadrant1_I (short, short, short, short, double, COLOR);  //   0° < degree < 90°
-void writeLineQuadrant1_II(short, short, short, short, double, COLOR);  //   0° < degree < 90°
-void writeLineQuadrant2_I (short, short, short, short, double, COLOR);  //  90° < degree < 180°
-void writeLineQuadrant2_II(short, short, short, short, double, COLOR);  //  90° < degree < 180°
-void writeLineQuadrant3_I (short, short, short, short, double, COLOR);  // 180° < degree < 270°
-void writeLineQuadrant3_II(short, short, short, short, double, COLOR);  // 180° < degree < 270°
-void writeLineQuadrant4_I (short, short, short, short, double, COLOR);  // 270° < degree < 360°
-void writeLineQuadrant4_II(short, short, short, short, double, COLOR);  // 270° < degree < 360°
+void drawLine(short, short, short, short, color, uint16_t);
+void writeLine0Degree  (short, short, short, short, color);
+void writeLine90Degree (short, short, short, short, color);
+void writeLine180Degree(short, short, short, short, color);
+void writeLine270Degree(short, short, short, short, color);
+void writeLineQuadrant1_I (short, short, short, short, double, color);  //   0° < degree < 90°
+void writeLineQuadrant1_II(short, short, short, short, double, color);  //   0° < degree < 90°
+void writeLineQuadrant2_I (short, short, short, short, double, color);  //  90° < degree < 180°
+void writeLineQuadrant2_II(short, short, short, short, double, color);  //  90° < degree < 180°
+void writeLineQuadrant3_I (short, short, short, short, double, color);  // 180° < degree < 270°
+void writeLineQuadrant3_II(short, short, short, short, double, color);  // 180° < degree < 270°
+void writeLineQuadrant4_I (short, short, short, short, double, color);  // 270° < degree < 360°
+void writeLineQuadrant4_II(short, short, short, short, double, color);  // 270° < degree < 360°
 
-void drawRectangle(short, short, short, short, COLOR);
-
-void writeChar(uint16_t, COLOR, COLOR);
-void writeButton(unsigned char *, short, short, COLOR);
-void printString(char *, uint16_t, uint16_t, COLOR, COLOR);
-void setDisplayLayout(COLOR);
+void drawRectangle(short, short, short, short, color);
+void drawString(char *, uint16_t, uint16_t, color, color);
 
 
 /*****************************  # global variables #    *************************/
-COLOR backColor;
-COLOR backMenu = (COLOR)GREEN;
-COLOR backImgStart = (COLOR)GREEN;
-COLOR backImgStop  = (COLOR)RED;
-COLOR backImgLeft  = (COLOR)YELLOW;
-COLOR backImgRight = (COLOR)BLUE;
-
 int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
+//color backColorTable;
+
+color arrowColor[768];
+color arrowBlack[768];
+
+Setup * set;
 
 
 /***********************  # extern global variables #    ************************/
@@ -96,56 +91,117 @@ extern unsigned char imgArrayArrowLButton[PIXEL_COUNT];
 extern unsigned char imgArrayArrowRButton[PIXEL_COUNT];
 
 
+/**************************  configureLCD()  ************************************/
+//       //
 /********************************************************************************/
-void configureLCD7Inch(uint32_t SysClock, COLOR backgroundColor)
+Setup * configureLCD(uint32_t SysClock, Settings * setting)
 {
-    setLCD7inchHardware(SysClock);
+    configureLCDHardware(SysClock);
+
     generateColors();
-    setLCDBackgroundColor7(backgroundColor);
-    setDisplayLayout((COLOR)BLACK);
+
+    set = &setting->setup[setting->setupNo];
+
+    drawDisplayLayout();
+
+    return set;
 }
 
 
-/******************************  setDisplayLayout()  ************************************/
-// draws nice lines for a stylish, modern and inovative display design**@       //
+/****************************  setLCDLayout()  **********************************/
+//       //
 /********************************************************************************/
-void setDisplayLayout(COLOR color)
+Setup * setLCDLayout(uint16_t num, Settings * setting)
 {
-    drawRectangle(510, 0, 799, 274, (COLOR)BLACK);  // background motor control
-    drawRectangle(510, 278, 799, 479, backMenu);    // background infos
+    setting->setupNo = num;
+    set = &setting->setup[setting->setupNo];
 
-    drawRectangle(507, 0, 510, 479, (COLOR)BLUE);   // spacer
-    drawRectangle(680, 278, 682, 479, (COLOR)BLUE); // little spacer
-    drawRectangle(510, 275, 799, 278, (COLOR)BLUE);
-    drawRectangle(510, 330, 799, 333, (COLOR)BLUE);
-    drawRectangle(510, 385, 799, 388, (COLOR)BLUE);
-    drawRectangle(510, 440, 799, 443, (COLOR)BLUE);
+    drawDisplayLayout();
+
+    return set;
+}
+
+
+/*************************  drawDisplayLayout()  ********************************/
+//       //
+/********************************************************************************/
+void drawDisplayLayout(void)
+{
+    drawRectangle(0, 0, 506, 479, set->backColorArrowWindow); // arrow background
+
+    drawRectangle(510, 0, 799, 274, set->backColorMotor);  // background motor control
+    drawRectangle(510, 278, 799, 479, set->backColorTable);    // background infos
+
+    drawRectangle(507,   0, 510, 479, set->spacerColor);   // spacerColor
+    drawRectangle(680, 278, 682, 479, set->spacerColor); // little spacerColor
+    drawRectangle(510, 275, 799, 278, set->spacerColor);
+    drawRectangle(510, 330, 799, 333, set->spacerColor);
+    drawRectangle(510, 385, 799, 388, set->spacerColor);
+    drawRectangle(510, 440, 799, 443, set->spacerColor);
 
     // 1.
-    writeButton(imgArrayArrowLButton, 540, 20, backImgStart);
+    writeButton(imgArrayArrowLButton, 540, 20, set->backColorImgLeft);
     // 2.
-    writeButton(imgArrayArrowRButton, 680, 20, backImgStart);
+    writeButton(imgArrayArrowRButton, 680, 20, set->backColorImgRight);
     // 3.
-    writeButton(imgArrayStopButton, 540, 150, backImgStop);
+    writeButton(imgArrayStopButton, 540, 150, set->backColorImgStop);
     // 4.
-    writeButton(imgArrayStartButton, 680, 150, backImgRight);
+    writeButton(imgArrayStartButton, 680, 150, set->backColorImgStart);
 
-    printString("max measured", 285, 520, (COLOR)BLACK, backMenu);
-    printString("analog value", 305, 520, (COLOR)BLACK, backMenu);
+    drawString("max measured", 285, 520, set->fontColor, set->backColorTable);
+    drawString("analog value", 305, 520, set->fontColor, set->backColorTable);
 
-    printString("max arrow", 340, 520, (COLOR)BLACK, backMenu);
-    printString("length", 360, 520, (COLOR)BLACK, backMenu);
+    drawString("max arrow", 340, 520, set->fontColor, set->backColorTable);
+    drawString("length", 360, 520, set->fontColor, set->backColorTable);
 
-    printString("scaling", 410, 520, (COLOR)BLACK, backMenu);
+    drawString("scaling", 410, 520, set->fontColor, set->backColorTable);
 
-    printString("hardware avg", 450, 520, (COLOR)BLACK, backMenu);
+    drawString("hardware avg", 450, 520, set->fontColor, set->backColorTable);
+
+    writeInfo(MAX_ARROW_LENGTH | SCALING | HARDW_AVG);
+}
+
+
+/***************************  drawArrowLengthMenu()  ****************************/
+// draws the 'Change max. arrow size' menu: background, lines and words.        //
+/********************************************************************************/
+void drawArrowLengthMenu(void)
+{
+    uint16_t m, n, value = 10;
+    char charValue[10];
+    // the rectangle is the background to the menu
+    drawRectangle(50, 50, 456, 456, set->backColorArrowLengthMenu);  // background motor buttons
+
+    // the following rectangles are the fat lines that build the grid.
+    drawRectangle( 48, 48,  49, 458, set->spacerColor);   // spacer
+    drawRectangle(150, 50, 151, 458, set->spacerColor);   // spacer
+    drawRectangle(252, 50, 253, 458, set->spacerColor);   // spacer
+    drawRectangle(354, 50, 355, 458, set->spacerColor);   // spacer
+    drawRectangle(456, 48, 457, 458, set->spacerColor);   // spacer
+
+    drawRectangle(50,  48, 456,  49, set->spacerColor);   // spacer
+    drawRectangle(50, 150, 456, 151, set->spacerColor);   // spacer
+    drawRectangle(50, 252, 456, 253, set->spacerColor);   // spacer
+    drawRectangle(50, 354, 456, 355, set->spacerColor);   // spacer
+    drawRectangle(50, 457, 456, 458, set->spacerColor);   // spacer
+
+    // now the available number choices are being printed out on the menu.
+    for(m = 0; m < 4; m++)
+    {
+        for(n = 0; n < 4; n++)
+        {
+            sprintf(charValue, "%.2d", value);
+            drawString(charValue, 95 + 100 * m, 90 + 100 * n, set->fontColor, set->backColorArrowLengthMenu);
+            value += 10;
+        }
+    }
 }
 
 
 /******************************  writeButton()  *********************************/
-// Helper function for setDisplayLayout().                                              //
+// Helper function for setDisplayLayout().                                      //
 /********************************************************************************/
-void writeButton(unsigned char *imgArray, short offsetX, short offsetY, COLOR color)
+void writeButton(unsigned char *imgArray, short offsetX, short offsetY, color color)
 {
     int pixel;
     short stopX, stopY;
@@ -157,8 +213,8 @@ void writeButton(unsigned char *imgArray, short offsetX, short offsetY, COLOR co
 
 // draws a cross for touch calibration
 #ifdef DEBUG
-    writeLine( offsetX + OFFSET_IMG/2, offsetY - EDGE, offsetX + OFFSET_IMG/2, stopY + EDGE, (COLOR)BLACK, NO_ARROW);
-    writeLine( offsetX - EDGE, offsetY + OFFSET_IMG/2, stopX + EDGE, offsetY + OFFSET_IMG/2, (COLOR)BLACK, NO_ARROW);
+    drawLine( offsetX + OFFSET_IMG/2, offsetY - EDGE, offsetX + OFFSET_IMG/2, stopY + EDGE, (color)BLACK, NO_ARROW);
+    drawLine( offsetX - EDGE, offsetY + OFFSET_IMG/2, stopX + EDGE, offsetY + OFFSET_IMG/2, (color)BLACK, NO_ARROW);
 #endif
 
     writePosition(offsetX, offsetY, stopX, stopY);
@@ -171,9 +227,11 @@ void writeButton(unsigned char *imgArray, short offsetX, short offsetY, COLOR co
             GPIO_PORTM_DATA_R = color.red;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+
             GPIO_PORTM_DATA_R = color.green;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+
             GPIO_PORTM_DATA_R = color.blue;
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
@@ -181,10 +239,13 @@ void writeButton(unsigned char *imgArray, short offsetX, short offsetY, COLOR co
         else
         {
             GPIO_PORTM_DATA_R = 0x00;
+
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+
             GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
             GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
         }
@@ -197,193 +258,102 @@ void writeButton(unsigned char *imgArray, short offsetX, short offsetY, COLOR co
 // Infos are: absolute or relative arrow mode, maximum measured analog,         //
 // arrow max length.                                                            //
 /********************************************************************************/
-void writeInfo(uint16_t info, void * value)
+void writeInfo(uint16_t info)
 {
     char charValue[20];
 
-    switch(info)
+    if( (info & MAX_ANALOG_VALUE) == MAX_ANALOG_VALUE)
     {
-    case ANALOG_VALUE:
-        sprintf(charValue, "%.3d", *(uint16_t *)value);
-        printString(charValue, 295, 720, (COLOR)BLACK, backMenu);
-        break;
-    case MAX_ARROW_LENGTH:
-        sprintf(charValue, "%.3d", *(uint16_t *)value);
-        printString(charValue, 350, 720, (COLOR)BLACK, backMenu);
-        break;
-    case SCALING:
-        (*(bool *)value) ?  sprintf(charValue, "relative") : sprintf(charValue, "absolute");
-        printString(charValue, 410, 690, (COLOR)BLACK, backMenu);
-        break;
-    case HARDW_AVG:
-        (*(bool *)value) ?  sprintf(charValue, " on") : sprintf(charValue, "off");
-        printString(charValue, 450, 720, (COLOR)BLACK, backMenu);
-        break;
-    case POS_DEBUG:
-        sprintf(charValue, "x: %.4d", (*(uint32_t *)value) >> 16);
-        printString(charValue, 290, 700, (COLOR)BLACK, backMenu);
-        sprintf(charValue, "y: %.4d", (*(uint16_t *)value));
-        printString(charValue, 310, 700, (COLOR)BLACK, backMenu);
-        break;
+        // TODO: implement here. Currently in separate function.
+    }
+    if( (info & MAX_ARROW_LENGTH) == MAX_ARROW_LENGTH)
+    {
+        sprintf(charValue, "%.3d", set->maxArrowLength);
+        drawString(charValue, 350, 720, set->fontColor, set->backColorTable);
+    }
+    if( (info & SCALING) == SCALING)
+    {
+        (set->relative) ?  sprintf(charValue, "relative") : sprintf(charValue, "absolute");
+        drawString(charValue, 410, 690, set->fontColor, set->backColorTable);
+    }
+    if( (info & HARDW_AVG) == HARDW_AVG)
+    {
+        (set->adcAVG) ?  sprintf(charValue, " on") : sprintf(charValue, "off");
+        drawString(charValue, 450, 720, set->fontColor, set->backColorTable);
+    }
+    if( (info & POS_DEBUG) == POS_DEBUG)
+    {
+//        sprintf(charValue, "x: %.4d", (*(uint32_t *)value) >> 16);
+//        drawString(charValue, 290, 700, (color)BLACK, backColorTable);
+//        sprintf(charValue, "y: %.4d", (*(uint16_t *)value));
+//        drawString(charValue, 310, 700, (color)BLACK, backColorTable);
     }
 }
 
 
-/****************************  printString()   **********************************/
+/************************  writeMaxAnalogValue()   ******************************/
+// arrow max length.                                                            //
+/********************************************************************************/
+void writeMaxAnalogValue(uint16_t maxAnalogValue)
+{
+    char charValue[20];
+
+    sprintf(charValue, "%.3d", maxAnalogValue);
+    drawString(charValue, 295, 720, set->fontColor, set->backColorTable);
+}
+
+
+/****************************  drawString()   **********************************/
 // writes a string to the given position on the LC-Display                      //
 /********************************************************************************/
-void printString(char *text, uint16_t row, uint16_t column, COLOR color, COLOR backcolor)
+void drawString(char *text, uint16_t rowStart, uint16_t columnStart, color fontColor, color backcolor)
 {
-    uint16_t letter, numLetter, lv;
-    uint16_t length = strlen(text);
-    uint16_t columnStart = column;
+    uint16_t letter, numLetter, byteNum, lv;
     uint16_t columnStop = columnStart + FONT_WIDTH_BIG - 1;
-    uint16_t rowStart = row;
     uint16_t rowStop = rowStart + FONT_HIGHT_BIG - 1;
 
-    for (numLetter = 0; numLetter < length; numLetter++)
+    // write all characters from given string
+    for (numLetter = 0; numLetter < strlen(text); numLetter++)
     {
         writePosition(columnStart, rowStart, columnStop, rowStop);
         writeCommand(0x2C);
-        for (lv = 0; lv < 32; lv += 2)
+
+        // Write the 16 rows with 2 bytes each (lv: 0,2,4,..,30,32)
+        for (byteNum = 0; byteNum < 32; byteNum += 2)
         {
-            letter = (font_12_16[text[numLetter]][lv + 1] << 4)
-                    | (font_12_16[text[numLetter]][lv] >> 4);
-            writeChar(letter, color, backcolor);
+            // letter = 16 bit = highByte<<4 OR lowByte>>4
+            letter = (font_12_16[text[numLetter]][byteNum + 1] << 4)
+                    | (font_12_16[text[numLetter]][byteNum] >> 4);
+
+            for (lv = 0; lv < 12; lv++) {
+                if (letter & 1) {             // Write data byte
+                    GPIO_PORTM_DATA_R = fontColor.red;
+                    GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+                    GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+                    GPIO_PORTM_DATA_R = fontColor.green;
+                    GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+                    GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+                    GPIO_PORTM_DATA_R = fontColor.blue;
+                    GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+                    GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+                } else {
+                    GPIO_PORTM_DATA_R = backcolor.red;
+                    GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+                    GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+                    GPIO_PORTM_DATA_R = backcolor.green;
+                    GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+                    GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+                    GPIO_PORTM_DATA_R = backcolor.blue;
+                    GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
+                    GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
+                }
+                letter >>= 1;
+            }
         }
         columnStart += FONT_WIDTH_BIG;
         columnStop  += FONT_WIDTH_BIG;
     }
 }
-
-
-/****************************  writeChar()   ************************************/
-// helper function for printString():                                           //
-// writes a single letter with height 12 pixel                                  //
-/********************************************************************************/
-void writeChar(uint16_t letter, COLOR color, COLOR backcolor)
-{
-    uint16_t lv;
-
-    for (lv = 0; lv < 12; lv++) {
-        if (letter & 1) {             // Write data byte
-            GPIO_PORTM_DATA_R = color.red;
-            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
-            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-            GPIO_PORTM_DATA_R = color.green;
-            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
-            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-            GPIO_PORTM_DATA_R = color.blue;
-            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
-            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-        } else {
-            GPIO_PORTM_DATA_R = backcolor.red;
-            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
-            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-            GPIO_PORTM_DATA_R = backcolor.green;
-            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
-            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-            GPIO_PORTM_DATA_R = backcolor.blue;
-            GPIO_PORTQ_DATA_R = 0x15;               // Chip select = 0, Write state = 0
-            GPIO_PORTQ_DATA_R = 0x1F;               // Initial state
-        }
-        letter >>= 1;
-    }
-}
-
-
-/***********************  setLCDBackgroundColor()  ******************************/
-// Writes the 5'' screen in one color                                           //
-/********************************************************************************/
-void setLCDBackgroundColor(COLOR backcolor)
-{
-    uint32_t count = 0;
-    backColor = backcolor;
-
-    writePosition(0, 0, 479, 271);
-    writeCommand(0x2C);
-
-    while (count++ < 130560) {
-        GPIO_PORTM_DATA_R = backColor.red;       // Write data byte
-        GPIO_PORTQ_DATA_R = 0x15;            // Chip select = 0, Write state = 0
-        GPIO_PORTQ_DATA_R = 0x1F;            // Initial state
-
-        GPIO_PORTM_DATA_R = backColor.green;    // Write data byte
-        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
-        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
-
-        GPIO_PORTM_DATA_R = backColor.blue;     // Write data byte
-        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
-        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
-    }
-}
-
-
-/***********************  setLCDBackgroundColor7()  *****************************/
-// Writes the 7'' screen in one color                                           //
-/********************************************************************************/
-void setLCDBackgroundColor7(COLOR backcolor)
-{
-    uint32_t count = 0;
-    backColor = backcolor;
-
-    writePosition(0, 0, 799, 479);
-    writeCommand(0x2C);
-
-    while (count++ < 384000) {
-        GPIO_PORTM_DATA_R = backColor.red;       // Write data byte
-        GPIO_PORTQ_DATA_R = 0x15;            // Chip select = 0, Write state = 0
-        GPIO_PORTQ_DATA_R = 0x1F;            // Initial state
-
-        GPIO_PORTM_DATA_R = backColor.green;    // Write data byte
-        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
-        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
-
-        GPIO_PORTM_DATA_R = backColor.blue;     // Write data byte
-        GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
-        GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
-    }
-}
-
-
-/**************************  drawDisplay5Inch()   *******************************/
-// draws all arrows to the 5 inch LC-Display.                                   //
-/********************************************************************************/
-void drawDisplay5Inch(struct arrows * arrow)
-{
-    int16_t m = 0, n = 0;               // m = row , n = column
-    point start, stop;
-    // write the arrows
-    for(m = 0; m <= 7; m++)
-    {
-        for(n = 0; n <= 7; n++)
-        {
-            // I. delete old arrows
-            start.x = n * 32 + GRID_OFFSET_X_5_INCH;
-            start.y = m * 32 + GRID_OFFSET_Y_5_INCH;
-            stop.x  = start.x + oldDiffCosResults[m][n];
-            stop.y  = start.y + oldDiffSinResults[m][n];
-
-            writeLine(start.x, start.y, stop.x, stop.y, backColor, WITH_ARROW);
-
-            // II. write grid cross
-            stop.x  = start.x;
-            stop.y  = start.y;
-
-            writeLine(start.x - 2, start.y, stop.x + 2, stop.y, (COLOR)BLACK, NO_ARROW);    // draw a small cross..
-            writeLine(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
-
-            // III. write new arrows
-            stop.x  = n * 32 + GRID_OFFSET_X_5_INCH + arrow->dCos[m][n];
-            stop.y  = m * 32 + GRID_OFFSET_Y_5_INCH + arrow->dSin[m][n];
-
-            writeLine(start.x, start.y, stop.x, stop.y, color[arrow->arrowLength[m][n]], WITH_ARROW);
-            oldDiffCosResults[m][n] = arrow->dCos[m][n];
-            oldDiffSinResults[m][n] = arrow->dSin[m][n];
-        }
-    }
-}
-
 
 
 /**************************  drawDisplay7Inch()   *******************************/
@@ -393,6 +363,19 @@ void drawDisplay7Inch(struct arrows * arrow)
 {
     int16_t m = 0, n = 0;               // m = row , n = column
     coordinates start, stop;
+    color *arrowColor1;
+
+    // if the option 'colored arrows' is enabled, the colors get linked to an
+    // array with 768 different colors from dark blue to red.
+    // if option is disabled colors get linked to an array with only 'black'.
+    if( set->coloredArrows == true)
+    {
+        arrowColor1 = arrowColor;
+    }
+    else
+    {
+        arrowColor1 = arrowBlack;
+    }
 
     // write the arrows
     for(m = 0; m <= 7; m++)
@@ -407,13 +390,13 @@ void drawDisplay7Inch(struct arrows * arrow)
             stop.x  = start.x + oldDiffCosResults[m][n];
             stop.y  = start.y + oldDiffSinResults[m][n];
 
-            writeLine(start.x, start.y, stop.x, stop.y, backColor, WITH_ARROW);
+            drawLine(start.x, start.y, stop.x, stop.y, set->backColorArrowWindow, WITH_ARROW);
 
             // III: write grid cross
             stop.x  = start.x;
             stop.y  = start.y;
-            writeLine(start.x - 2, start.y, stop.x + 2, stop.y, (COLOR)BLACK, NO_ARROW);    // draw a small cross..
-            writeLine(start.x, start.y - 2, stop.x, stop.y + 2, (COLOR)BLACK, NO_ARROW);    // ..as as grid indicator
+            drawLine(start.x - 2, start.y, stop.x + 2, stop.y, set->gridColor, NO_ARROW);    // draw a small cross..
+            drawLine(start.x, start.y - 2, stop.x, stop.y + 2, set->gridColor, NO_ARROW);    // ..as as grid indicator
 
             // IV: write new arrows
             stop.x  = start.x + arrow->dCos[m][n];
@@ -440,8 +423,8 @@ void drawDisplay7Inch(struct arrows * arrow)
                 stop.x  = 506;
             }
 
-            writeLine(start.x, start.y, stop.x, stop.y, (COLOR)BLACK, WITH_ARROW);
-//            writeLine(start.x, start.y, stop.x, stop.y, color[arrow->arrowLength[m][n]], WITH_ARROW);
+            drawLine(start.x, start.y, stop.x, stop.y, arrowColor1[arrow->arrowLength[m][n]], WITH_ARROW);
+
             oldDiffCosResults[m][n] = arrow->dCos[m][n];
             oldDiffSinResults[m][n] = arrow->dSin[m][n];
         }
@@ -453,7 +436,7 @@ void drawDisplay7Inch(struct arrows * arrow)
 // Draws rectangles with specified color.                                       //
 // This function is used to draw the menu backgrounds.                          //
 /********************************************************************************/
-void drawRectangle(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void drawRectangle(short start_x, short start_y, short stop_x, short stop_y, color color)
 {
     uint32_t start, stop;
 
@@ -481,7 +464,7 @@ void drawRectangle(short start_x, short start_y, short stop_x, short stop_y, COL
 //
 /********************************************************************************/
 //draws a line from start point x to stop point y directly to the display
-void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR color, uint16_t arrowOption)
+void drawLine(short start_x, short start_y, short stop_x, short stop_y, color color, uint16_t arrowOption)
 {
     int16_t delta_x = stop_x - start_x;
     int16_t delta_y = stop_y - start_y;
@@ -495,9 +478,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
             if(arrowOption == WITH_ARROW && -delta_y > 1)
             {
-                writeLine(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                drawLine(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
-                writeLine(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                drawLine(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
@@ -507,9 +490,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
             if(arrowOption == WITH_ARROW && delta_y > 1)
             {
-                writeLine(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                drawLine(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
-                writeLine(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                drawLine(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
@@ -523,9 +506,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
             if(arrowOption == WITH_ARROW && -delta_x > 1)
             {
-                writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
-                writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
+                drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
@@ -535,9 +518,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
             if(arrowOption == WITH_ARROW && delta_x > 1)
             {
-                writeLine(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                drawLine(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
-                writeLine(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
+                drawLine(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
                            stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
             }
         }
@@ -558,10 +541,10 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                     if(arrowOption == WITH_ARROW & delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         angle = atan2(delta_y, delta_x);
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);    // upper arrow line
 
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);    // lower arrow line
                     }
                 }
@@ -573,9 +556,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                     if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         angle = atan2(delta_y, delta_x);
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper arrow line
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -592,9 +575,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                     {
                         angle = atan2(delta_y, delta_x);
                         //                        printf("%lf\n", angle);
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper arrow line
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
                                    stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -606,9 +589,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                     if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         angle = 1.571 - atan(gain);
-                        writeLine(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                        drawLine(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
-                        writeLine(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                        drawLine(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -627,9 +610,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                     if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         angle = atan(gain);
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE - angle),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE - angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE - angle), color, NO_ARROW);// upper arrow line
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE + angle),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE + angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE + angle), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -641,9 +624,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                     if(arrowOption == WITH_ARROW && delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         angle = 1.571 - atan(gain);
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -658,9 +641,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                     if(arrowOption == WITH_ARROW && -delta_y > MIN_LENGTH_FOR_ARROW)
                     {
                         angle = atan(gain);
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -672,9 +655,9 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
                     if(arrowOption == WITH_ARROW && -delta_x > MIN_LENGTH_FOR_ARROW)
                     {
                         angle = 1.571 - atan(gain);
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
                                    stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
-                        writeLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
+                        drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
                                    stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
                     }
                 }
@@ -685,7 +668,7 @@ void writeLine(short start_x, short start_y, short stop_x, short stop_y, COLOR c
 
 
 /********************************************************************************/
-void writeLine0Degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine0Degree(short start_x, short start_y, short stop_x, short stop_y, color color)
 {
     int16_t x;
 
@@ -699,7 +682,7 @@ void writeLine0Degree(short start_x, short start_y, short stop_x, short stop_y, 
 
 
 /********************************************************************************/
-void writeLine90Degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine90Degree(short start_x, short start_y, short stop_x, short stop_y, color color)
 {
     int16_t y;
 
@@ -713,7 +696,7 @@ void writeLine90Degree(short start_x, short start_y, short stop_x, short stop_y,
 
 
 /********************************************************************************/
-void writeLine180Degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine180Degree(short start_x, short start_y, short stop_x, short stop_y, color color)
 {
     int16_t x;
 
@@ -727,7 +710,7 @@ void writeLine180Degree(short start_x, short start_y, short stop_x, short stop_y
 
 
 /********************************************************************************/
-void writeLine270Degree(short start_x, short start_y, short stop_x, short stop_y, COLOR color)
+void writeLine270Degree(short start_x, short start_y, short stop_x, short stop_y, color color)
 {
     int16_t y;
 
@@ -741,7 +724,7 @@ void writeLine270Degree(short start_x, short start_y, short stop_x, short stop_y
 
 
 /********************************************************************************/
-void writeLineQuadrant1_I(short start_x, short start_y, short stop_x, short stop_y, double gain,COLOR color)
+void writeLineQuadrant1_I(short start_x, short start_y, short stop_x, short stop_y, double gain,color color)
 {
     double gain2 = 0.5;
 
@@ -765,7 +748,7 @@ void writeLineQuadrant1_I(short start_x, short start_y, short stop_x, short stop
 
 
 /********************************************************************************/
-void writeLineQuadrant1_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant1_II(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -789,7 +772,7 @@ void writeLineQuadrant1_II(short start_x, short start_y, short stop_x, short sto
 
 
 /********************************************************************************/
-void writeLineQuadrant2_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant2_I(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -813,7 +796,7 @@ void writeLineQuadrant2_I(short start_x, short start_y, short stop_x, short stop
 
 
 /********************************************************************************/
-void writeLineQuadrant2_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant2_II(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -837,7 +820,7 @@ void writeLineQuadrant2_II(short start_x, short start_y, short stop_x, short sto
 
 
 /********************************************************************************/
-void writeLineQuadrant3_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant3_I(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -861,7 +844,7 @@ void writeLineQuadrant3_I(short start_x, short start_y, short stop_x, short stop
 
 
 /********************************************************************************/
-void writeLineQuadrant3_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant3_II(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -885,7 +868,7 @@ void writeLineQuadrant3_II(short start_x, short start_y, short stop_x, short sto
 
 
 /********************************************************************************/
-void writeLineQuadrant4_I(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant4_I(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -909,7 +892,7 @@ void writeLineQuadrant4_I(short start_x, short start_y, short stop_x, short stop
 
 
 /********************************************************************************/
-void writeLineQuadrant4_II(short start_x, short start_y, short stop_x, short stop_y, double gain, COLOR color)
+void writeLineQuadrant4_II(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -968,9 +951,14 @@ void generateColors(void)
             green = 1023 - val;
             blue = 0;
         }
-        color[i].red = red;
-        color[i].green = green;
-        color[i].blue = blue;
+        arrowColor[i].red = red;
+        arrowColor[i].green = green;
+        arrowColor[i].blue = blue;
+
+        arrowBlack[i].red = 0x00;
+        arrowBlack[i].green = 0x00;
+        arrowBlack[i].blue = 0x00;
+
         val++;
     }
 }
@@ -995,17 +983,17 @@ void writeCmdData(unsigned char data)
 
 
 /********************************************************************************/
-void writeData(COLOR color)
+void writeData(color color_)
 {
-    GPIO_PORTM_DATA_R = color.red;      // Write data byte
+    GPIO_PORTM_DATA_R = color_.red;      // Write data byte
     GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
     GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
 
-    GPIO_PORTM_DATA_R = color.green;    // Write data byte
+    GPIO_PORTM_DATA_R = color_.green;    // Write data byte
     GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
     GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
 
-    GPIO_PORTM_DATA_R = color.blue;     // Write data byte
+    GPIO_PORTM_DATA_R = color_.blue;     // Write data byte
     GPIO_PORTQ_DATA_R = 0x15;           // Chip select = 0, Write state = 0
     GPIO_PORTQ_DATA_R = 0x1F;           // Initial state
 }
@@ -1030,7 +1018,7 @@ void writePosition(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uint
 
 /********************************************************************************/
 // LCD Panel initialize:
-void configureLCD5Inch(uint32_t SysClock, COLOR backgroundColor) {
+void configureLCD5Inch(uint32_t SysClock) {
     uint32_t value;
 
     // Set Port L  0-4: Multiplexer address output for 8x8 Array
@@ -1124,15 +1112,11 @@ void configureLCD5Inch(uint32_t SysClock, COLOR backgroundColor) {
 //    writeCmdData(0b00000001);          // flip vertical
 
     writeCommand(0x29);                // Set display on
-
-    generateColors();
-    setLCDBackgroundColor(backgroundColor);
-    setDisplayLayout((COLOR)BLACK);
 }
 
 
 /********************************************************************************/
-void setLCD7inchHardware(uint32_t SysClock)
+void configureLCDHardware(uint32_t SysClock)
 {
     // Set Port L  0-4: Multiplexer address output for 8x8 Array
     // Pin 3 = D; Pin 2 = C; Pin 1 = B; Pin 0 = A; Pin 4 = nD
@@ -1241,4 +1225,5 @@ void setLCD7inchHardware(uint32_t SysClock)
     writeCmdData(0x00);
 
     writeCommand(SET_DISPLAY_ON);           // Set display on
+
 }

@@ -39,7 +39,7 @@ void main(void)
     configureDebugGPIO();
     sensorData = configureADC();
     configureTimer0(SysClock);
-    configureLCD(SysClock, (COLOR)settings->backgroundColor);
+    configureLCD(SysClock, (color)settings->backgroundColor);
     configureUartUDMA();
     ConfigureUART0(SysClock);
     ConfigureUART2(SysClock);

@@ -38,16 +38,18 @@
 
 /***************************  # global variables #   ****************************/
 // All ADC-Values. Temporarily stored here while ADC in progress.
-static int16_t SinResults[8][16];
-static int16_t CosResults[8][16];
+static int16_t SinResults[8][16];   // 128 bytes
+static int16_t CosResults[8][16];   // 128 bytes
 
-// The offset values are being computed but are not used at the moment.
+// These offset values are being computed but are not used at the moment.
 // They are here for historic reasons and to be used again in the future.
+// TODO: use :)
 int16_t SinOffset[8][8];
 int16_t CosOffset[8][8];
 
 // Struct to hold all sensor data used in other functions
 TMRSensorData SensorData;
+
 
 /********************************************************************************/
 void startADConversion(void)
@@ -171,9 +173,9 @@ void storeArraySensorData(uint16_t step)
 
 
 /***********************  computeArrows() ***************************************/
-/* Compute differential signal                                                  */
+/* Compute differential signals.                                                */
 /********************************************************************************/
-void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * sensor)
+void computeArrows(bool relative, uint16_t maxArrowLength)
 {
     static int16_t negSinResults[8][8];
     static int16_t posSinResults[8][8];
@@ -183,7 +185,7 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
 
     uint16_t m, n;
 
-    sensor->maxAnalogValue = 1;
+    SensorData.maxAnalogValue = 1;
 
     for(m = 0; m <= 7; m++)
     {
@@ -199,18 +201,18 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
             CosOffset[m][n] = (negCosResults[m][n] + posCosResults[m][n]) >> 1;
             SinOffset[m][n] = (negSinResults[m][n] + posSinResults[m][n]) >> 1;
 
-            sensor->dCos[m][n] = negCosResults[m][n] - posCosResults[m][n];
-            sensor->dSin[m][n] = negSinResults[m][n] - posSinResults[m][n];
+            SensorData.dCos[m][n] = negCosResults[m][n] - posCosResults[m][n];
+            SensorData.dSin[m][n] = negSinResults[m][n] - posSinResults[m][n];
 
             // calculate arrow length
-            sensor->arrows.arrowLength[m][n] = (uint16_t) sqrt(
-                    sensor->dCos[m][n] * sensor->dCos[m][n] +
-                    sensor->dSin[m][n] * sensor->dSin[m][n] );
+            SensorData.arrows.arrowLength[m][n] = (uint16_t) sqrt(
+                    SensorData.dCos[m][n] * SensorData.dCos[m][n] +
+                    SensorData.dSin[m][n] * SensorData.dSin[m][n] );
 
             // store length of longest arrow
-            if(sensor->arrows.arrowLength[m][n] > sensor->maxAnalogValue)
+            if(SensorData.arrows.arrowLength[m][n] > SensorData.maxAnalogValue)
             {
-                sensor->maxAnalogValue = sensor->arrows.arrowLength[m][n];
+                SensorData.maxAnalogValue = SensorData.arrows.arrowLength[m][n];
             }
         }
     }
@@ -226,10 +228,10 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
         {
             for(n = 0; n <= 7; n++)
             {
-                sensor->arrows.dCos[m][n]  = sensor->dCos[7-m][n] * maxArrowLength;
-                sensor->arrows.dCos[m][n] /= sensor->maxAnalogValue;
-                sensor->arrows.dSin[m][n]  =-sensor->dSin[7-m][n] * maxArrowLength;
-                sensor->arrows.dSin[m][n] /= sensor->maxAnalogValue;
+                SensorData.arrows.dCos[m][n]  = SensorData.dCos[7-m][n] * maxArrowLength;
+                SensorData.arrows.dCos[m][n] /= SensorData.maxAnalogValue;
+                SensorData.arrows.dSin[m][n]  =-SensorData.dSin[7-m][n] * maxArrowLength;
+                SensorData.arrows.dSin[m][n] /= SensorData.maxAnalogValue;
             }
         }
     }
@@ -239,16 +241,16 @@ void computeArrows(bool relative, uint16_t maxArrowLength, TMRSensorData * senso
         {
             for(n = 0; n <= 7; n++)
             {
-                sensor->arrows.dCos[m][n] =  sensor->dCos[7-m][n];
-                sensor->arrows.dSin[m][n] = -sensor->dSin[7-m][n];
+                SensorData.arrows.dCos[m][n] =  SensorData.dCos[7-m][n];
+                SensorData.arrows.dSin[m][n] = -SensorData.dSin[7-m][n];
 
                 // limit the maximum arrow length to the max allowed value.
-                if(sensor->arrows.arrowLength[7-m][n] > maxArrowLength)
+                if(SensorData.arrows.arrowLength[7-m][n] > maxArrowLength)
                 {
-                    sensor->arrows.dCos[m][n] *= maxArrowLength;
-                    sensor->arrows.dCos[m][n] /= sensor->arrows.arrowLength[7-m][n];
-                    sensor->arrows.dSin[m][n] *= maxArrowLength;
-                    sensor->arrows.dSin[m][n] /= sensor->arrows.arrowLength[7-m][n];
+                    SensorData.arrows.dCos[m][n] *= maxArrowLength;
+                    SensorData.arrows.dCos[m][n] /= SensorData.arrows.arrowLength[7-m][n];
+                    SensorData.arrows.dSin[m][n] *= maxArrowLength;
+                    SensorData.arrows.dSin[m][n] /= SensorData.arrows.arrowLength[7-m][n];
                 }
             }
         }

@@ -1,35 +1,35 @@
 ******************************************************************************
                   TI ARM Linker Unix v20.2.0                   
 ******************************************************************************
->> Linked Mon Aug 10 11:06:21 2020
+>> Linked Sun Aug 16 19:39:56 2020
 
 OUTPUT FILE NAME:   <BP_TMR_sensor_array.out>
-ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 0000bd09
+ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 0000c26d
 
 
 MEMORY CONFIGURATION
 
          name            origin    length      used     unused   attr    fill
 ----------------------  --------  ---------  --------  --------  ----  --------
-  FLASH                 00000000   00100000  0000f5aa  000f0a56  R  X
-  SRAM                  20000000   00040000  0002f532  00010ace  RW X
+  FLASH                 00000000   00100000  0000fb92  000f046e  R  X
+  SRAM                  20000000   00040000  000301f6  0000fe0a  RW X
 
 
 SEGMENT ALLOCATION MAP
 
 run origin  load origin   length   init length attrs members
 ----------  ----------- ---------- ----------- ----- -------
-00000000    00000000    0000f5b0   0000f5b0    r-x
+00000000    00000000    0000fb98   0000fb98    r-x
   00000000    00000000    00000208   00000208    r-- .intvecs
-  00000208    00000208    0000bc32   0000bc32    r-x .text
-  0000be40    0000be40    00002a10   00002a10    r-- .const
-  0000e850    0000e850    00000d60   00000d60    r-- .cinit
-20000000    20000000    0002dc80   00000000    rw-
+  00000208    00000208    0000c1b6   0000c1b6    r-x .text
+  0000c3c0    0000c3c0    00002a74   00002a74    r-- .const
+  0000ee38    0000ee38    00000d60   00000d60    r-- .cinit
+20000000    20000000    0002dc74   00000000    rw-
   20000000    20000000    0000026c   00000000    rw- .vtable
   20000270    20000270    000249f0   00000000    rw- .stack
-  20024c60    20024c60    00009020   00000000    rw- .data
-2002e000    2002e000    000018b6   00000000    rw-
-  2002e000    2002e000    000018b6   00000000    rw- .bss
+  20024c60    20024c60    00009014   00000000    rw- .data
+2002e000    2002e000    00002586   00000000    rw-
+  2002e000    2002e000    00002586   00000000    rw- .bss
 
 
 SECTION ALLOCATION MAP
@@ -40,141 +40,169 @@ section   page    origin      length       input sections
 .intvecs   0    00000000    00000208     
                   00000000    00000208     tm4c1294ncpdt_startup_ccs.obj (.intvecs)
 
-.text      0    00000208    0000bc32     
-                  00000208    00002fa0     lcd_functions.obj (.text)
-                  000031a8    00000f80     sysctl.obj (.text)
-                  00004128    00000b94     gpio.obj (.text)
-                  00004cbc    00000a4e     rtsv7M4_T_le_v4SPD16_eabi.lib : _printfi.c.obj (.text:__TI_printfi)
-                  0000570a    00000002                                   : div0.asm.obj (.text)
-                  0000570c    000009f0     adc_functions.obj (.text)
-                  000060fc    00000842     adc.obj (.text)
-                  0000693e    00000002     --HOLE-- [fill = 0]
-                  00006940    00000738     rtsv7M4_T_le_v4SPD16_eabi.lib : k_rem_pio2.c.obj (.text:__kernel_rem_pio2)
-                  00007078    00000642     timer.obj (.text)
-                  000076ba    00000002     --HOLE-- [fill = 0]
-                  000076bc    0000062e     uart.obj (.text)
-                  00007cea    00000002     --HOLE-- [fill = 0]
-                  00007cec    000005dc     rtsv7M4_T_le_v4SPD16_eabi.lib : s_cos.c.obj (.text:cos)
-                  000082c8    000005c4                                   : s_sin.c.obj (.text:sin)
-                  0000888c    000004e0     udma.obj (.text)
-                  00008d6c    00000470     eeprom.obj (.text)
-                  000091dc    000003d4     uartDMA.obj (.text)
-                  000095b0    000003c0     interrupt.obj (.text)
-                  00009970    000002ec     rtsv7M4_T_le_v4SPD16_eabi.lib : s_atan.c.obj (.text:atan)
-                  00009c5c    000002dc     touch.obj (.text)
-                  00009f38    000002bc     main.obj (.text)
-                  0000a1f4    00000270     rtsv7M4_T_le_v4SPD16_eabi.lib : _printfi.c.obj (.text:_pconv_a)
-                  0000a464    000001d8                                   : e_atan2.c.obj (.text:atan2)
-                  0000a63c    000001d0                                   : _printfi.c.obj (.text:_pconv_g)
-                  0000a80c    000001b6                                   : fd_add_t2.asm.obj (.text)
-                  0000a9c2    00000002     --HOLE-- [fill = 0]
-                  0000a9c4    00000174                                   : k_sin.c.obj (.text:__kernel_sin)
-                  0000ab38    0000016c                                   : k_cos.c.obj (.text:__kernel_cos)
-                  0000aca4    00000158                                   : e_sqrt.c.obj (.text:sqrt)
-                  0000adfc    0000013c                                   : _printfi.c.obj (.text:_pconv_e)
-                  0000af38    00000136                                   : fd_div_t2.asm.obj (.text)
-                  0000b06e    00000002     --HOLE-- [fill = 0]
-                  0000b070    00000124                                   : _printfi.c.obj (.text:fcvt)
-                  0000b194    00000110                                   : s_scalbn.c.obj (.text:scalbn)
-                  0000b2a4    000000fc                                   : fd_mul_t2.asm.obj (.text)
-                  0000b3a0    000000f8                                   : s_floor.c.obj (.text:floor)
-                  0000b498    000000d8     EEPROM_functions.obj (.text)
-                  0000b570    000000b1     rtsv7M4_T_le_v4SPD16_eabi.lib : _printfi.c.obj (.text:_ltostr)
-                  0000b621    00000001     --HOLE-- [fill = 0]
-                  0000b622    0000009c                                   : memcpy_t2.asm.obj (.text)
-                  0000b6be    00000096                                   : ull_div_t2.asm.obj (.text)
-                  0000b754    00000086                                   : fd_cmp_t2.asm.obj (.text:__aeabi_cdcmple)
-                  0000b7da    00000086                                   : fd_cmp_t2.asm.obj (.text:__aeabi_cdrcmple)
-                  0000b860    0000007a                                   : memset_t2.asm.obj (.text)
-                  0000b8da    0000006e                                   : _printfi.c.obj (.text:_mcpy)
-                  0000b948    00000068                                   : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
-                  0000b9b0    00000064                                   : s_frexp.c.obj (.text:frexp)
-                  0000ba14    00000064     timer_functions.obj (.text)
-                  0000ba78    00000056     rtsv7M4_T_le_v4SPD16_eabi.lib : _printfi.c.obj (.text:_pconv_f)
-                  0000bace    00000054                                   : _ltoa.c.obj (.text:__TI_ltoa)
-                  0000bb22    00000052                                   : _printfi.c.obj (.text:_ecpy)
-                  0000bb74    0000004c                                   : atoi.c.obj (.text:atoi)
-                  0000bbc0    00000048                                   : fd_toi_t2.asm.obj (.text)
-                  0000bc08    00000044                                   : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit:__TI_auto_init_nobinit_nopinit)
-                  0000bc4c    00000040                                   : sprintf.c.obj (.text:sprintf)
-                  0000bc8c    0000003e                                   : _printfi.c.obj (.text:_fcpy)
-                  0000bcca    0000003e     cpu.obj (.text)
-                  0000bd08    00000034     rtsv7M4_T_le_v4SPD16_eabi.lib : boot_cortex_m.c.obj (.text:_c_int00_noargs:_c_int00_noargs)
-                  0000bd3c    0000002e                                   : i_tofd_t2.asm.obj (.text)
-                  0000bd6a    0000001c                                   : memccpy.c.obj (.text:memccpy)
-                  0000bd86    0000001a                                   : s_copysign.c.obj (.text:copysign)
-                  0000bda0    00000018                                   : sprintf.c.obj (.text:_outs)
-                  0000bdb8    00000016                                   : strchr.c.obj (.text:strchr)
-                  0000bdce    00000014                                   : strlen.c.obj (.text:strlen)
-                  0000bde2    00000012                                   : wcslen.c.obj (.text:wcslen)
-                  0000bdf4    0000000e                                   : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
-                  0000be02    0000000c                                   : copy_zero_init.c.obj (.text:decompress:ZI:__TI_zero_init)
-                  0000be0e    0000000c     tm4c1294ncpdt_startup_ccs.obj (.text)
-                  0000be1a    0000000a     rtsv7M4_T_le_v4SPD16_eabi.lib : sprintf.c.obj (.text:_outc)
-                  0000be24    00000008                                   : errno.c.obj (.text:__aeabi_errno_addr)
-                  0000be2c    00000006     sysctl.obj (.text:SysCtlDelay)
-                  0000be32    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : pre_init.c.obj (.text:_system_pre_init)
-                  0000be36    00000004                                   : exit.c.obj (.text:abort:abort)
+.text      0    00000208    0000c1b6     
+                  00000208    00002db0     lcd_functions.obj (.text)
+                  00002fb8    00000f80     sysctl.obj (.text)
+                  00003f38    00000b94     gpio.obj (.text)
+                  00004acc    00000a4e     rtsv7M4_T_le_v4SPD16_eabi.lib : _printfi.c.obj (.text:__TI_printfi)
+                  0000551a    00000002                                   : div0.asm.obj (.text)
+                  0000551c    000009a4     adc_functions.obj (.text)
+                  00005ec0    00000898     main.obj (.text)
+                  00006758    00000842     adc.obj (.text)
+                  00006f9a    00000002     --HOLE-- [fill = 0]
+                  00006f9c    00000738     rtsv7M4_T_le_v4SPD16_eabi.lib : k_rem_pio2.c.obj (.text:__kernel_rem_pio2)
+                  000076d4    00000642     timer.obj (.text)
+                  00007d16    00000002     --HOLE-- [fill = 0]
+                  00007d18    0000062e     uart.obj (.text)
+                  00008346    00000002     --HOLE-- [fill = 0]
+                  00008348    000005dc     rtsv7M4_T_le_v4SPD16_eabi.lib : s_cos.c.obj (.text:cos)
+                  00008924    000005c4                                   : s_sin.c.obj (.text:sin)
+                  00008ee8    000004e0     udma.obj (.text)
+                  000093c8    00000470     eeprom.obj (.text)
+                  00009838    00000458     touch.obj (.text)
+                  00009c90    000003d4     uartDMA.obj (.text)
+                  0000a064    000003c0     interrupt.obj (.text)
+                  0000a424    000002ec     rtsv7M4_T_le_v4SPD16_eabi.lib : s_atan.c.obj (.text:atan)
+                  0000a710    00000270                                   : _printfi.c.obj (.text:_pconv_a)
+                  0000a980    000001d8                                   : e_atan2.c.obj (.text:atan2)
+                  0000ab58    000001d0                                   : _printfi.c.obj (.text:_pconv_g)
+                  0000ad28    000001b6                                   : fd_add_t2.asm.obj (.text)
+                  0000aede    00000002     --HOLE-- [fill = 0]
+                  0000aee0    00000174                                   : k_sin.c.obj (.text:__kernel_sin)
+                  0000b054    0000016c                                   : k_cos.c.obj (.text:__kernel_cos)
+                  0000b1c0    00000158                                   : e_sqrt.c.obj (.text:sqrt)
+                  0000b318    0000013c                                   : _printfi.c.obj (.text:_pconv_e)
+                  0000b454    00000136                                   : fd_div_t2.asm.obj (.text)
+                  0000b58a    00000002     --HOLE-- [fill = 0]
+                  0000b58c    00000124                                   : _printfi.c.obj (.text:fcvt)
+                  0000b6b0    00000110                                   : s_scalbn.c.obj (.text:scalbn)
+                  0000b7c0    000000fc                                   : fd_mul_t2.asm.obj (.text)
+                  0000b8bc    000000f8                                   : s_floor.c.obj (.text:floor)
+                  0000b9b4    000000c0     debug_functions.obj (.text)
+                  0000ba74    000000b1     rtsv7M4_T_le_v4SPD16_eabi.lib : _printfi.c.obj (.text:_ltostr)
+                  0000bb25    00000001     --HOLE-- [fill = 0]
+                  0000bb26    0000009c                                   : memcpy_t2.asm.obj (.text)
+                  0000bbc2    00000096                                   : ull_div_t2.asm.obj (.text)
+                  0000bc58    0000008c     timer_functions.obj (.text)
+                  0000bce4    00000086     rtsv7M4_T_le_v4SPD16_eabi.lib : fd_cmp_t2.asm.obj (.text:__aeabi_cdcmple)
+                  0000bd6a    00000086                                   : fd_cmp_t2.asm.obj (.text:__aeabi_cdrcmple)
+                  0000bdf0    0000007a                                   : memset_t2.asm.obj (.text)
+                  0000be6a    0000006e                                   : _printfi.c.obj (.text:_mcpy)
+                  0000bed8    00000068                                   : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
+                  0000bf40    00000064                                   : s_frexp.c.obj (.text:frexp)
+                  0000bfa4    00000056                                   : _printfi.c.obj (.text:_pconv_f)
+                  0000bffa    00000054                                   : _ltoa.c.obj (.text:__TI_ltoa)
+                  0000c04e    00000052                                   : _printfi.c.obj (.text:_ecpy)
+                  0000c0a0    0000004c                                   : atoi.c.obj (.text:atoi)
+                  0000c0ec    00000048                                   : fd_toi_t2.asm.obj (.text)
+                  0000c134    00000044                                   : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit:__TI_auto_init_nobinit_nopinit)
+                  0000c178    00000040                                   : sprintf.c.obj (.text:sprintf)
+                  0000c1b8    0000003e                                   : _printfi.c.obj (.text:_fcpy)
+                  0000c1f6    0000003e     cpu.obj (.text)
+                  0000c234    00000038     EEPROM_functions.obj (.text)
+                  0000c26c    00000034     rtsv7M4_T_le_v4SPD16_eabi.lib : boot_cortex_m.c.obj (.text:_c_int00_noargs:_c_int00_noargs)
+                  0000c2a0    0000002e                                   : i_tofd_t2.asm.obj (.text)
+                  0000c2ce    00000020                                   : u_tofd_t2.asm.obj (.text)
+                  0000c2ee    0000001c                                   : memccpy.c.obj (.text:memccpy)
+                  0000c30a    0000001a                                   : s_copysign.c.obj (.text:copysign)
+                  0000c324    00000018                                   : sprintf.c.obj (.text:_outs)
+                  0000c33c    00000016                                   : strchr.c.obj (.text:strchr)
+                  0000c352    00000014                                   : strlen.c.obj (.text:strlen)
+                  0000c366    00000012                                   : wcslen.c.obj (.text:wcslen)
+                  0000c378    0000000e                                   : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
+                  0000c386    0000000c                                   : copy_zero_init.c.obj (.text:decompress:ZI:__TI_zero_init)
+                  0000c392    0000000c     tm4c1294ncpdt_startup_ccs.obj (.text)
+                  0000c39e    0000000a     rtsv7M4_T_le_v4SPD16_eabi.lib : sprintf.c.obj (.text:_outc)
+                  0000c3a8    00000008                                   : errno.c.obj (.text:__aeabi_errno_addr)
+                  0000c3b0    00000006     sysctl.obj (.text:SysCtlDelay)
+                  0000c3b6    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : pre_init.c.obj (.text:_system_pre_init)
+                  0000c3ba    00000004                                   : exit.c.obj (.text:abort:abort)
 
-.const     0    0000be40    00002a10     
-                  0000be40    00002000     lcd_functions.obj (.const:font_12_16)
-                  0000de40    000001b0     sysctl.obj (.const:g_pppui32XTALtoVCO)
-                  0000dff0    00000158     rtsv7M4_T_le_v4SPD16_eabi.lib : k_rem_pio2.c.obj (.const:$O1$$)
-                  0000e148    00000101                                   : ctype.c.obj (.const:.string:_ctypes_)
-                  0000e249    00000003     --HOLE-- [fill = 0]
-                  0000e24c    000000d8     gpio.obj (.const:g_ppui32GPIOIntMapSnowflake)
-                  0000e324    000000c0     gpio.obj (.const:g_ppui32GPIOIntMapBlizzard)
-                  0000e3e4    0000009c     interrupt.obj (.const:g_pui32Regs)
-                  0000e480    00000098     rtsv7M4_T_le_v4SPD16_eabi.lib : s_atan.c.obj (.const:$O1$$)
-                  0000e518    00000090     gpio.obj (.const:g_pui32GPIOBaseAddrs)
-                  0000e5a8    0000006c     sysctl.obj (.const:g_pui32Xtals)
-                  0000e614    00000060     timer.obj (.const:g_ppui32TimerIntMap)
-                  0000e674    00000040     timer.obj (.const:g_ppui32TimerIntMapSnowflake)
-                  0000e6b4    00000040     uart.obj (.const:g_ppui32UARTIntMap)
-                  0000e6f4    00000040     uart.obj (.const:g_ppui32UARTIntMapSnowflake)
-                  0000e734    00000030     sysctl.obj (.const:g_sXTALtoMEMTIM)
-                  0000e764    00000020     interrupt.obj (.const:g_pui32Priority)
-                  0000e784    00000014     interrupt.obj (.const:g_pui32Dii16Regs)
-                  0000e798    00000014     interrupt.obj (.const:g_pui32EnRegs)
-                  0000e7ac    00000014     interrupt.obj (.const:g_pui32PendRegs)
-                  0000e7c0    00000014     interrupt.obj (.const:g_pui32UnpendRegs)
-                  0000e7d4    00000009     uartDMA.obj (.const:.string:$P$T0$2)
-                  0000e7dd    00000003     --HOLE-- [fill = 0]
-                  0000e7e0    00000008     sysctl.obj (.const:g_pui32VCOFrequencies)
-                  0000e7e8    00000004     lcd_functions.obj (.const:$P$T16$2)
-                  0000e7ec    00000004     lcd_functions.obj (.const:$P$T17$3)
-                  0000e7f0    00000004     lcd_functions.obj (.const:$P$T18$4)
-                  0000e7f4    00000004     lcd_functions.obj (.const:$P$T19$5)
-                  0000e7f8    00000004     lcd_functions.obj (.const:$P$T2$1)
-                  0000e7fc    00000004     lcd_functions.obj (.const:$P$T20$6)
-                  0000e800    00000004     lcd_functions.obj (.const:$P$T21$7)
-                  0000e804    00000004     lcd_functions.obj (.const:$P$T22$8)
-                  0000e808    00000004     lcd_functions.obj (.const:$P$T23$9)
-                  0000e80c    00000004     lcd_functions.obj (.const:$P$T24$10)
-                  0000e810    00000004     lcd_functions.obj (.const:$P$T25$11)
-                  0000e814    00000004     lcd_functions.obj (.const:$P$T26$12)
-                  0000e818    00000004     lcd_functions.obj (.const:$P$T27$13)
-                  0000e81c    00000004     lcd_functions.obj (.const:$P$T28$14)
-                  0000e820    00000004     lcd_functions.obj (.const:$P$T35$15)
-                  0000e824    00000004     lcd_functions.obj (.const:$P$T36$16)
-                  0000e828    00000004     lcd_functions.obj (.const:$P$T37$17)
-                  0000e82c    00000004     lcd_functions.obj (.const:$P$T38$18)
-                  0000e830    00000004     lcd_functions.obj (.const:$P$T39$19)
-                  0000e834    00000004     lcd_functions.obj (.const:$P$T40$20)
-                  0000e838    00000004     lcd_functions.obj (.const:$P$T43$21)
-                  0000e83c    00000004     lcd_functions.obj (.const:$P$T44$22)
-                  0000e840    00000004     lcd_functions.obj (.const:$P$T48$23)
-                  0000e844    00000004     lcd_functions.obj (.const:$P$T49$24)
-                  0000e848    00000004     lcd_functions.obj (.const:$P$T50$25)
-                  0000e84c    00000004     lcd_functions.obj (.const:$P$T52$26)
+.const     0    0000c3c0    00002a74     
+                  0000c3c0    00002000     lcd_functions.obj (.const:font_12_16)
+                  0000e3c0    000001b0     sysctl.obj (.const:g_pppui32XTALtoVCO)
+                  0000e570    00000158     rtsv7M4_T_le_v4SPD16_eabi.lib : k_rem_pio2.c.obj (.const:$O1$$)
+                  0000e6c8    00000101                                   : ctype.c.obj (.const:.string:_ctypes_)
+                  0000e7c9    00000003     --HOLE-- [fill = 0]
+                  0000e7cc    000000d8     gpio.obj (.const:g_ppui32GPIOIntMapSnowflake)
+                  0000e8a4    000000c0     gpio.obj (.const:g_ppui32GPIOIntMapBlizzard)
+                  0000e964    0000009c     interrupt.obj (.const:g_pui32Regs)
+                  0000ea00    00000098     rtsv7M4_T_le_v4SPD16_eabi.lib : s_atan.c.obj (.const:$O1$$)
+                  0000ea98    00000090     gpio.obj (.const:g_pui32GPIOBaseAddrs)
+                  0000eb28    0000006c     sysctl.obj (.const:g_pui32Xtals)
+                  0000eb94    00000060     timer.obj (.const:g_ppui32TimerIntMap)
+                  0000ebf4    00000040     timer.obj (.const:g_ppui32TimerIntMapSnowflake)
+                  0000ec34    00000040     uart.obj (.const:g_ppui32UARTIntMap)
+                  0000ec74    00000040     uart.obj (.const:g_ppui32UARTIntMapSnowflake)
+                  0000ecb4    00000030     sysctl.obj (.const:g_sXTALtoMEMTIM)
+                  0000ece4    00000020     interrupt.obj (.const:g_pui32Priority)
+                  0000ed04    00000014     interrupt.obj (.const:g_pui32Dii16Regs)
+                  0000ed18    00000014     interrupt.obj (.const:g_pui32EnRegs)
+                  0000ed2c    00000014     interrupt.obj (.const:g_pui32PendRegs)
+                  0000ed40    00000014     interrupt.obj (.const:g_pui32UnpendRegs)
+                  0000ed54    00000009     uartDMA.obj (.const:.string:$P$T0$2)
+                  0000ed5d    00000003     --HOLE-- [fill = 0]
+                  0000ed60    00000008     sysctl.obj (.const:g_pui32VCOFrequencies)
+                  0000ed68    00000004     main.obj (.const:$P$T100$48)
+                  0000ed6c    00000004     main.obj (.const:$P$T101$49)
+                  0000ed70    00000004     main.obj (.const:$P$T102$50)
+                  0000ed74    00000004     main.obj (.const:$P$T103$51)
+                  0000ed78    00000004     main.obj (.const:$P$T104$52)
+                  0000ed7c    00000004     main.obj (.const:$P$T54$2)
+                  0000ed80    00000004     main.obj (.const:$P$T55$3)
+                  0000ed84    00000004     main.obj (.const:$P$T56$4)
+                  0000ed88    00000004     main.obj (.const:$P$T57$5)
+                  0000ed8c    00000004     main.obj (.const:$P$T58$6)
+                  0000ed90    00000004     main.obj (.const:$P$T59$7)
+                  0000ed94    00000004     main.obj (.const:$P$T60$8)
+                  0000ed98    00000004     main.obj (.const:$P$T61$9)
+                  0000ed9c    00000004     main.obj (.const:$P$T62$10)
+                  0000eda0    00000004     main.obj (.const:$P$T63$11)
+                  0000eda4    00000004     main.obj (.const:$P$T64$12)
+                  0000eda8    00000004     main.obj (.const:$P$T65$13)
+                  0000edac    00000004     main.obj (.const:$P$T66$14)
+                  0000edb0    00000004     main.obj (.const:$P$T67$15)
+                  0000edb4    00000004     main.obj (.const:$P$T68$16)
+                  0000edb8    00000004     main.obj (.const:$P$T69$17)
+                  0000edbc    00000004     main.obj (.const:$P$T70$18)
+                  0000edc0    00000004     main.obj (.const:$P$T71$19)
+                  0000edc4    00000004     main.obj (.const:$P$T72$20)
+                  0000edc8    00000004     main.obj (.const:$P$T73$21)
+                  0000edcc    00000004     main.obj (.const:$P$T74$22)
+                  0000edd0    00000004     main.obj (.const:$P$T75$23)
+                  0000edd4    00000004     main.obj (.const:$P$T76$24)
+                  0000edd8    00000004     main.obj (.const:$P$T77$25)
+                  0000eddc    00000004     main.obj (.const:$P$T78$26)
+                  0000ede0    00000004     main.obj (.const:$P$T79$27)
+                  0000ede4    00000004     main.obj (.const:$P$T80$28)
+                  0000ede8    00000004     main.obj (.const:$P$T81$29)
+                  0000edec    00000004     main.obj (.const:$P$T82$30)
+                  0000edf0    00000004     main.obj (.const:$P$T83$31)
+                  0000edf4    00000004     main.obj (.const:$P$T84$32)
+                  0000edf8    00000004     main.obj (.const:$P$T85$33)
+                  0000edfc    00000004     main.obj (.const:$P$T86$34)
+                  0000ee00    00000004     main.obj (.const:$P$T87$35)
+                  0000ee04    00000004     main.obj (.const:$P$T88$36)
+                  0000ee08    00000004     main.obj (.const:$P$T89$37)
+                  0000ee0c    00000004     main.obj (.const:$P$T90$38)
+                  0000ee10    00000004     main.obj (.const:$P$T91$39)
+                  0000ee14    00000004     main.obj (.const:$P$T92$40)
+                  0000ee18    00000004     main.obj (.const:$P$T93$41)
+                  0000ee1c    00000004     main.obj (.const:$P$T94$42)
+                  0000ee20    00000004     main.obj (.const:$P$T95$43)
+                  0000ee24    00000004     main.obj (.const:$P$T96$44)
+                  0000ee28    00000004     main.obj (.const:$P$T97$45)
+                  0000ee2c    00000004     main.obj (.const:$P$T98$46)
+                  0000ee30    00000004     main.obj (.const:$P$T99$47)
 
-.cinit     0    0000e850    00000d60     
-                  0000e850    00000d29     (.cinit..data.load) [load image, compression = lzss]
-                  0000f579    00000003     --HOLE-- [fill = 0]
-                  0000f57c    0000000c     (__TI_handler_table)
-                  0000f588    00000008     (.cinit..bss.load) [load image, compression = zero_init]
-                  0000f590    00000008     (.cinit..vtable.load) [load image, compression = zero_init]
-                  0000f598    00000018     (__TI_cinit_table)
+.cinit     0    0000ee38    00000d60     
+                  0000ee38    00000d25     (.cinit..data.load) [load image, compression = lzss]
+                  0000fb5d    00000003     --HOLE-- [fill = 0]
+                  0000fb60    0000000c     (__TI_handler_table)
+                  0000fb6c    00000004     --HOLE-- [fill = 0]
+                  0000fb70    00000008     (.cinit..bss.load) [load image, compression = zero_init]
+                  0000fb78    00000008     (.cinit..vtable.load) [load image, compression = zero_init]
+                  0000fb80    00000018     (__TI_cinit_table)
 
 .init_array 
 *          0    00000000    00000000     UNINITIALIZED
@@ -182,41 +210,38 @@ section   page    origin      length       input sections
 .vtable    0    20000000    0000026c     UNINITIALIZED
                   20000000    0000026c     interrupt.obj (.vtable)
 
-.data      0    20024c60    00009020     UNINITIALIZED
+.data      0    20024c60    00009014     UNINITIALIZED
                   20024c60    00002400     arrow_left.obj (.data:imgArrayArrowLButton)
                   20027060    00002400     arrow_right.obj (.data:imgArrayArrowRButton)
                   20029460    00002400     startButton.obj (.data:imgArrayStartButton)
                   2002b860    00002400     stopButton.obj (.data:imgArrayStopButton)
                   2002dc60    00000009     uartDMA.obj (.data:stepperMotorCommand$1)
                   2002dc69    00000001     --HOLE--
-                  2002dc6a    00000002     main.obj (.data)
-                  2002dc6c    00000004     lcd_functions.obj (.data:backImgRight)
-                  2002dc70    00000004     lcd_functions.obj (.data:backImgStart)
-                  2002dc74    00000004     lcd_functions.obj (.data:backImgStop)
-                  2002dc78    00000004     lcd_functions.obj (.data:backMenu)
-                  2002dc7c    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : errno.c.obj (.data)
+                  2002dc6a    00000006     main.obj (.data)
+                  2002dc70    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : errno.c.obj (.data)
 
-.bss       0    2002e000    000018b6     UNINITIALIZED
-                  2002e000    00000c00     (.common:color)
-                  2002ec00    00000400     (.common:pui8ControlTable)
-                  2002f000    00000282     (.common:SensorData)
-                  2002f282    00000100     adc_functions.obj (.bss:CosResults)
-                  2002f382    00000100     adc_functions.obj (.bss:SinResults)
-                  2002f482    00000080     adc_functions.obj (.bss:negCosResults$3)
-                  2002f502    00000080     adc_functions.obj (.bss:negSinResults$1)
-                  2002f582    00000080     adc_functions.obj (.bss:posCosResults$4)
-                  2002f602    00000080     adc_functions.obj (.bss:posSinResults$2)
-                  2002f682    00000080     (.common:CosOffset)
-                  2002f702    00000080     (.common:SinOffset)
-                  2002f782    00000080     (.common:oldDiffCosResults)
-                  2002f802    00000080     (.common:oldDiffSinResults)
-                  2002f882    00000002     (.common:xpos)
-                  2002f884    00000014     (.common:setting)
-                  2002f898    00000008     uartDMA.obj (.bss:UART0receive)
-                  2002f8a0    00000008     adc.obj (.bss:g_pui8OversampleFactor)
-                  2002f8a8    00000008     main.obj (.bss)
-                  2002f8b0    00000004     (.common:backColor)
-                  2002f8b4    00000002     (.common:ypos)
+.bss       0    2002e000    00002586     UNINITIALIZED
+                  2002e000    00000c00     (.common:arrowBlack)
+                  2002ec00    00000c00     (.common:arrowColor)
+                  2002f800    00000400     (.common:pui8ControlTable)
+                  2002fc00    00000282     (.common:SensorData)
+                  2002fe82    00000100     adc_functions.obj (.bss:CosResults)
+                  2002ff82    00000100     adc_functions.obj (.bss:SinResults)
+                  20030082    00000002     (.common:xpos)
+                  20030084    000000e4     main.obj (.bss:settings)
+                  20030168    00000080     adc_functions.obj (.bss:negCosResults$3)
+                  200301e8    00000080     adc_functions.obj (.bss:negSinResults$1)
+                  20030268    00000080     adc_functions.obj (.bss:posCosResults$4)
+                  200302e8    00000080     adc_functions.obj (.bss:posSinResults$2)
+                  20030368    00000080     (.common:CosOffset)
+                  200303e8    00000080     (.common:SinOffset)
+                  20030468    00000080     (.common:oldDiffCosResults)
+                  200304e8    00000080     (.common:oldDiffSinResults)
+                  20030568    00000008     uartDMA.obj (.bss:UART0receive)
+                  20030570    00000008     adc.obj (.bss:g_pui8OversampleFactor)
+                  20030578    00000008     main.obj (.bss)
+                  20030580    00000004     (.common:set)
+                  20030584    00000002     (.common:ypos)
 
 .stack     0    20000270    000249f0     UNINITIALIZED
                   20000270    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : boot_cortex_m.c.obj (.stack)
@@ -243,19 +268,20 @@ MODULE SUMMARY
        Total:                          0       0         36864  
                                                                 
     ./main/
-       main.obj                        700     0         3086   
+       main.obj                        2200    204       246    
     +--+-------------------------------+-------+---------+---------+
-       Total:                          700     0         3086   
+       Total:                          2200    204       246    
                                                                 
     ./src/
-       lcd_functions.obj               12192   8296      276    
-       adc_functions.obj               2544    0         1922   
+       lcd_functions.obj               11696   8192      6404   
+       adc_functions.obj               2468    0         1922   
        uartDMA.obj                     980     9         1041   
-       touch.obj                       732     0         0      
-       EEPROM_functions.obj            216     0         20     
-       timer_functions.obj             100     0         0      
+       touch.obj                       1112    0         0      
+       debug_functions.obj             192     0         0      
+       timer_functions.obj             140     0         0      
+       EEPROM_functions.obj            56      0         0      
     +--+-------------------------------+-------+---------+---------+
-       Total:                          16764   8305      3259   
+       Total:                          16644   8201      9367   
                                                                 
     ./tivaware/src/
        sysctl.obj                      3974    596       0      
@@ -299,6 +325,7 @@ MODULE SUMMARY
        autoinit.c.obj                  68      0         0      
        boot_cortex_m.c.obj             52      0         0      
        i_tofd_t2.asm.obj               46      0         0      
+       u_tofd_t2.asm.obj               32      0         0      
        memccpy.c.obj                   28      0         0      
        s_copysign.c.obj                26      0         0      
        strchr.c.obj                    22      0         0      
@@ -311,25 +338,25 @@ MODULE SUMMARY
        pre_init.c.obj                  4       0         0      
        div0.asm.obj                    2       0         0      
     +--+-------------------------------+-------+---------+---------+
-       Total:                          15049   753       4      
+       Total:                          15081   753       4      
                                                                 
        Stack:                          0       0         150000 
-       Linker Generated:               0       3421      0      
+       Linker Generated:               0       3417      0      
     +--+-------------------------------+-------+---------+---------+
-       Grand Total:                    48167   14703     193841 
+       Grand Total:                    49579   14799     197109 
 
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 0000f598 records: 3, size/record: 8, table size: 24
-	.data: load addr=0000e850, load size=00000d29 bytes, run addr=20024c60, run size=00009020 bytes, compression=lzss
-	.bss: load addr=0000f588, load size=00000008 bytes, run addr=2002e000, run size=000018b6 bytes, compression=zero_init
-	.vtable: load addr=0000f590, load size=00000008 bytes, run addr=20000000, run size=0000026c bytes, compression=zero_init
+__TI_cinit_table @ 0000fb80 records: 3, size/record: 8, table size: 24
+	.data: load addr=0000ee38, load size=00000d25 bytes, run addr=20024c60, run size=00009014 bytes, compression=lzss
+	.bss: load addr=0000fb70, load size=00000008 bytes, run addr=2002e000, run size=00002586 bytes, compression=zero_init
+	.vtable: load addr=0000fb78, load size=00000008 bytes, run addr=20000000, run size=0000026c bytes, compression=zero_init
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 0000f57c records: 3, size/record: 4, table size: 12
+__TI_handler_table @ 0000fb60 records: 3, size/record: 4, table size: 12
 	index: 0, handler: __TI_zero_init
 	index: 1, handler: __TI_decompress_lzss
 	index: 2, handler: __TI_decompress_none
@@ -339,472 +366,480 @@ GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name
 
 address   name                              
 -------   ----                              
-0000a17f  ADC1InterruptHandler              
-000068b5  ADCBusy                           
-000068fd  ADCClockConfigGet                 
-000068d3  ADCClockConfigSet                 
-000066c7  ADCComparatorConfigure            
-000067a9  ADCComparatorIntClear             
-00006753  ADCComparatorIntDisable           
-00006771  ADCComparatorIntEnable            
-00006795  ADCComparatorIntStatus            
-000066e3  ADCComparatorRegionSet            
-0000670d  ADCComparatorReset                
-00006695  ADCHardwareOversampleConfigure    
-00006237  ADCIntClear                       
-0000681d  ADCIntClearEx                     
-0000619d  ADCIntDisable                     
-000067bb  ADCIntDisableEx                   
-000061b9  ADCIntEnable                      
-000067d3  ADCIntEnableEx                    
-00006157  ADCIntRegister                    
-000061df  ADCIntStatus                      
-000067eb  ADCIntStatusEx                    
-0000617f  ADCIntUnregister                  
-0000686f  ADCPhaseDelayGet                  
-0000685d  ADCPhaseDelaySet                  
-000064a9  ADCProcessorTrigger               
-0000684b  ADCReferenceGet                   
-0000682f  ADCReferenceSet                   
-00006281  ADCSequenceConfigure              
-00006899  ADCSequenceDMADisable             
-0000687d  ADCSequenceDMAEnable              
-00006467  ADCSequenceDataGet                
-00006267  ADCSequenceDisable                
-0000624d  ADCSequenceEnable                 
-0000640b  ADCSequenceOverflow               
-00006423  ADCSequenceOverflowClear          
-0000631d  ADCSequenceStepConfigure          
-00006439  ADCSequenceUnderflow              
-00006451  ADCSequenceUnderflowClear         
-000064cd  ADCSoftwareOversampleConfigure    
-00006601  ADCSoftwareOversampleDataGet      
-0000651f  ADCSoftwareOversampleStepConfigure
-0000be37  C$$EXIT                           
-0000bcff  CPUbasepriGet                     
-0000bcf1  CPUbasepriSet                     
-0000bccb  CPUcpsid                          
-0000bce1  CPUcpsie                          
-0000bcd7  CPUprimask                        
-0000bced  CPUwfi                            
-00009489  ConfigureUART0                    
-0000951d  ConfigureUART2                    
-2002f682  CosOffset                         
-00008e31  EEPROMBlockCountGet               
-000090ed  EEPROMBlockHide                   
-00009079  EEPROMBlockLock                   
-00009031  EEPROMBlockPasswordSet            
-00008ff1  EEPROMBlockProtectGet             
-00009005  EEPROMBlockProtectSet             
-000090a1  EEPROMBlockUnlock                 
-00008de1  EEPROMInit                        
-0000917b  EEPROMIntClear                    
-0000912d  EEPROMIntDisable                  
-00009109  EEPROMIntEnable                   
-0000914b  EEPROMIntStatus                   
-00008fb3  EEPROMMassErase                   
-00008e95  EEPROMProgram                     
-00008f71  EEPROMProgramNonBlocking          
-00008e3f  EEPROMRead                        
-00008e25  EEPROMSizeGet                     
-000091a3  EEPROMStatusGet                   
-00004c95  GPIOADCTriggerDisable             
-00004c77  GPIOADCTriggerEnable              
-00004c59  GPIODMATriggerDisable             
-00004c3b  GPIODMATriggerEnable              
-000041e3  GPIODirModeGet                    
-00004187  GPIODirModeSet                    
-0000474b  GPIOIntClear                      
-0000470f  GPIOIntDisable                    
-000046f5  GPIOIntEnable                     
-0000475f  GPIOIntRegister                   
-00004797  GPIOIntRegisterPin                
-00004729  GPIOIntStatus                     
-000042d3  GPIOIntTypeGet                    
-0000422f  GPIOIntTypeSet                    
-0000477d  GPIOIntUnregister                 
-000047c5  GPIOIntUnregisterPin              
-000045a3  GPIOPadConfigGet                  
-00004369  GPIOPadConfigSet                  
-00004bdd  GPIOPinConfigure                  
-000047e9  GPIOPinRead                       
-00004821  GPIOPinTypeADC                    
-00004845  GPIOPinTypeCAN                    
-00004869  GPIOPinTypeComparator             
-0000488d  GPIOPinTypeComparatorOutput       
-000048b1  GPIOPinTypeDIVSCLK                
-000048d5  GPIOPinTypeEPI                    
-000048f9  GPIOPinTypeEthernetLED            
-0000491d  GPIOPinTypeEthernetMII            
-00004941  GPIOPinTypeGPIOInput              
-00004965  GPIOPinTypeGPIOOutput             
-00004989  GPIOPinTypeGPIOOutputOD           
-000049ad  GPIOPinTypeHibernateRTCCLK        
-000049d1  GPIOPinTypeI2C                    
-000049f5  GPIOPinTypeI2CSCL                 
-00004a19  GPIOPinTypeLCD                    
-00004a3d  GPIOPinTypeOneWire                
-00004a61  GPIOPinTypePWM                    
-00004a85  GPIOPinTypeQEI                    
-00004aa9  GPIOPinTypeSSI                    
-00004acd  GPIOPinTypeTimer                  
-00004af1  GPIOPinTypeTrace                  
-00004b15  GPIOPinTypeUART                   
-00004b39  GPIOPinTypeUSBAnalog              
-00004b5d  GPIOPinTypeUSBDigital             
-00004b81  GPIOPinTypeWakeHigh               
-00004ba7  GPIOPinTypeWakeLow                
-00004bcd  GPIOPinWakeStatus                 
-00004801  GPIOPinWrite                      
-00009771  IntDisable                        
-000096ff  IntEnable                         
-000097e3  IntIsEnabled                      
-000095c3  IntMasterDisable                  
-000095b3  IntMasterEnable                   
-000098d9  IntPendClear                      
-00009869  IntPendSet                        
-000096db  IntPriorityGet                    
-00009653  IntPriorityGroupingGet            
-00009639  IntPriorityGroupingSet            
-00009933  IntPriorityMaskGet                
-00009927  IntPriorityMaskSet                
-0000968b  IntPrioritySet                    
-000095d3  IntRegister                       
-0000993b  IntTrigger                        
-00009625  IntUnregister                     
-0000be0f  ResetISR                          
-2002f000  SensorData                        
-2002f702  SinOffset                         
-000040e5  SysCtlAltClkConfig                
-0000380d  SysCtlClockFreqSet                
-00003cd5  SysCtlClockGet                    
-000040c9  SysCtlClockOutConfig              
-00003b05  SysCtlClockSet                    
-00003711  SysCtlDeepSleep                   
-00003e99  SysCtlDeepSleepClockConfigSet     
-00003e7b  SysCtlDeepSleepClockSet           
-000036f1  SysCtlDeepSleepPowerSet           
-0000be2d  SysCtlDelay                       
-0000329f  SysCtlFlashSectorSizeGet          
-00003273  SysCtlFlashSizeGet                
-00003f6f  SysCtlGPIOAHBDisable              
-00003f53  SysCtlGPIOAHBEnable               
-00003685  SysCtlIntClear                    
-0000366d  SysCtlIntDisable                  
-00003659  SysCtlIntEnable                   
-00003631  SysCtlIntRegister                 
-00003695  SysCtlIntStatus                   
-00003649  SysCtlIntUnregister               
-000036d7  SysCtlLDODeepSleepGet             
-000036c7  SysCtlLDODeepSleepSet             
-000036c1  SysCtlLDOSleepGet                 
-000036b1  SysCtlLDOSleepSet                 
-00003747  SysCtlMOSCConfigSet               
-000040ad  SysCtlNMIClear                    
-00004099  SysCtlNMIStatus                   
-0000375d  SysCtlPIOSCCalibrate              
-00003f3d  SysCtlPWMClockGet                 
-00003f23  SysCtlPWMClockSet                 
-000035dd  SysCtlPeripheralClockGating       
-00003595  SysCtlPeripheralDeepSleepDisable  
-00003545  SysCtlPeripheralDeepSleepEnable   
-00003481  SysCtlPeripheralDisable           
-00003445  SysCtlPeripheralEnable            
-00003381  SysCtlPeripheralPowerOff          
-00003345  SysCtlPeripheralPowerOn           
-000032c5  SysCtlPeripheralPresent           
-00003305  SysCtlPeripheralReady             
-000033bd  SysCtlPeripheralReset             
-00003509  SysCtlPeripheralSleepDisable      
-000034c5  SysCtlPeripheralSleepEnable       
-00003701  SysCtlReset                       
-000037bd  SysCtlResetBehaviorGet            
-000037ad  SysCtlResetBehaviorSet            
-00003733  SysCtlResetCauseClear             
-0000372d  SysCtlResetCauseGet               
-00003269  SysCtlSRAMSizeGet                 
-00003709  SysCtlSleep                       
-000036dd  SysCtlSleepPowerSet               
-00003f97  SysCtlUSBPLLDisable               
-00003f8b  SysCtlUSBPLLEnable                
-00003fdd  SysCtlVCOGet                      
-00003fc5  SysCtlVoltageEventClear           
-00003fa9  SysCtlVoltageEventConfig          
-00003fb9  SysCtlVoltageEventStatus          
-0000a159  Timer0InterruptHandler            
-00007639  TimerADCEventGet                  
-00007627  TimerADCEventSet                  
-0000735d  TimerClockSourceGet               
-00007333  TimerClockSourceSet               
-00007127  TimerConfigure                    
-00007247  TimerControlEvent                 
-000071a3  TimerControlLevel                 
-00007271  TimerControlStall                 
-000071d9  TimerControlTrigger               
-000072a7  TimerControlWaitOnTrigger         
-00007659  TimerDMAEventGet                  
-00007647  TimerDMAEventSet                  
-00007109  TimerDisable                      
-000070eb  TimerEnable                       
-00007603  TimerIntClear                     
-000075cd  TimerIntDisable                   
-000075b5  TimerIntEnable                    
-0000756f  TimerIntRegister                  
-000075e5  TimerIntStatus                    
-00007597  TimerIntUnregister                
-00007427  TimerLoadGet                      
-0000745d  TimerLoadGet64                    
-000073fd  TimerLoadSet                      
-00007443  TimerLoadSet64                    
-00007507  TimerMatchGet                     
-0000753d  TimerMatchGet64                   
-000074dd  TimerMatchSet                     
-00007523  TimerMatchSet64                   
-00007397  TimerPrescaleGet                  
-000073e1  TimerPrescaleMatchGet             
-000073b3  TimerPrescaleMatchSet             
-0000736d  TimerPrescaleSet                  
-0000731d  TimerRTCDisable                   
-00007307  TimerRTCEnable                    
-00007615  TimerSynchronize                  
-00007667  TimerUpdateMode                   
-0000748f  TimerValueGet                     
-000074ab  TimerValueGet64                   
-00009fb5  TouchInterruptHandler             
-000091dd  UART0ClearInterrupt               
-0000a081  UART0InterruptHandler             
-00009381  UART2IntHandler                   
-00007c8d  UART9BitAddrSend                  
-00007c67  UART9BitAddrSet                   
-00007c51  UART9BitDisable                   
-00007c3b  UART9BitEnable                    
-00007adf  UARTBreakCtl                      
-00007b09  UARTBusy                          
-00007a87  UARTCharGet                       
-00007a6b  UARTCharGetNonBlocking            
-00007ac1  UARTCharPut                       
-00007a9d  UARTCharPutNonBlocking            
-00007a2f  UARTCharsAvail                    
-00007c2b  UARTClockSourceGet                
-00007c17  UARTClockSourceSet                
-000077ff  UARTConfigGetExpClk               
-00007789  UARTConfigSetExpClk               
-00007bdd  UARTDMADisable                    
-00007bc5  UARTDMAEnable                     
-0000786f  UARTDisable                       
-000078f3  UARTDisableSIR                    
-0000784b  UARTEnable                        
-000078c5  UARTEnableSIR                     
-000078af  UARTFIFODisable                   
-00007899  UARTFIFOEnable                    
-00007761  UARTFIFOLevelGet                  
-00007749  UARTFIFOLevelSet                  
-000079ef  UARTFlowControlGet                
-000079d3  UARTFlowControlSet                
-000091eb  UARTGetIntStatus                  
-00007bb3  UARTIntClear                      
-00007b7d  UARTIntDisable                    
-00007b65  UARTIntEnable                     
-00007b27  UARTIntRegister                   
-00007b95  UARTIntStatus                     
-00007b45  UARTIntUnregister                 
-00007cd5  UARTLoopbackEnable                
-00007989  UARTModemControlClear             
-000079ad  UARTModemControlGet               
-00007951  UARTModemControlSet               
-000079bf  UARTModemStatusGet                
-00007737  UARTParityModeGet                 
-0000771b  UARTParityModeSet                 
-00007c07  UARTRxErrorClear                  
-00007bf5  UARTRxErrorGet                    
-0000793b  UARTSmartCardDisable              
-00007909  UARTSmartCardEnable               
-00007a4d  UARTSpaceAvail                    
-00007a1d  UARTTxIntModeGet                  
-00007a01  UARTTxIntModeSet                  
+2002dc6a  A                                 
+0000623d  ADC1InterruptHandler              
+00006f11  ADCBusy                           
+00006f59  ADCClockConfigGet                 
+00006f2f  ADCClockConfigSet                 
+00006d23  ADCComparatorConfigure            
+00006e05  ADCComparatorIntClear             
+00006daf  ADCComparatorIntDisable           
+00006dcd  ADCComparatorIntEnable            
+00006df1  ADCComparatorIntStatus            
+00006d3f  ADCComparatorRegionSet            
+00006d69  ADCComparatorReset                
+00006cf1  ADCHardwareOversampleConfigure    
+00006893  ADCIntClear                       
+00006e79  ADCIntClearEx                     
+000067f9  ADCIntDisable                     
+00006e17  ADCIntDisableEx                   
+00006815  ADCIntEnable                      
+00006e2f  ADCIntEnableEx                    
+000067b3  ADCIntRegister                    
+0000683b  ADCIntStatus                      
+00006e47  ADCIntStatusEx                    
+000067db  ADCIntUnregister                  
+00006ecb  ADCPhaseDelayGet                  
+00006eb9  ADCPhaseDelaySet                  
+00006b05  ADCProcessorTrigger               
+00006ea7  ADCReferenceGet                   
+00006e8b  ADCReferenceSet                   
+000068dd  ADCSequenceConfigure              
+00006ef5  ADCSequenceDMADisable             
+00006ed9  ADCSequenceDMAEnable              
+00006ac3  ADCSequenceDataGet                
+000068c3  ADCSequenceDisable                
+000068a9  ADCSequenceEnable                 
+00006a67  ADCSequenceOverflow               
+00006a7f  ADCSequenceOverflowClear          
+00006979  ADCSequenceStepConfigure          
+00006a95  ADCSequenceUnderflow              
+00006aad  ADCSequenceUnderflowClear         
+00006b29  ADCSoftwareOversampleConfigure    
+00006c5d  ADCSoftwareOversampleDataGet      
+00006b7b  ADCSoftwareOversampleStepConfigure
+0000c3bb  C$$EXIT                           
+0000c22b  CPUbasepriGet                     
+0000c21d  CPUbasepriSet                     
+0000c1f7  CPUcpsid                          
+0000c20d  CPUcpsie                          
+0000c203  CPUprimask                        
+0000c219  CPUwfi                            
+00009f3d  ConfigureUART0                    
+00009fd1  ConfigureUART2                    
+20030368  CosOffset                         
+0000948d  EEPROMBlockCountGet               
+00009749  EEPROMBlockHide                   
+000096d5  EEPROMBlockLock                   
+0000968d  EEPROMBlockPasswordSet            
+0000964d  EEPROMBlockProtectGet             
+00009661  EEPROMBlockProtectSet             
+000096fd  EEPROMBlockUnlock                 
+0000943d  EEPROMInit                        
+000097d7  EEPROMIntClear                    
+00009789  EEPROMIntDisable                  
+00009765  EEPROMIntEnable                   
+000097a7  EEPROMIntStatus                   
+0000960f  EEPROMMassErase                   
+000094f1  EEPROMProgram                     
+000095cd  EEPROMProgramNonBlocking          
+0000949b  EEPROMRead                        
+00009481  EEPROMSizeGet                     
+000097ff  EEPROMStatusGet                   
+00004aa5  GPIOADCTriggerDisable             
+00004a87  GPIOADCTriggerEnable              
+00004a69  GPIODMATriggerDisable             
+00004a4b  GPIODMATriggerEnable              
+00003ff3  GPIODirModeGet                    
+00003f97  GPIODirModeSet                    
+0000455b  GPIOIntClear                      
+0000451f  GPIOIntDisable                    
+00004505  GPIOIntEnable                     
+0000456f  GPIOIntRegister                   
+000045a7  GPIOIntRegisterPin                
+00004539  GPIOIntStatus                     
+000040e3  GPIOIntTypeGet                    
+0000403f  GPIOIntTypeSet                    
+0000458d  GPIOIntUnregister                 
+000045d5  GPIOIntUnregisterPin              
+000043b3  GPIOPadConfigGet                  
+00004179  GPIOPadConfigSet                  
+000049ed  GPIOPinConfigure                  
+000045f9  GPIOPinRead                       
+00004631  GPIOPinTypeADC                    
+00004655  GPIOPinTypeCAN                    
+00004679  GPIOPinTypeComparator             
+0000469d  GPIOPinTypeComparatorOutput       
+000046c1  GPIOPinTypeDIVSCLK                
+000046e5  GPIOPinTypeEPI                    
+00004709  GPIOPinTypeEthernetLED            
+0000472d  GPIOPinTypeEthernetMII            
+00004751  GPIOPinTypeGPIOInput              
+00004775  GPIOPinTypeGPIOOutput             
+00004799  GPIOPinTypeGPIOOutputOD           
+000047bd  GPIOPinTypeHibernateRTCCLK        
+000047e1  GPIOPinTypeI2C                    
+00004805  GPIOPinTypeI2CSCL                 
+00004829  GPIOPinTypeLCD                    
+0000484d  GPIOPinTypeOneWire                
+00004871  GPIOPinTypePWM                    
+00004895  GPIOPinTypeQEI                    
+000048b9  GPIOPinTypeSSI                    
+000048dd  GPIOPinTypeTimer                  
+00004901  GPIOPinTypeTrace                  
+00004925  GPIOPinTypeUART                   
+00004949  GPIOPinTypeUSBAnalog              
+0000496d  GPIOPinTypeUSBDigital             
+00004991  GPIOPinTypeWakeHigh               
+000049b7  GPIOPinTypeWakeLow                
+000049dd  GPIOPinWakeStatus                 
+00004611  GPIOPinWrite                      
+0000a225  IntDisable                        
+0000a1b3  IntEnable                         
+0000a297  IntIsEnabled                      
+0000a077  IntMasterDisable                  
+0000a067  IntMasterEnable                   
+0000a38d  IntPendClear                      
+0000a31d  IntPendSet                        
+0000a18f  IntPriorityGet                    
+0000a107  IntPriorityGroupingGet            
+0000a0ed  IntPriorityGroupingSet            
+0000a3e7  IntPriorityMaskGet                
+0000a3db  IntPriorityMaskSet                
+0000a13f  IntPrioritySet                    
+0000a087  IntRegister                       
+0000a3ef  IntTrigger                        
+0000a0d9  IntUnregister                     
+0000c393  ResetISR                          
+2002fc00  SensorData                        
+200303e8  SinOffset                         
+00003ef5  SysCtlAltClkConfig                
+0000361d  SysCtlClockFreqSet                
+00003ae5  SysCtlClockGet                    
+00003ed9  SysCtlClockOutConfig              
+00003915  SysCtlClockSet                    
+00003521  SysCtlDeepSleep                   
+00003ca9  SysCtlDeepSleepClockConfigSet     
+00003c8b  SysCtlDeepSleepClockSet           
+00003501  SysCtlDeepSleepPowerSet           
+0000c3b1  SysCtlDelay                       
+000030af  SysCtlFlashSectorSizeGet          
+00003083  SysCtlFlashSizeGet                
+00003d7f  SysCtlGPIOAHBDisable              
+00003d63  SysCtlGPIOAHBEnable               
+00003495  SysCtlIntClear                    
+0000347d  SysCtlIntDisable                  
+00003469  SysCtlIntEnable                   
+00003441  SysCtlIntRegister                 
+000034a5  SysCtlIntStatus                   
+00003459  SysCtlIntUnregister               
+000034e7  SysCtlLDODeepSleepGet             
+000034d7  SysCtlLDODeepSleepSet             
+000034d1  SysCtlLDOSleepGet                 
+000034c1  SysCtlLDOSleepSet                 
+00003557  SysCtlMOSCConfigSet               
+00003ebd  SysCtlNMIClear                    
+00003ea9  SysCtlNMIStatus                   
+0000356d  SysCtlPIOSCCalibrate              
+00003d4d  SysCtlPWMClockGet                 
+00003d33  SysCtlPWMClockSet                 
+000033ed  SysCtlPeripheralClockGating       
+000033a5  SysCtlPeripheralDeepSleepDisable  
+00003355  SysCtlPeripheralDeepSleepEnable   
+00003291  SysCtlPeripheralDisable           
+00003255  SysCtlPeripheralEnable            
+00003191  SysCtlPeripheralPowerOff          
+00003155  SysCtlPeripheralPowerOn           
+000030d5  SysCtlPeripheralPresent           
+00003115  SysCtlPeripheralReady             
+000031cd  SysCtlPeripheralReset             
+00003319  SysCtlPeripheralSleepDisable      
+000032d5  SysCtlPeripheralSleepEnable       
+00003511  SysCtlReset                       
+000035cd  SysCtlResetBehaviorGet            
+000035bd  SysCtlResetBehaviorSet            
+00003543  SysCtlResetCauseClear             
+0000353d  SysCtlResetCauseGet               
+00003079  SysCtlSRAMSizeGet                 
+00003519  SysCtlSleep                       
+000034ed  SysCtlSleepPowerSet               
+00003da7  SysCtlUSBPLLDisable               
+00003d9b  SysCtlUSBPLLEnable                
+00003ded  SysCtlVCOGet                      
+00003dd5  SysCtlVoltageEventClear           
+00003db9  SysCtlVoltageEventConfig          
+00003dc9  SysCtlVoltageEventStatus          
+000060e1  Timer0InterruptHandler            
+00007c95  TimerADCEventGet                  
+00007c83  TimerADCEventSet                  
+000079b9  TimerClockSourceGet               
+0000798f  TimerClockSourceSet               
+00007783  TimerConfigure                    
+000078a3  TimerControlEvent                 
+000077ff  TimerControlLevel                 
+000078cd  TimerControlStall                 
+00007835  TimerControlTrigger               
+00007903  TimerControlWaitOnTrigger         
+00007cb5  TimerDMAEventGet                  
+00007ca3  TimerDMAEventSet                  
+00007765  TimerDisable                      
+00007747  TimerEnable                       
+00007c5f  TimerIntClear                     
+00007c29  TimerIntDisable                   
+00007c11  TimerIntEnable                    
+00007bcb  TimerIntRegister                  
+00007c41  TimerIntStatus                    
+00007bf3  TimerIntUnregister                
+00007a83  TimerLoadGet                      
+00007ab9  TimerLoadGet64                    
+00007a59  TimerLoadSet                      
+00007a9f  TimerLoadSet64                    
+00007b63  TimerMatchGet                     
+00007b99  TimerMatchGet64                   
+00007b39  TimerMatchSet                     
+00007b7f  TimerMatchSet64                   
+000079f3  TimerPrescaleGet                  
+00007a3d  TimerPrescaleMatchGet             
+00007a0f  TimerPrescaleMatchSet             
+000079c9  TimerPrescaleSet                  
+00007979  TimerRTCDisable                   
+00007963  TimerRTCEnable                    
+00007c71  TimerSynchronize                  
+00007cc3  TimerUpdateMode                   
+00007aeb  TimerValueGet                     
+00007b07  TimerValueGet64                   
+00005f1b  TouchInterruptHandler             
+00009c91  UART0ClearInterrupt               
+00006005  UART0InterruptHandler             
+00009e35  UART2IntHandler                   
+000082e9  UART9BitAddrSend                  
+000082c3  UART9BitAddrSet                   
+000082ad  UART9BitDisable                   
+00008297  UART9BitEnable                    
+0000813b  UARTBreakCtl                      
+00008165  UARTBusy                          
+000080e3  UARTCharGet                       
+000080c7  UARTCharGetNonBlocking            
+0000811d  UARTCharPut                       
+000080f9  UARTCharPutNonBlocking            
+0000808b  UARTCharsAvail                    
+00008287  UARTClockSourceGet                
+00008273  UARTClockSourceSet                
+00007e5b  UARTConfigGetExpClk               
+00007de5  UARTConfigSetExpClk               
+00008239  UARTDMADisable                    
+00008221  UARTDMAEnable                     
+00007ecb  UARTDisable                       
+00007f4f  UARTDisableSIR                    
+00007ea7  UARTEnable                        
+00007f21  UARTEnableSIR                     
+00007f0b  UARTFIFODisable                   
+00007ef5  UARTFIFOEnable                    
+00007dbd  UARTFIFOLevelGet                  
+00007da5  UARTFIFOLevelSet                  
+0000804b  UARTFlowControlGet                
+0000802f  UARTFlowControlSet                
+00009c9f  UARTGetIntStatus                  
+0000820f  UARTIntClear                      
+000081d9  UARTIntDisable                    
+000081c1  UARTIntEnable                     
+00008183  UARTIntRegister                   
+000081f1  UARTIntStatus                     
+000081a1  UARTIntUnregister                 
+00008331  UARTLoopbackEnable                
+00007fe5  UARTModemControlClear             
+00008009  UARTModemControlGet               
+00007fad  UARTModemControlSet               
+0000801b  UARTModemStatusGet                
+00007d93  UARTParityModeGet                 
+00007d77  UARTParityModeSet                 
+00008263  UARTRxErrorClear                  
+00008251  UARTRxErrorGet                    
+00007f97  UARTSmartCardDisable              
+00007f65  UARTSmartCardEnable               
+000080a9  UARTSpaceAvail                    
+00008079  UARTTxIntModeGet                  
+0000805d  UARTTxIntModeSet                  
 20024c60  __STACK_END                       
 000249f0  __STACK_SIZE                      
 20000470  __STACK_TOP                       
-0000f598  __TI_CINIT_Base                   
-0000f5b0  __TI_CINIT_Limit                  
-0000f57c  __TI_Handler_Table_Base           
-0000f588  __TI_Handler_Table_Limit          
-0000bc09  __TI_auto_init_nobinit_nopinit    
-0000b949  __TI_decompress_lzss              
-0000bdf5  __TI_decompress_none              
-0000bacf  __TI_ltoa                         
+0000fb80  __TI_CINIT_Base                   
+0000fb98  __TI_CINIT_Limit                  
+0000fb60  __TI_Handler_Table_Base           
+0000fb6c  __TI_Handler_Table_Limit          
+0000c135  __TI_auto_init_nobinit_nopinit    
+0000bed9  __TI_decompress_lzss              
+0000c379  __TI_decompress_none              
+0000bffb  __TI_ltoa                         
 ffffffff  __TI_pprof_out_hndl               
-00004cbd  __TI_printfi                      
+00004acd  __TI_printfi                      
 ffffffff  __TI_prof_data_size               
 ffffffff  __TI_prof_data_start              
 00000000  __TI_static_base__                
-0000be03  __TI_zero_init                    
-0000b755  __aeabi_cdcmpeq                   
-0000b755  __aeabi_cdcmple                   
-0000b7db  __aeabi_cdrcmple                  
-0000bbc1  __aeabi_d2iz                      
-0000a817  __aeabi_dadd                      
-0000af39  __aeabi_ddiv                      
-0000b2a5  __aeabi_dmul                      
-0000a80d  __aeabi_dsub                      
-0000be25  __aeabi_errno_addr                
-0000bd3d  __aeabi_i2d                       
-0000570b  __aeabi_idiv0                     
-0000570b  __aeabi_ldiv0                     
-0000b861  __aeabi_memclr                    
-0000b861  __aeabi_memclr4                   
-0000b861  __aeabi_memclr8                   
-0000b623  __aeabi_memcpy                    
-0000b623  __aeabi_memcpy4                   
-0000b623  __aeabi_memcpy8                   
-0000b863  __aeabi_memset                    
-0000b863  __aeabi_memset4                   
-0000b863  __aeabi_memset8                   
-0000b6bf  __aeabi_uldivmod                  
+0000c387  __TI_zero_init                    
+0000bce5  __aeabi_cdcmpeq                   
+0000bce5  __aeabi_cdcmple                   
+0000bd6b  __aeabi_cdrcmple                  
+0000c0ed  __aeabi_d2iz                      
+0000ad33  __aeabi_dadd                      
+0000b455  __aeabi_ddiv                      
+0000b7c1  __aeabi_dmul                      
+0000ad29  __aeabi_dsub                      
+0000c3a9  __aeabi_errno_addr                
+0000c2a1  __aeabi_i2d                       
+0000551b  __aeabi_idiv0                     
+0000551b  __aeabi_ldiv0                     
+0000bdf1  __aeabi_memclr                    
+0000bdf1  __aeabi_memclr4                   
+0000bdf1  __aeabi_memclr8                   
+0000bb27  __aeabi_memcpy                    
+0000bb27  __aeabi_memcpy4                   
+0000bb27  __aeabi_memcpy8                   
+0000bdf3  __aeabi_memset                    
+0000bdf3  __aeabi_memset4                   
+0000bdf3  __aeabi_memset8                   
+0000c2cf  __aeabi_ui2d                      
+0000bbc3  __aeabi_uldivmod                  
 ffffffff  __binit__                         
 ffffffff  __c_args__                        
-0000ab39  __kernel_cos                      
-00006941  __kernel_rem_pio2                 
-0000a9c5  __kernel_sin                      
+0000b055  __kernel_cos                      
+00006f9d  __kernel_rem_pio2                 
+0000aee1  __kernel_sin                      
 UNDEFED   __mpu_init                        
 20000270  __stack                           
 20000000  __start___llvm_prf_cnts           
 20000000  __stop___llvm_prf_cnts            
-0000bd09  _c_int00_noargs                   
-0000e148  _ctypes_                          
+0000c26d  _c_int00_noargs                   
+0000e6c8  _ctypes_                          
 UNDEFED   _system_post_cinit                
-0000be33  _system_pre_init                  
-0000be37  abort                             
-00005729  adcIntClear                       
-00009971  atan                              
-0000a465  atan2                             
-0000a465  atan2l                            
-00009971  atanl                             
-0000bb75  atoi                              
-2002f8b0  backColor                         
-2002dc6c  backImgRight                      
-2002dc70  backImgStart                      
-2002dc74  backImgStop                       
-2002dc78  backMenu                          
+0000c3b7  _system_pre_init                  
+2002dc6c  a                                 
+0000c3bb  abort                             
+00005539  adcIntClear                       
+2002e000  arrowBlack                        
+2002ec00  arrowColor                        
+0000a425  atan                              
+0000a981  atan2                             
+0000a981  atan2l                            
+0000a425  atanl                             
+0000c0a1  atoi                              
 ffffffff  binit                             
-2002e000  color                             
-00005a39  computeArrows                     
-00005f6d  configureADC                      
-0000b559  configureEEPROM                   
-00002d13  configureLCD5Inch                 
-00000209  configureLCD7Inch                 
-0000ba21  configureTimer0                   
-00009c5d  configureTouch                    
-0000941f  configureUartUDMA                 
-0000bd87  copysign                          
-0000bd87  copysignl                         
-00007ced  cos                               
-00007ced  cosl                              
-00000a11  drawDisplay5Inch                  
-00000c29  drawDisplay7Inch                  
-00000f7d  drawRectangle                     
-2002dc7c  errno                             
-0000b3a1  floor                             
-0000b3a1  floorl                            
-0000b9b1  frexp                             
-0000b9b1  frexpl                            
+00005849  computeArrows                     
+00005d29  configureADC                      
+0000ba4b  configureDebugGPIO                
+0000c259  configureEEPROM                   
+00000209  configureLCD                      
+00002b39  configureLCD5Inch                 
+00002d41  configureLCDHardware              
+0000bc8d  configureTimer0                   
+00009839  configureTouch                    
+00009ed3  configureUartUDMA                 
+0000c30b  copysign                          
+0000c30b  copysignl                         
+00008349  cos                               
+00008349  cosl                              
+00000453  drawArrowLengthMenu               
+00000a19  drawDisplay7Inch                  
+00000265  drawDisplayLayout                 
+00000e45  drawLine                          
+00000d9d  drawRectangle                     
+0000086d  drawString                        
+2002dc70  errno                             
+0000b8bd  floor                             
+0000b8bd  floorl                            
+0000bf41  frexp                             
+0000bf41  frexpl                            
 20000000  g_pfnRAMVectors                   
 00000000  g_pfnVectors                      
-00002b41  generateColors                    
-000091fb  getMaxArrowLengthUART             
-000091f7  getUART0RxData                    
+00002949  generateColors                    
+00009caf  getMaxArrowLengthUART             
+00009cab  getUART0RxData                    
 20024c60  imgArrayArrowLButton              
 20027060  imgArrayArrowRButton              
 20029460  imgArrayStartButton               
 2002b860  imgArrayStopButton                
-0000b499  initSettings                      
-0000b195  ldexp                             
-0000b195  ldexpl                            
-0000b4cd  loadSettingsFromEEPROM            
-00009f39  main                              
-0000bd6b  memccpy                           
-0000b623  memcpy                            
-0000b869  memset                            
-2002f782  oldDiffCosResults                 
-2002f802  oldDiffSinResults                 
-0000921b  prepareNextReceiveDMA             
-0000070d  printString                       
-2002ec00  pui8ControlTable                  
-000093a3  receiveDataFromMotor              
-0000b51f  saveSettingsToEEPROM              
-0000b195  scalbn                            
-0000b195  scalbnl                           
-000092d7  sendCommandToMotor                
-00009253  sendRawCommandToMotor             
-00009235  sendUARTDMA                       
-0000576b  setADCHardwareAveraging           
-0000022d  setDisplayLayout                  
-00002f2d  setLCD7inchHardware               
-000008e9  setLCDBackgroundColor             
-0000097d  setLCDBackgroundColor7            
-00005735  setMultiplexer                    
-2002f884  setting                           
-000082c9  sin                               
-000082c9  sinl                              
-0000bc4d  sprintf                           
-0000aca5  sqrt                              
-0000aca5  sqrtl                             
-0000570d  startADConversion                 
-000057ad  storeArraySensorData              
-0000bdb9  strchr                            
-0000bdcf  strlen                            
-0000ba15  timer0IntClear                    
-00009ca1  touchGetItem                      
-00009e31  touchRead                         
-00008ce5  uDMAChannelAssign                 
-0000898b  uDMAChannelAttributeDisable       
-00008937  uDMAChannelAttributeEnable        
-000089df  uDMAChannelAttributeGet           
-00008a4f  uDMAChannelControlSet             
-000088c3  uDMAChannelDisable                
-000088ab  uDMAChannelEnable                 
-000088db  uDMAChannelIsEnabled              
-00008c5d  uDMAChannelModeGet                
-0000891f  uDMAChannelRequest                
-00008b89  uDMAChannelScatterGatherSet       
-00008d41  uDMAChannelSelectDefault          
-00008d2d  uDMAChannelSelectSecondary        
-00008c15  uDMAChannelSizeGet                
-00008a91  uDMAChannelTransferSet            
-00008919  uDMAControlAlternateBaseGet       
-00008913  uDMAControlBaseGet                
-00008903  uDMAControlBaseSet                
-00008895  uDMADisable                       
-0000888d  uDMAEnable                        
-000088a3  uDMAErrorStatusClear              
-0000889d  uDMAErrorStatusGet                
-00008cd1  uDMAIntClear                      
-00008ca3  uDMAIntRegister                   
-00008ccb  uDMAIntStatus                     
-00008cb9  uDMAIntUnregister                 
-0000bde3  wcslen                            
-00000409  writeButton                       
-00000805  writeChar                         
-00002c3d  writeCmdData                      
-00002c1d  writeCommand                      
-00002c5d  writeData                         
-00000585  writeInfo                         
-0000103d  writeLine                         
-00002385  writeLine0Degree                  
-0000242d  writeLine180Degree                
-00002481  writeLine270Degree                
-000023d9  writeLine90Degree                 
-000024dd  writeLineQuadrant1_I              
-000025b5  writeLineQuadrant1_II             
-0000267b  writeLineQuadrant2_I              
-00002741  writeLineQuadrant2_II             
-00002819  writeLineQuadrant3_I              
-000028df  writeLineQuadrant3_II             
-000029a5  writeLineQuadrant4_I              
-00002a6b  writeLineQuadrant4_II             
-00002ca3  writePosition                     
-2002f882  xpos                              
-2002f8b4  ypos                              
+000062b1  initROM                           
+0000b6b1  ldexp                             
+0000b6b1  ldexpl                            
+0000c235  loadSettingsFromEEPROM            
+00005ec1  main                              
+0000c2ef  memccpy                           
+0000bb27  memcpy                            
+0000bdf9  memset                            
+0000b9ff  offLED                            
+0000ba31  offOszi                           
+20030468  oldDiffCosResults                 
+200304e8  oldDiffSinResults                 
+0000b9e7  onLED                             
+0000ba17  onOszi                            
+00009ccf  prepareNextReceiveDMA             
+2002f800  pui8ControlTable                  
+00009e57  receiveDataFromMotor              
+0000c247  saveSettingsToEEPROM              
+0000b6b1  scalbn                            
+0000b6b1  scalbnl                           
+00009d8b  sendCommandToMotor                
+00009d07  sendRawCommandToMotor             
+00009ce9  sendUARTDMA                       
+20030580  set                               
+0000557b  setADCHardwareAveraging           
+00000237  setLCDLayout                      
+00005545  setMultiplexer                    
+00008925  sin                               
+00008925  sinl                              
+0000c179  sprintf                           
+0000b1c1  sqrt                              
+0000b1c1  sqrtl                             
+0000551d  startADConversion                 
+000055bd  storeArraySensorData              
+0000c33d  strchr                            
+0000c353  strlen                            
+0000bc81  timer0IntClear                    
+0000bc59  timerInterruptDisable             
+0000bc6d  timerInterruptEnable              
+0000b9b5  toggleLED                         
+0000b9cd  toggleOszi                        
+0000987d  touchGetArrowLength               
+00009a05  touchGetMenuItem                  
+00009b91  touchRead                         
+00009341  uDMAChannelAssign                 
+00008fe7  uDMAChannelAttributeDisable       
+00008f93  uDMAChannelAttributeEnable        
+0000903b  uDMAChannelAttributeGet           
+000090ab  uDMAChannelControlSet             
+00008f1f  uDMAChannelDisable                
+00008f07  uDMAChannelEnable                 
+00008f37  uDMAChannelIsEnabled              
+000092b9  uDMAChannelModeGet                
+00008f7b  uDMAChannelRequest                
+000091e5  uDMAChannelScatterGatherSet       
+0000939d  uDMAChannelSelectDefault          
+00009389  uDMAChannelSelectSecondary        
+00009271  uDMAChannelSizeGet                
+000090ed  uDMAChannelTransferSet            
+00008f75  uDMAControlAlternateBaseGet       
+00008f6f  uDMAControlBaseGet                
+00008f5f  uDMAControlBaseSet                
+00008ef1  uDMADisable                       
+00008ee9  uDMAEnable                        
+00008eff  uDMAErrorStatusClear              
+00008ef9  uDMAErrorStatusGet                
+0000932d  uDMAIntClear                      
+000092ff  uDMAIntRegister                   
+00009327  uDMAIntStatus                     
+00009315  uDMAIntUnregister                 
+0000c367  wcslen                            
+00000609  writeButton                       
+00002a63  writeCmdData                      
+00002a43  writeCommand                      
+00002a83  writeData                         
+0000074b  writeInfo                         
+0000218d  writeLine0Degree                  
+00002235  writeLine180Degree                
+00002289  writeLine270Degree                
+000021e1  writeLine90Degree                 
+000022e5  writeLineQuadrant1_I              
+000023bd  writeLineQuadrant1_II             
+00002483  writeLineQuadrant2_I              
+00002549  writeLineQuadrant2_II             
+00002621  writeLineQuadrant3_I              
+000026e7  writeLineQuadrant3_II             
+000027ad  writeLineQuadrant4_I              
+00002873  writeLineQuadrant4_II             
+00000827  writeMaxAnalogValue               
+00002ac9  writePosition                     
+20030082  xpos                              
+20030584  ypos                              
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
@@ -813,435 +848,445 @@ address   name
 -------   ----                              
 00000000  __TI_static_base__                
 00000000  g_pfnVectors                      
-00000209  configureLCD7Inch                 
-0000022d  setDisplayLayout                  
-00000409  writeButton                       
-00000585  writeInfo                         
-0000070d  printString                       
-00000805  writeChar                         
-000008e9  setLCDBackgroundColor             
-0000097d  setLCDBackgroundColor7            
-00000a11  drawDisplay5Inch                  
-00000c29  drawDisplay7Inch                  
-00000f7d  drawRectangle                     
-0000103d  writeLine                         
-00002385  writeLine0Degree                  
-000023d9  writeLine90Degree                 
-0000242d  writeLine180Degree                
-00002481  writeLine270Degree                
-000024dd  writeLineQuadrant1_I              
-000025b5  writeLineQuadrant1_II             
-0000267b  writeLineQuadrant2_I              
-00002741  writeLineQuadrant2_II             
-00002819  writeLineQuadrant3_I              
-000028df  writeLineQuadrant3_II             
-000029a5  writeLineQuadrant4_I              
-00002a6b  writeLineQuadrant4_II             
-00002b41  generateColors                    
-00002c1d  writeCommand                      
-00002c3d  writeCmdData                      
-00002c5d  writeData                         
-00002ca3  writePosition                     
-00002d13  configureLCD5Inch                 
-00002f2d  setLCD7inchHardware               
-00003269  SysCtlSRAMSizeGet                 
-00003273  SysCtlFlashSizeGet                
-0000329f  SysCtlFlashSectorSizeGet          
-000032c5  SysCtlPeripheralPresent           
-00003305  SysCtlPeripheralReady             
-00003345  SysCtlPeripheralPowerOn           
-00003381  SysCtlPeripheralPowerOff          
-000033bd  SysCtlPeripheralReset             
-00003445  SysCtlPeripheralEnable            
-00003481  SysCtlPeripheralDisable           
-000034c5  SysCtlPeripheralSleepEnable       
-00003509  SysCtlPeripheralSleepDisable      
-00003545  SysCtlPeripheralDeepSleepEnable   
-00003595  SysCtlPeripheralDeepSleepDisable  
-000035dd  SysCtlPeripheralClockGating       
-00003631  SysCtlIntRegister                 
-00003649  SysCtlIntUnregister               
-00003659  SysCtlIntEnable                   
-0000366d  SysCtlIntDisable                  
-00003685  SysCtlIntClear                    
-00003695  SysCtlIntStatus                   
-000036b1  SysCtlLDOSleepSet                 
-000036c1  SysCtlLDOSleepGet                 
-000036c7  SysCtlLDODeepSleepSet             
-000036d7  SysCtlLDODeepSleepGet             
-000036dd  SysCtlSleepPowerSet               
-000036f1  SysCtlDeepSleepPowerSet           
-00003701  SysCtlReset                       
-00003709  SysCtlSleep                       
-00003711  SysCtlDeepSleep                   
-0000372d  SysCtlResetCauseGet               
-00003733  SysCtlResetCauseClear             
-00003747  SysCtlMOSCConfigSet               
-0000375d  SysCtlPIOSCCalibrate              
-000037ad  SysCtlResetBehaviorSet            
-000037bd  SysCtlResetBehaviorGet            
-0000380d  SysCtlClockFreqSet                
-00003b05  SysCtlClockSet                    
-00003cd5  SysCtlClockGet                    
-00003e7b  SysCtlDeepSleepClockSet           
-00003e99  SysCtlDeepSleepClockConfigSet     
-00003f23  SysCtlPWMClockSet                 
-00003f3d  SysCtlPWMClockGet                 
-00003f53  SysCtlGPIOAHBEnable               
-00003f6f  SysCtlGPIOAHBDisable              
-00003f8b  SysCtlUSBPLLEnable                
-00003f97  SysCtlUSBPLLDisable               
-00003fa9  SysCtlVoltageEventConfig          
-00003fb9  SysCtlVoltageEventStatus          
-00003fc5  SysCtlVoltageEventClear           
-00003fdd  SysCtlVCOGet                      
-00004099  SysCtlNMIStatus                   
-000040ad  SysCtlNMIClear                    
-000040c9  SysCtlClockOutConfig              
-000040e5  SysCtlAltClkConfig                
-00004187  GPIODirModeSet                    
-000041e3  GPIODirModeGet                    
-0000422f  GPIOIntTypeSet                    
-000042d3  GPIOIntTypeGet                    
-00004369  GPIOPadConfigSet                  
-000045a3  GPIOPadConfigGet                  
-000046f5  GPIOIntEnable                     
-0000470f  GPIOIntDisable                    
-00004729  GPIOIntStatus                     
-0000474b  GPIOIntClear                      
-0000475f  GPIOIntRegister                   
-0000477d  GPIOIntUnregister                 
-00004797  GPIOIntRegisterPin                
-000047c5  GPIOIntUnregisterPin              
-000047e9  GPIOPinRead                       
-00004801  GPIOPinWrite                      
-00004821  GPIOPinTypeADC                    
-00004845  GPIOPinTypeCAN                    
-00004869  GPIOPinTypeComparator             
-0000488d  GPIOPinTypeComparatorOutput       
-000048b1  GPIOPinTypeDIVSCLK                
-000048d5  GPIOPinTypeEPI                    
-000048f9  GPIOPinTypeEthernetLED            
-0000491d  GPIOPinTypeEthernetMII            
-00004941  GPIOPinTypeGPIOInput              
-00004965  GPIOPinTypeGPIOOutput             
-00004989  GPIOPinTypeGPIOOutputOD           
-000049ad  GPIOPinTypeHibernateRTCCLK        
-000049d1  GPIOPinTypeI2C                    
-000049f5  GPIOPinTypeI2CSCL                 
-00004a19  GPIOPinTypeLCD                    
-00004a3d  GPIOPinTypeOneWire                
-00004a61  GPIOPinTypePWM                    
-00004a85  GPIOPinTypeQEI                    
-00004aa9  GPIOPinTypeSSI                    
-00004acd  GPIOPinTypeTimer                  
-00004af1  GPIOPinTypeTrace                  
-00004b15  GPIOPinTypeUART                   
-00004b39  GPIOPinTypeUSBAnalog              
-00004b5d  GPIOPinTypeUSBDigital             
-00004b81  GPIOPinTypeWakeHigh               
-00004ba7  GPIOPinTypeWakeLow                
-00004bcd  GPIOPinWakeStatus                 
-00004bdd  GPIOPinConfigure                  
-00004c3b  GPIODMATriggerEnable              
-00004c59  GPIODMATriggerDisable             
-00004c77  GPIOADCTriggerEnable              
-00004c95  GPIOADCTriggerDisable             
-00004cbd  __TI_printfi                      
-0000570b  __aeabi_idiv0                     
-0000570b  __aeabi_ldiv0                     
-0000570d  startADConversion                 
-00005729  adcIntClear                       
-00005735  setMultiplexer                    
-0000576b  setADCHardwareAveraging           
-000057ad  storeArraySensorData              
-00005a39  computeArrows                     
-00005f6d  configureADC                      
-00006157  ADCIntRegister                    
-0000617f  ADCIntUnregister                  
-0000619d  ADCIntDisable                     
-000061b9  ADCIntEnable                      
-000061df  ADCIntStatus                      
-00006237  ADCIntClear                       
-0000624d  ADCSequenceEnable                 
-00006267  ADCSequenceDisable                
-00006281  ADCSequenceConfigure              
-0000631d  ADCSequenceStepConfigure          
-0000640b  ADCSequenceOverflow               
-00006423  ADCSequenceOverflowClear          
-00006439  ADCSequenceUnderflow              
-00006451  ADCSequenceUnderflowClear         
-00006467  ADCSequenceDataGet                
-000064a9  ADCProcessorTrigger               
-000064cd  ADCSoftwareOversampleConfigure    
-0000651f  ADCSoftwareOversampleStepConfigure
-00006601  ADCSoftwareOversampleDataGet      
-00006695  ADCHardwareOversampleConfigure    
-000066c7  ADCComparatorConfigure            
-000066e3  ADCComparatorRegionSet            
-0000670d  ADCComparatorReset                
-00006753  ADCComparatorIntDisable           
-00006771  ADCComparatorIntEnable            
-00006795  ADCComparatorIntStatus            
-000067a9  ADCComparatorIntClear             
-000067bb  ADCIntDisableEx                   
-000067d3  ADCIntEnableEx                    
-000067eb  ADCIntStatusEx                    
-0000681d  ADCIntClearEx                     
-0000682f  ADCReferenceSet                   
-0000684b  ADCReferenceGet                   
-0000685d  ADCPhaseDelaySet                  
-0000686f  ADCPhaseDelayGet                  
-0000687d  ADCSequenceDMAEnable              
-00006899  ADCSequenceDMADisable             
-000068b5  ADCBusy                           
-000068d3  ADCClockConfigSet                 
-000068fd  ADCClockConfigGet                 
-00006941  __kernel_rem_pio2                 
-000070eb  TimerEnable                       
-00007109  TimerDisable                      
-00007127  TimerConfigure                    
-000071a3  TimerControlLevel                 
-000071d9  TimerControlTrigger               
-00007247  TimerControlEvent                 
-00007271  TimerControlStall                 
-000072a7  TimerControlWaitOnTrigger         
-00007307  TimerRTCEnable                    
-0000731d  TimerRTCDisable                   
-00007333  TimerClockSourceSet               
-0000735d  TimerClockSourceGet               
-0000736d  TimerPrescaleSet                  
-00007397  TimerPrescaleGet                  
-000073b3  TimerPrescaleMatchSet             
-000073e1  TimerPrescaleMatchGet             
-000073fd  TimerLoadSet                      
-00007427  TimerLoadGet                      
-00007443  TimerLoadSet64                    
-0000745d  TimerLoadGet64                    
-0000748f  TimerValueGet                     
-000074ab  TimerValueGet64                   
-000074dd  TimerMatchSet                     
-00007507  TimerMatchGet                     
-00007523  TimerMatchSet64                   
-0000753d  TimerMatchGet64                   
-0000756f  TimerIntRegister                  
-00007597  TimerIntUnregister                
-000075b5  TimerIntEnable                    
-000075cd  TimerIntDisable                   
-000075e5  TimerIntStatus                    
-00007603  TimerIntClear                     
-00007615  TimerSynchronize                  
-00007627  TimerADCEventSet                  
-00007639  TimerADCEventGet                  
-00007647  TimerDMAEventSet                  
-00007659  TimerDMAEventGet                  
-00007667  TimerUpdateMode                   
-0000771b  UARTParityModeSet                 
-00007737  UARTParityModeGet                 
-00007749  UARTFIFOLevelSet                  
-00007761  UARTFIFOLevelGet                  
-00007789  UARTConfigSetExpClk               
-000077ff  UARTConfigGetExpClk               
-0000784b  UARTEnable                        
-0000786f  UARTDisable                       
-00007899  UARTFIFOEnable                    
-000078af  UARTFIFODisable                   
-000078c5  UARTEnableSIR                     
-000078f3  UARTDisableSIR                    
-00007909  UARTSmartCardEnable               
-0000793b  UARTSmartCardDisable              
-00007951  UARTModemControlSet               
-00007989  UARTModemControlClear             
-000079ad  UARTModemControlGet               
-000079bf  UARTModemStatusGet                
-000079d3  UARTFlowControlSet                
-000079ef  UARTFlowControlGet                
-00007a01  UARTTxIntModeSet                  
-00007a1d  UARTTxIntModeGet                  
-00007a2f  UARTCharsAvail                    
-00007a4d  UARTSpaceAvail                    
-00007a6b  UARTCharGetNonBlocking            
-00007a87  UARTCharGet                       
-00007a9d  UARTCharPutNonBlocking            
-00007ac1  UARTCharPut                       
-00007adf  UARTBreakCtl                      
-00007b09  UARTBusy                          
-00007b27  UARTIntRegister                   
-00007b45  UARTIntUnregister                 
-00007b65  UARTIntEnable                     
-00007b7d  UARTIntDisable                    
-00007b95  UARTIntStatus                     
-00007bb3  UARTIntClear                      
-00007bc5  UARTDMAEnable                     
-00007bdd  UARTDMADisable                    
-00007bf5  UARTRxErrorGet                    
-00007c07  UARTRxErrorClear                  
-00007c17  UARTClockSourceSet                
-00007c2b  UARTClockSourceGet                
-00007c3b  UART9BitEnable                    
-00007c51  UART9BitDisable                   
-00007c67  UART9BitAddrSet                   
-00007c8d  UART9BitAddrSend                  
-00007cd5  UARTLoopbackEnable                
-00007ced  cos                               
-00007ced  cosl                              
-000082c9  sin                               
-000082c9  sinl                              
-0000888d  uDMAEnable                        
-00008895  uDMADisable                       
-0000889d  uDMAErrorStatusGet                
-000088a3  uDMAErrorStatusClear              
-000088ab  uDMAChannelEnable                 
-000088c3  uDMAChannelDisable                
-000088db  uDMAChannelIsEnabled              
-00008903  uDMAControlBaseSet                
-00008913  uDMAControlBaseGet                
-00008919  uDMAControlAlternateBaseGet       
-0000891f  uDMAChannelRequest                
-00008937  uDMAChannelAttributeEnable        
-0000898b  uDMAChannelAttributeDisable       
-000089df  uDMAChannelAttributeGet           
-00008a4f  uDMAChannelControlSet             
-00008a91  uDMAChannelTransferSet            
-00008b89  uDMAChannelScatterGatherSet       
-00008c15  uDMAChannelSizeGet                
-00008c5d  uDMAChannelModeGet                
-00008ca3  uDMAIntRegister                   
-00008cb9  uDMAIntUnregister                 
-00008ccb  uDMAIntStatus                     
-00008cd1  uDMAIntClear                      
-00008ce5  uDMAChannelAssign                 
-00008d2d  uDMAChannelSelectSecondary        
-00008d41  uDMAChannelSelectDefault          
-00008de1  EEPROMInit                        
-00008e25  EEPROMSizeGet                     
-00008e31  EEPROMBlockCountGet               
-00008e3f  EEPROMRead                        
-00008e95  EEPROMProgram                     
-00008f71  EEPROMProgramNonBlocking          
-00008fb3  EEPROMMassErase                   
-00008ff1  EEPROMBlockProtectGet             
-00009005  EEPROMBlockProtectSet             
-00009031  EEPROMBlockPasswordSet            
-00009079  EEPROMBlockLock                   
-000090a1  EEPROMBlockUnlock                 
-000090ed  EEPROMBlockHide                   
-00009109  EEPROMIntEnable                   
-0000912d  EEPROMIntDisable                  
-0000914b  EEPROMIntStatus                   
-0000917b  EEPROMIntClear                    
-000091a3  EEPROMStatusGet                   
-000091dd  UART0ClearInterrupt               
-000091eb  UARTGetIntStatus                  
-000091f7  getUART0RxData                    
-000091fb  getMaxArrowLengthUART             
-0000921b  prepareNextReceiveDMA             
-00009235  sendUARTDMA                       
-00009253  sendRawCommandToMotor             
-000092d7  sendCommandToMotor                
-00009381  UART2IntHandler                   
-000093a3  receiveDataFromMotor              
-0000941f  configureUartUDMA                 
-00009489  ConfigureUART0                    
-0000951d  ConfigureUART2                    
-000095b3  IntMasterEnable                   
-000095c3  IntMasterDisable                  
-000095d3  IntRegister                       
-00009625  IntUnregister                     
-00009639  IntPriorityGroupingSet            
-00009653  IntPriorityGroupingGet            
-0000968b  IntPrioritySet                    
-000096db  IntPriorityGet                    
-000096ff  IntEnable                         
-00009771  IntDisable                        
-000097e3  IntIsEnabled                      
-00009869  IntPendSet                        
-000098d9  IntPendClear                      
-00009927  IntPriorityMaskSet                
-00009933  IntPriorityMaskGet                
-0000993b  IntTrigger                        
-00009971  atan                              
-00009971  atanl                             
-00009c5d  configureTouch                    
-00009ca1  touchGetItem                      
-00009e31  touchRead                         
-00009f39  main                              
-00009fb5  TouchInterruptHandler             
-0000a081  UART0InterruptHandler             
-0000a159  Timer0InterruptHandler            
-0000a17f  ADC1InterruptHandler              
-0000a465  atan2                             
-0000a465  atan2l                            
-0000a80d  __aeabi_dsub                      
-0000a817  __aeabi_dadd                      
-0000a9c5  __kernel_sin                      
-0000ab39  __kernel_cos                      
-0000aca5  sqrt                              
-0000aca5  sqrtl                             
-0000af39  __aeabi_ddiv                      
-0000b195  ldexp                             
-0000b195  ldexpl                            
-0000b195  scalbn                            
-0000b195  scalbnl                           
-0000b2a5  __aeabi_dmul                      
-0000b3a1  floor                             
-0000b3a1  floorl                            
-0000b499  initSettings                      
-0000b4cd  loadSettingsFromEEPROM            
-0000b51f  saveSettingsToEEPROM              
-0000b559  configureEEPROM                   
-0000b623  __aeabi_memcpy                    
-0000b623  __aeabi_memcpy4                   
-0000b623  __aeabi_memcpy8                   
-0000b623  memcpy                            
-0000b6bf  __aeabi_uldivmod                  
-0000b755  __aeabi_cdcmpeq                   
-0000b755  __aeabi_cdcmple                   
-0000b7db  __aeabi_cdrcmple                  
-0000b861  __aeabi_memclr                    
-0000b861  __aeabi_memclr4                   
-0000b861  __aeabi_memclr8                   
-0000b863  __aeabi_memset                    
-0000b863  __aeabi_memset4                   
-0000b863  __aeabi_memset8                   
-0000b869  memset                            
-0000b949  __TI_decompress_lzss              
-0000b9b1  frexp                             
-0000b9b1  frexpl                            
-0000ba15  timer0IntClear                    
-0000ba21  configureTimer0                   
-0000bacf  __TI_ltoa                         
-0000bb75  atoi                              
-0000bbc1  __aeabi_d2iz                      
-0000bc09  __TI_auto_init_nobinit_nopinit    
-0000bc4d  sprintf                           
-0000bccb  CPUcpsid                          
-0000bcd7  CPUprimask                        
-0000bce1  CPUcpsie                          
-0000bced  CPUwfi                            
-0000bcf1  CPUbasepriSet                     
-0000bcff  CPUbasepriGet                     
-0000bd09  _c_int00_noargs                   
-0000bd3d  __aeabi_i2d                       
-0000bd6b  memccpy                           
-0000bd87  copysign                          
-0000bd87  copysignl                         
-0000bdb9  strchr                            
-0000bdcf  strlen                            
-0000bde3  wcslen                            
-0000bdf5  __TI_decompress_none              
-0000be03  __TI_zero_init                    
-0000be0f  ResetISR                          
-0000be25  __aeabi_errno_addr                
-0000be2d  SysCtlDelay                       
-0000be33  _system_pre_init                  
-0000be37  C$$EXIT                           
-0000be37  abort                             
-0000e148  _ctypes_                          
-0000f57c  __TI_Handler_Table_Base           
-0000f588  __TI_Handler_Table_Limit          
-0000f598  __TI_CINIT_Base                   
-0000f5b0  __TI_CINIT_Limit                  
+00000209  configureLCD                      
+00000237  setLCDLayout                      
+00000265  drawDisplayLayout                 
+00000453  drawArrowLengthMenu               
+00000609  writeButton                       
+0000074b  writeInfo                         
+00000827  writeMaxAnalogValue               
+0000086d  drawString                        
+00000a19  drawDisplay7Inch                  
+00000d9d  drawRectangle                     
+00000e45  drawLine                          
+0000218d  writeLine0Degree                  
+000021e1  writeLine90Degree                 
+00002235  writeLine180Degree                
+00002289  writeLine270Degree                
+000022e5  writeLineQuadrant1_I              
+000023bd  writeLineQuadrant1_II             
+00002483  writeLineQuadrant2_I              
+00002549  writeLineQuadrant2_II             
+00002621  writeLineQuadrant3_I              
+000026e7  writeLineQuadrant3_II             
+000027ad  writeLineQuadrant4_I              
+00002873  writeLineQuadrant4_II             
+00002949  generateColors                    
+00002a43  writeCommand                      
+00002a63  writeCmdData                      
+00002a83  writeData                         
+00002ac9  writePosition                     
+00002b39  configureLCD5Inch                 
+00002d41  configureLCDHardware              
+00003079  SysCtlSRAMSizeGet                 
+00003083  SysCtlFlashSizeGet                
+000030af  SysCtlFlashSectorSizeGet          
+000030d5  SysCtlPeripheralPresent           
+00003115  SysCtlPeripheralReady             
+00003155  SysCtlPeripheralPowerOn           
+00003191  SysCtlPeripheralPowerOff          
+000031cd  SysCtlPeripheralReset             
+00003255  SysCtlPeripheralEnable            
+00003291  SysCtlPeripheralDisable           
+000032d5  SysCtlPeripheralSleepEnable       
+00003319  SysCtlPeripheralSleepDisable      
+00003355  SysCtlPeripheralDeepSleepEnable   
+000033a5  SysCtlPeripheralDeepSleepDisable  
+000033ed  SysCtlPeripheralClockGating       
+00003441  SysCtlIntRegister                 
+00003459  SysCtlIntUnregister               
+00003469  SysCtlIntEnable                   
+0000347d  SysCtlIntDisable                  
+00003495  SysCtlIntClear                    
+000034a5  SysCtlIntStatus                   
+000034c1  SysCtlLDOSleepSet                 
+000034d1  SysCtlLDOSleepGet                 
+000034d7  SysCtlLDODeepSleepSet             
+000034e7  SysCtlLDODeepSleepGet             
+000034ed  SysCtlSleepPowerSet               
+00003501  SysCtlDeepSleepPowerSet           
+00003511  SysCtlReset                       
+00003519  SysCtlSleep                       
+00003521  SysCtlDeepSleep                   
+0000353d  SysCtlResetCauseGet               
+00003543  SysCtlResetCauseClear             
+00003557  SysCtlMOSCConfigSet               
+0000356d  SysCtlPIOSCCalibrate              
+000035bd  SysCtlResetBehaviorSet            
+000035cd  SysCtlResetBehaviorGet            
+0000361d  SysCtlClockFreqSet                
+00003915  SysCtlClockSet                    
+00003ae5  SysCtlClockGet                    
+00003c8b  SysCtlDeepSleepClockSet           
+00003ca9  SysCtlDeepSleepClockConfigSet     
+00003d33  SysCtlPWMClockSet                 
+00003d4d  SysCtlPWMClockGet                 
+00003d63  SysCtlGPIOAHBEnable               
+00003d7f  SysCtlGPIOAHBDisable              
+00003d9b  SysCtlUSBPLLEnable                
+00003da7  SysCtlUSBPLLDisable               
+00003db9  SysCtlVoltageEventConfig          
+00003dc9  SysCtlVoltageEventStatus          
+00003dd5  SysCtlVoltageEventClear           
+00003ded  SysCtlVCOGet                      
+00003ea9  SysCtlNMIStatus                   
+00003ebd  SysCtlNMIClear                    
+00003ed9  SysCtlClockOutConfig              
+00003ef5  SysCtlAltClkConfig                
+00003f97  GPIODirModeSet                    
+00003ff3  GPIODirModeGet                    
+0000403f  GPIOIntTypeSet                    
+000040e3  GPIOIntTypeGet                    
+00004179  GPIOPadConfigSet                  
+000043b3  GPIOPadConfigGet                  
+00004505  GPIOIntEnable                     
+0000451f  GPIOIntDisable                    
+00004539  GPIOIntStatus                     
+0000455b  GPIOIntClear                      
+0000456f  GPIOIntRegister                   
+0000458d  GPIOIntUnregister                 
+000045a7  GPIOIntRegisterPin                
+000045d5  GPIOIntUnregisterPin              
+000045f9  GPIOPinRead                       
+00004611  GPIOPinWrite                      
+00004631  GPIOPinTypeADC                    
+00004655  GPIOPinTypeCAN                    
+00004679  GPIOPinTypeComparator             
+0000469d  GPIOPinTypeComparatorOutput       
+000046c1  GPIOPinTypeDIVSCLK                
+000046e5  GPIOPinTypeEPI                    
+00004709  GPIOPinTypeEthernetLED            
+0000472d  GPIOPinTypeEthernetMII            
+00004751  GPIOPinTypeGPIOInput              
+00004775  GPIOPinTypeGPIOOutput             
+00004799  GPIOPinTypeGPIOOutputOD           
+000047bd  GPIOPinTypeHibernateRTCCLK        
+000047e1  GPIOPinTypeI2C                    
+00004805  GPIOPinTypeI2CSCL                 
+00004829  GPIOPinTypeLCD                    
+0000484d  GPIOPinTypeOneWire                
+00004871  GPIOPinTypePWM                    
+00004895  GPIOPinTypeQEI                    
+000048b9  GPIOPinTypeSSI                    
+000048dd  GPIOPinTypeTimer                  
+00004901  GPIOPinTypeTrace                  
+00004925  GPIOPinTypeUART                   
+00004949  GPIOPinTypeUSBAnalog              
+0000496d  GPIOPinTypeUSBDigital             
+00004991  GPIOPinTypeWakeHigh               
+000049b7  GPIOPinTypeWakeLow                
+000049dd  GPIOPinWakeStatus                 
+000049ed  GPIOPinConfigure                  
+00004a4b  GPIODMATriggerEnable              
+00004a69  GPIODMATriggerDisable             
+00004a87  GPIOADCTriggerEnable              
+00004aa5  GPIOADCTriggerDisable             
+00004acd  __TI_printfi                      
+0000551b  __aeabi_idiv0                     
+0000551b  __aeabi_ldiv0                     
+0000551d  startADConversion                 
+00005539  adcIntClear                       
+00005545  setMultiplexer                    
+0000557b  setADCHardwareAveraging           
+000055bd  storeArraySensorData              
+00005849  computeArrows                     
+00005d29  configureADC                      
+00005ec1  main                              
+00005f1b  TouchInterruptHandler             
+00006005  UART0InterruptHandler             
+000060e1  Timer0InterruptHandler            
+0000623d  ADC1InterruptHandler              
+000062b1  initROM                           
+000067b3  ADCIntRegister                    
+000067db  ADCIntUnregister                  
+000067f9  ADCIntDisable                     
+00006815  ADCIntEnable                      
+0000683b  ADCIntStatus                      
+00006893  ADCIntClear                       
+000068a9  ADCSequenceEnable                 
+000068c3  ADCSequenceDisable                
+000068dd  ADCSequenceConfigure              
+00006979  ADCSequenceStepConfigure          
+00006a67  ADCSequenceOverflow               
+00006a7f  ADCSequenceOverflowClear          
+00006a95  ADCSequenceUnderflow              
+00006aad  ADCSequenceUnderflowClear         
+00006ac3  ADCSequenceDataGet                
+00006b05  ADCProcessorTrigger               
+00006b29  ADCSoftwareOversampleConfigure    
+00006b7b  ADCSoftwareOversampleStepConfigure
+00006c5d  ADCSoftwareOversampleDataGet      
+00006cf1  ADCHardwareOversampleConfigure    
+00006d23  ADCComparatorConfigure            
+00006d3f  ADCComparatorRegionSet            
+00006d69  ADCComparatorReset                
+00006daf  ADCComparatorIntDisable           
+00006dcd  ADCComparatorIntEnable            
+00006df1  ADCComparatorIntStatus            
+00006e05  ADCComparatorIntClear             
+00006e17  ADCIntDisableEx                   
+00006e2f  ADCIntEnableEx                    
+00006e47  ADCIntStatusEx                    
+00006e79  ADCIntClearEx                     
+00006e8b  ADCReferenceSet                   
+00006ea7  ADCReferenceGet                   
+00006eb9  ADCPhaseDelaySet                  
+00006ecb  ADCPhaseDelayGet                  
+00006ed9  ADCSequenceDMAEnable              
+00006ef5  ADCSequenceDMADisable             
+00006f11  ADCBusy                           
+00006f2f  ADCClockConfigSet                 
+00006f59  ADCClockConfigGet                 
+00006f9d  __kernel_rem_pio2                 
+00007747  TimerEnable                       
+00007765  TimerDisable                      
+00007783  TimerConfigure                    
+000077ff  TimerControlLevel                 
+00007835  TimerControlTrigger               
+000078a3  TimerControlEvent                 
+000078cd  TimerControlStall                 
+00007903  TimerControlWaitOnTrigger         
+00007963  TimerRTCEnable                    
+00007979  TimerRTCDisable                   
+0000798f  TimerClockSourceSet               
+000079b9  TimerClockSourceGet               
+000079c9  TimerPrescaleSet                  
+000079f3  TimerPrescaleGet                  
+00007a0f  TimerPrescaleMatchSet             
+00007a3d  TimerPrescaleMatchGet             
+00007a59  TimerLoadSet                      
+00007a83  TimerLoadGet                      
+00007a9f  TimerLoadSet64                    
+00007ab9  TimerLoadGet64                    
+00007aeb  TimerValueGet                     
+00007b07  TimerValueGet64                   
+00007b39  TimerMatchSet                     
+00007b63  TimerMatchGet                     
+00007b7f  TimerMatchSet64                   
+00007b99  TimerMatchGet64                   
+00007bcb  TimerIntRegister                  
+00007bf3  TimerIntUnregister                
+00007c11  TimerIntEnable                    
+00007c29  TimerIntDisable                   
+00007c41  TimerIntStatus                    
+00007c5f  TimerIntClear                     
+00007c71  TimerSynchronize                  
+00007c83  TimerADCEventSet                  
+00007c95  TimerADCEventGet                  
+00007ca3  TimerDMAEventSet                  
+00007cb5  TimerDMAEventGet                  
+00007cc3  TimerUpdateMode                   
+00007d77  UARTParityModeSet                 
+00007d93  UARTParityModeGet                 
+00007da5  UARTFIFOLevelSet                  
+00007dbd  UARTFIFOLevelGet                  
+00007de5  UARTConfigSetExpClk               
+00007e5b  UARTConfigGetExpClk               
+00007ea7  UARTEnable                        
+00007ecb  UARTDisable                       
+00007ef5  UARTFIFOEnable                    
+00007f0b  UARTFIFODisable                   
+00007f21  UARTEnableSIR                     
+00007f4f  UARTDisableSIR                    
+00007f65  UARTSmartCardEnable               
+00007f97  UARTSmartCardDisable              
+00007fad  UARTModemControlSet               
+00007fe5  UARTModemControlClear             
+00008009  UARTModemControlGet               
+0000801b  UARTModemStatusGet                
+0000802f  UARTFlowControlSet                
+0000804b  UARTFlowControlGet                
+0000805d  UARTTxIntModeSet                  
+00008079  UARTTxIntModeGet                  
+0000808b  UARTCharsAvail                    
+000080a9  UARTSpaceAvail                    
+000080c7  UARTCharGetNonBlocking            
+000080e3  UARTCharGet                       
+000080f9  UARTCharPutNonBlocking            
+0000811d  UARTCharPut                       
+0000813b  UARTBreakCtl                      
+00008165  UARTBusy                          
+00008183  UARTIntRegister                   
+000081a1  UARTIntUnregister                 
+000081c1  UARTIntEnable                     
+000081d9  UARTIntDisable                    
+000081f1  UARTIntStatus                     
+0000820f  UARTIntClear                      
+00008221  UARTDMAEnable                     
+00008239  UARTDMADisable                    
+00008251  UARTRxErrorGet                    
+00008263  UARTRxErrorClear                  
+00008273  UARTClockSourceSet                
+00008287  UARTClockSourceGet                
+00008297  UART9BitEnable                    
+000082ad  UART9BitDisable                   
+000082c3  UART9BitAddrSet                   
+000082e9  UART9BitAddrSend                  
+00008331  UARTLoopbackEnable                
+00008349  cos                               
+00008349  cosl                              
+00008925  sin                               
+00008925  sinl                              
+00008ee9  uDMAEnable                        
+00008ef1  uDMADisable                       
+00008ef9  uDMAErrorStatusGet                
+00008eff  uDMAErrorStatusClear              
+00008f07  uDMAChannelEnable                 
+00008f1f  uDMAChannelDisable                
+00008f37  uDMAChannelIsEnabled              
+00008f5f  uDMAControlBaseSet                
+00008f6f  uDMAControlBaseGet                
+00008f75  uDMAControlAlternateBaseGet       
+00008f7b  uDMAChannelRequest                
+00008f93  uDMAChannelAttributeEnable        
+00008fe7  uDMAChannelAttributeDisable       
+0000903b  uDMAChannelAttributeGet           
+000090ab  uDMAChannelControlSet             
+000090ed  uDMAChannelTransferSet            
+000091e5  uDMAChannelScatterGatherSet       
+00009271  uDMAChannelSizeGet                
+000092b9  uDMAChannelModeGet                
+000092ff  uDMAIntRegister                   
+00009315  uDMAIntUnregister                 
+00009327  uDMAIntStatus                     
+0000932d  uDMAIntClear                      
+00009341  uDMAChannelAssign                 
+00009389  uDMAChannelSelectSecondary        
+0000939d  uDMAChannelSelectDefault          
+0000943d  EEPROMInit                        
+00009481  EEPROMSizeGet                     
+0000948d  EEPROMBlockCountGet               
+0000949b  EEPROMRead                        
+000094f1  EEPROMProgram                     
+000095cd  EEPROMProgramNonBlocking          
+0000960f  EEPROMMassErase                   
+0000964d  EEPROMBlockProtectGet             
+00009661  EEPROMBlockProtectSet             
+0000968d  EEPROMBlockPasswordSet            
+000096d5  EEPROMBlockLock                   
+000096fd  EEPROMBlockUnlock                 
+00009749  EEPROMBlockHide                   
+00009765  EEPROMIntEnable                   
+00009789  EEPROMIntDisable                  
+000097a7  EEPROMIntStatus                   
+000097d7  EEPROMIntClear                    
+000097ff  EEPROMStatusGet                   
+00009839  configureTouch                    
+0000987d  touchGetArrowLength               
+00009a05  touchGetMenuItem                  
+00009b91  touchRead                         
+00009c91  UART0ClearInterrupt               
+00009c9f  UARTGetIntStatus                  
+00009cab  getUART0RxData                    
+00009caf  getMaxArrowLengthUART             
+00009ccf  prepareNextReceiveDMA             
+00009ce9  sendUARTDMA                       
+00009d07  sendRawCommandToMotor             
+00009d8b  sendCommandToMotor                
+00009e35  UART2IntHandler                   
+00009e57  receiveDataFromMotor              
+00009ed3  configureUartUDMA                 
+00009f3d  ConfigureUART0                    
+00009fd1  ConfigureUART2                    
+0000a067  IntMasterEnable                   
+0000a077  IntMasterDisable                  
+0000a087  IntRegister                       
+0000a0d9  IntUnregister                     
+0000a0ed  IntPriorityGroupingSet            
+0000a107  IntPriorityGroupingGet            
+0000a13f  IntPrioritySet                    
+0000a18f  IntPriorityGet                    
+0000a1b3  IntEnable                         
+0000a225  IntDisable                        
+0000a297  IntIsEnabled                      
+0000a31d  IntPendSet                        
+0000a38d  IntPendClear                      
+0000a3db  IntPriorityMaskSet                
+0000a3e7  IntPriorityMaskGet                
+0000a3ef  IntTrigger                        
+0000a425  atan                              
+0000a425  atanl                             
+0000a981  atan2                             
+0000a981  atan2l                            
+0000ad29  __aeabi_dsub                      
+0000ad33  __aeabi_dadd                      
+0000aee1  __kernel_sin                      
+0000b055  __kernel_cos                      
+0000b1c1  sqrt                              
+0000b1c1  sqrtl                             
+0000b455  __aeabi_ddiv                      
+0000b6b1  ldexp                             
+0000b6b1  ldexpl                            
+0000b6b1  scalbn                            
+0000b6b1  scalbnl                           
+0000b7c1  __aeabi_dmul                      
+0000b8bd  floor                             
+0000b8bd  floorl                            
+0000b9b5  toggleLED                         
+0000b9cd  toggleOszi                        
+0000b9e7  onLED                             
+0000b9ff  offLED                            
+0000ba17  onOszi                            
+0000ba31  offOszi                           
+0000ba4b  configureDebugGPIO                
+0000bb27  __aeabi_memcpy                    
+0000bb27  __aeabi_memcpy4                   
+0000bb27  __aeabi_memcpy8                   
+0000bb27  memcpy                            
+0000bbc3  __aeabi_uldivmod                  
+0000bc59  timerInterruptDisable             
+0000bc6d  timerInterruptEnable              
+0000bc81  timer0IntClear                    
+0000bc8d  configureTimer0                   
+0000bce5  __aeabi_cdcmpeq                   
+0000bce5  __aeabi_cdcmple                   
+0000bd6b  __aeabi_cdrcmple                  
+0000bdf1  __aeabi_memclr                    
+0000bdf1  __aeabi_memclr4                   
+0000bdf1  __aeabi_memclr8                   
+0000bdf3  __aeabi_memset                    
+0000bdf3  __aeabi_memset4                   
+0000bdf3  __aeabi_memset8                   
+0000bdf9  memset                            
+0000bed9  __TI_decompress_lzss              
+0000bf41  frexp                             
+0000bf41  frexpl                            
+0000bffb  __TI_ltoa                         
+0000c0a1  atoi                              
+0000c0ed  __aeabi_d2iz                      
+0000c135  __TI_auto_init_nobinit_nopinit    
+0000c179  sprintf                           
+0000c1f7  CPUcpsid                          
+0000c203  CPUprimask                        
+0000c20d  CPUcpsie                          
+0000c219  CPUwfi                            
+0000c21d  CPUbasepriSet                     
+0000c22b  CPUbasepriGet                     
+0000c235  loadSettingsFromEEPROM            
+0000c247  saveSettingsToEEPROM              
+0000c259  configureEEPROM                   
+0000c26d  _c_int00_noargs                   
+0000c2a1  __aeabi_i2d                       
+0000c2cf  __aeabi_ui2d                      
+0000c2ef  memccpy                           
+0000c30b  copysign                          
+0000c30b  copysignl                         
+0000c33d  strchr                            
+0000c353  strlen                            
+0000c367  wcslen                            
+0000c379  __TI_decompress_none              
+0000c387  __TI_zero_init                    
+0000c393  ResetISR                          
+0000c3a9  __aeabi_errno_addr                
+0000c3b1  SysCtlDelay                       
+0000c3b7  _system_pre_init                  
+0000c3bb  C$$EXIT                           
+0000c3bb  abort                             
+0000e6c8  _ctypes_                          
+0000fb60  __TI_Handler_Table_Base           
+0000fb6c  __TI_Handler_Table_Limit          
+0000fb80  __TI_CINIT_Base                   
+0000fb98  __TI_CINIT_Limit                  
 000249f0  __STACK_SIZE                      
 20000000  __start___llvm_prf_cnts           
 20000000  __stop___llvm_prf_cnts            
@@ -1253,22 +1298,20 @@ address   name
 20027060  imgArrayArrowRButton              
 20029460  imgArrayStartButton               
 2002b860  imgArrayStopButton                
-2002dc6c  backImgRight                      
-2002dc70  backImgStart                      
-2002dc74  backImgStop                       
-2002dc78  backMenu                          
-2002dc7c  errno                             
-2002e000  color                             
-2002ec00  pui8ControlTable                  
-2002f000  SensorData                        
-2002f682  CosOffset                         
-2002f702  SinOffset                         
-2002f782  oldDiffCosResults                 
-2002f802  oldDiffSinResults                 
-2002f882  xpos                              
-2002f884  setting                           
-2002f8b0  backColor                         
-2002f8b4  ypos                              
+2002dc6a  A                                 
+2002dc6c  a                                 
+2002dc70  errno                             
+2002e000  arrowBlack                        
+2002ec00  arrowColor                        
+2002f800  pui8ControlTable                  
+2002fc00  SensorData                        
+20030082  xpos                              
+20030368  CosOffset                         
+200303e8  SinOffset                         
+20030468  oldDiffCosResults                 
+200304e8  oldDiffSinResults                 
+20030580  set                               
+20030584  ypos                              
 ffffffff  __TI_pprof_out_hndl               
 ffffffff  __TI_prof_data_size               
 ffffffff  __TI_prof_data_start              
@@ -1278,4 +1321,4 @@ ffffffff  binit
 UNDEFED   __mpu_init                        
 UNDEFED   _system_post_cinit                
 
-[466 symbols]
+[474 symbols]

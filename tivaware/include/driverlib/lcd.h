@@ -325,9 +325,9 @@ tLCDRasterTiming;
                                 0x00000202
 #define RASTER_FMT_PASSIVE_PALETTIZED                                         \
                                 0x00000000
-#define RASTER_FMT_PASSIVE_COLOR_12BIT                                        \
+#define RASTER_FMT_PASSIVE_color_12BIT                                        \
                                 0x00000000
-#define RASTER_FMT_PASSIVE_COLOR_16BIT                                        \
+#define RASTER_FMT_PASSIVE_color_16BIT                                        \
                                 0x01000000
 #define RASTER_ACTVID_DURING_BLANK                                            \
                                 0x08000000

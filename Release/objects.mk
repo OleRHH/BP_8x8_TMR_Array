@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -llibc.a
+LIBS := -llibc.a -l"/home/ole/CodeComposerStudio10/workspace/project_Bachelorprojekt/BP_TMR_sensor_array/tivaware/driverlib/driverlib.lib"
 

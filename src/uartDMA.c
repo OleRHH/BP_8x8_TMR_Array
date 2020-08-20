@@ -145,7 +145,7 @@ void sendCommandToMotor(uint16_t command)
 /* receive telemetry data from stepper-motor via RS485 */
 void UART2IntHandler(void)
 {
-    uint32_t positionData;
+    volatile uint32_t positionData;
 
     uint32_t UIstatus = UARTIntStatus(UART2_BASE, true);    // Get the interrupt status.
     UARTIntClear(UART2_BASE, UIstatus);
@@ -264,9 +264,18 @@ void configureUartUDMA(void)
 }
 
 
-/********************************************************************************/
-/* UART0 is used to transmit Array Data (256 byes) via RS232 and to receive     */
-/* control commands.                                                            */
+/***********************  ConfigureUART0()  *************************************/
+/* UART0 is used to receive control commands from a PC and to send the sensor   */
+/* array data back to the PC. The commands are always 8 bytes long. For example */
+/* a matlab script running on a PC could periodically request a sensor data     */
+/* transfer from the MCU. The MCU then sends back the current sensor array data */
+/* which is a 256 bytes long RAW data packet with the cosinus and sinus results */
+/* from the sensor array.                                                       */
+/* Other commands can set the displayed arrow length or switch modes like       */
+/* scaling and averaging.                                                       */
+/* The MCU operates in slave mode. This means it is configured with an input
+ * interrupt. When a receive interrupt is triggered, the 'UART0InterruptHandler'*/
+/* function is called to evaluate and execute the command from PC.              */
 /********************************************************************************/
 void ConfigureUART0(uint32_t SysClock)
 {
@@ -298,7 +307,6 @@ void ConfigureUART0(uint32_t SysClock)
 
     // Enable the UART DMA TX/RX interrupts.
     UARTIntRegister(UART0_BASE, UART0InterruptHandler);
-//  UARTIntEnable(UART0_BASE, UART_INT_RX);
     UARTIntEnable(UART0_BASE, UART_INT_DMARX);
 
     // Enable the UART peripheral interrupts.

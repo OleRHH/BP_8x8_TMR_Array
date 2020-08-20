@@ -7,13 +7,33 @@
 #include <inc/hw_memmap.h>      // TIMER0_BASE_BASE
 
 
-/*********************************************************************************************/
+
+/********************************************************************************/
+void timerInterruptDisable(void)
+{
+//    TimerDisable(TIMER0_BASE, TIMER_A);
+    TimerIntDisable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+
+}
+
+
+/********************************************************************************/
+void timerInterruptEnable(void)
+{
+    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+//    IntEnable(INT_TIMER0A);
+    TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+}
+
+
+/********************************************************************************/
 void timer0IntClear(void)
 {
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 }
 
-/*********************************************************************************************/
+/********************************************************************************/
 void configureTimer0(uint32_t SysClock)
 /* this timer is used to run the program periodically. Upon call the analog inputs are read,
  * converted and send to the LC-Display */

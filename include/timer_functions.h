@@ -18,7 +18,8 @@
 /*********************  # public Prototypes #   ***************************/
 void configureTimer0(uint32_t);
 void timer0IntClear(void);
-
+void timerInterruptDisable(void);
+void timerInterruptEnable(void);
 // interrupt handler for Timer 0. Needs to be implemented in project.
 extern void Timer0InterruptHandler(void);
 
