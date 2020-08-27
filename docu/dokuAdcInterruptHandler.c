@@ -1,27 +1,22 @@
 /***********************  ADC Interrupt handler  ********************************/
-/* captures the analog sensor array signals without busy waiting.               */
-/* The digitized signals are being processed at the end.                        */
+/* The hardware can convert up to 16 analog signals to digital when triggered.  */
+/* When done with the conversion this function is called and another conversion */
+/* is started until all sensor data was read. This function has to be triggered */
+/* 16 times to convert all 16*16 = 256 analog values.                           */
 /********************************************************************************/
-void ADC1InterruptHandler(void)
+void adcInterruptHandler(void)
 {
     static uint16_t step = 0;
 
     // Interrupt is set when a AD-conversion is finished. It needs to be cleared.
     adcIntClear();
 
-
     // advance step count each time an AD-conversion is finished. The first one
     // was already started in Timer0Inthandler. There are 16 steps in total.
     step++;
 
-    // Port L is used to address the analog multiplexers on the TMR sensor array
-    // GPIO_PIN_4 is inverted after half the measures are done. This is because
-    // of the sensor-array hardware layout.
-    if(step == 8)
-    {
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, ~GPIO_PIN_4);
-    }
-    GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
+    // set the analog multiplexer addresses or the next 16 sensor values.
+    setMultiplexer(step);
 
     // store the just captured analog values into buffers to be later processed.
     storeArraySensorData(step - 1);
@@ -36,12 +31,9 @@ void ADC1InterruptHandler(void)
     // AD-conversion (which gets started during the next Timer0 Interrupt).
     else
     {
-        // process arrow length and store results to be later drawn on LCD.
-        maximumAnalogValue = computeArrows(relative, maxArrowLength);
         // reset step counter for next use
         step = 0;
         // reset digital multiplexer inputs
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_3_DOWNTO_0, step);
-        GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, GPIO_PIN_4);
+        setMultiplexer(step);
     }
 }

@@ -42,18 +42,19 @@ enum colors
     GREY    = 0x00AAAAAA,
 };
 
-struct arrows {
+typedef struct {
     int16_t dSin[8][8];
     int16_t dCos[8][8];
     uint16_t arrowLength[8][8];
-};
+} lcdArrows;
 
 // x-y-coordinate structure
 // todo: this concept wasn't fully implemented
 typedef struct
 {
-    int16_t x;
-    int16_t y;
+    int32_t x;
+    int32_t y;
+    bool arrowActive;
 } coordinates;
 
 typedef struct
@@ -61,6 +62,7 @@ typedef struct
     bool relative;
     bool adcAVG;
     uint16_t maxArrowLength;
+    bool reqSensorData;
 
     bool coloredArrows;
     color backColorArrowWindow;
@@ -81,7 +83,7 @@ typedef struct
 
 typedef struct
 {
-  uint16_t setupNo;
+  uint16_t settingNo;
   Setup setup[4];
 } Settings;
 
@@ -89,10 +91,11 @@ typedef struct
 void configureLCD5Inch(uint32_t);
 Setup * configureLCD(uint32_t, Settings *);
 void configureLCDHardware(uint32_t);
-Setup * setLCDLayout(uint16_t, Settings *);
+Setup * setLCDLayout(Settings *);
+void drawSettingsMenu(void);
 void drawDisplayLayout(void);
 
-void drawDisplay7Inch(struct arrows *);
+void drawDisplay7Inch(lcdArrows *);
 void drawArrowLengthMenu(void);
 void writeInfo(uint16_t);
 void writeMaxAnalogValue(uint16_t);

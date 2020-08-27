@@ -2,7 +2,7 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
-CG_TOOL_ROOT := /home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS
+CG_TOOL_ROOT := /home/ole/ti/ccs1010/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -19,8 +19,8 @@ ORDERED_OBJS += \
 "./src/debug_functions.obj" \
 "./src/lcd_functions.obj" \
 "./src/timer_functions.obj" \
-"./src/touch.obj" \
-"./src/uartDMA.obj" \
+"./src/touch_functions.obj" \
+"./src/uartDMA_functions.obj" \
 "./tivaware/src/adc.obj" \
 "./tivaware/src/aes.obj" \
 "./tivaware/src/can.obj" \
@@ -57,7 +57,7 @@ ORDERED_OBJS += \
 "../tivaware/driverlib/driverlib.lib" \
 $(GEN_CMDS__FLAG) \
 -llibc.a \
--l"/home/ole/CodeComposerStudio10/workspace/project_Bachelorprojekt/BP_TMR_sensor_array/tivaware/driverlib/driverlib.lib" \
+-l"/home/ole/ccs_10/workspace/project_Bachelorprojekt/BP_TMR_sensor_array/tivaware/driverlib/driverlib.lib" \
 
 -include ../makefile.init
 
@@ -194,23 +194,24 @@ all: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 BP_TMR_sensor_array.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: ARM Linker'
-	"/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me -Ooff --opt_for_speed=0 --define=ccs="ccs" --define=PART_TM4C1294NCPDT --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"BP_TMR_sensor_array.map" --heap_size=10000 --stack_size=10000 -i"/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/lib" -i"/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="BP_TMR_sensor_array_linkInfo.xml" --rom_model -o "BP_TMR_sensor_array.out" $(ORDERED_OBJS)
+	"/home/ole/ti/ccs1010/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me -O4 --opt_for_speed=5 --define=ccs="ccs" --define=PART_TM4C1294NCPDT --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"BP_TMR_sensor_array.map" --heap_size=10000 --stack_size=10000 -i"/home/ole/ti/ccs1010/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/lib" -i"/home/ole/ti/ccs1010/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="BP_TMR_sensor_array_linkInfo.xml" --rom_model -o "BP_TMR_sensor_array.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
 BP_TMR_sensor_array.hex: $(EXE_OUTPUTS)
 	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo 'Invoking: ARM Hex Utility'
-	"/home/ole/CodeComposerStudio10/ccs/tools/compiler/ti-cgt-arm_20.2.0.LTS/bin/armhex"  -o "BP_TMR_sensor_array.hex" $(EXE_OUTPUTS__QUOTED)
+	"/home/ole/ti/ccs1010/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armhex"  -o "BP_TMR_sensor_array.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "tm4c1294ncpdt_startup_ccs.obj" "Image_Src/arrow_left.obj" "Image_Src/arrow_right.obj" "Image_Src/startButton.obj" "Image_Src/stopButton.obj" "main/main.obj" "src/EEPROM_functions.obj" "src/adc_functions.obj" "src/debug_functions.obj" "src/lcd_functions.obj" "src/timer_functions.obj" "src/touch.obj" "src/uartDMA.obj" "tivaware/src/adc.obj" "tivaware/src/aes.obj" "tivaware/src/can.obj" "tivaware/src/comp.obj" "tivaware/src/cpu.obj" "tivaware/src/crc.obj" "tivaware/src/des.obj" "tivaware/src/eeprom.obj" "tivaware/src/emac.obj" "tivaware/src/epi.obj" "tivaware/src/flash.obj" "tivaware/src/fpu.obj" "tivaware/src/gpio.obj" "tivaware/src/hibernate.obj" "tivaware/src/i2c.obj" "tivaware/src/interrupt.obj" "tivaware/src/lcd.obj" "tivaware/src/mpu.obj" "tivaware/src/onewire.obj" "tivaware/src/pwm.obj" "tivaware/src/qei.obj" "tivaware/src/shamd5.obj" "tivaware/src/ssi.obj" "tivaware/src/sw_crc.obj" "tivaware/src/sysctl.obj" "tivaware/src/sysexc.obj" "tivaware/src/systick.obj" "tivaware/src/timer.obj" 
+	-$(RM) "tm4c1294ncpdt_startup_ccs.obj" "Image_Src/arrow_left.obj" "Image_Src/arrow_right.obj" "Image_Src/startButton.obj" "Image_Src/stopButton.obj" "main/main.obj" "src/EEPROM_functions.obj" "src/adc_functions.obj" "src/debug_functions.obj" "src/lcd_functions.obj" "src/timer_functions.obj" "src/touch_functions.obj" "src/uartDMA_functions.obj" "tivaware/src/adc.obj" "tivaware/src/aes.obj" "tivaware/src/can.obj" "tivaware/src/comp.obj" "tivaware/src/cpu.obj" "tivaware/src/crc.obj" "tivaware/src/des.obj" "tivaware/src/eeprom.obj" "tivaware/src/emac.obj" "tivaware/src/epi.obj" "tivaware/src/flash.obj" "tivaware/src/fpu.obj" "tivaware/src/gpio.obj" "tivaware/src/hibernate.obj" "tivaware/src/i2c.obj" "tivaware/src/interrupt.obj" "tivaware/src/lcd.obj" "tivaware/src/mpu.obj" "tivaware/src/onewire.obj" "tivaware/src/pwm.obj" "tivaware/src/qei.obj" "tivaware/src/shamd5.obj" "tivaware/src/ssi.obj" "tivaware/src/sw_crc.obj" "tivaware/src/sysctl.obj" "tivaware/src/sysexc.obj" "tivaware/src/systick.obj" "tivaware/src/timer.obj" 
 	-$(RM) "tivaware/src/uart.obj" "tivaware/src/udma.obj" "tivaware/src/usb.obj" "tivaware/src/watchdog.obj" 
-	-$(RM) "tm4c1294ncpdt_startup_ccs.d" "Image_Src/arrow_left.d" "Image_Src/arrow_right.d" "Image_Src/startButton.d" "Image_Src/stopButton.d" "main/main.d" "src/EEPROM_functions.d" "src/adc_functions.d" "src/debug_functions.d" "src/lcd_functions.d" "src/timer_functions.d" "src/touch.d" "src/uartDMA.d" "tivaware/src/adc.d" "tivaware/src/aes.d" "tivaware/src/can.d" "tivaware/src/comp.d" "tivaware/src/cpu.d" "tivaware/src/crc.d" "tivaware/src/des.d" "tivaware/src/eeprom.d" "tivaware/src/emac.d" "tivaware/src/epi.d" "tivaware/src/flash.d" "tivaware/src/fpu.d" "tivaware/src/gpio.d" "tivaware/src/hibernate.d" "tivaware/src/i2c.d" "tivaware/src/interrupt.d" "tivaware/src/lcd.d" "tivaware/src/mpu.d" "tivaware/src/onewire.d" "tivaware/src/pwm.d" "tivaware/src/qei.d" "tivaware/src/shamd5.d" "tivaware/src/ssi.d" "tivaware/src/sw_crc.d" "tivaware/src/sysctl.d" "tivaware/src/sysexc.d" "tivaware/src/systick.d" "tivaware/src/timer.d" "tivaware/src/uart.d" "tivaware/src/udma.d" "tivaware/src/usb.d" "tivaware/src/watchdog.d" 
+	-$(RM) "tm4c1294ncpdt_startup_ccs.d" "Image_Src/arrow_left.d" "Image_Src/arrow_right.d" "Image_Src/startButton.d" "Image_Src/stopButton.d" "main/main.d" "src/EEPROM_functions.d" "src/adc_functions.d" "src/debug_functions.d" "src/lcd_functions.d" "src/timer_functions.d" "src/touch_functions.d" "src/uartDMA_functions.d" "tivaware/src/adc.d" "tivaware/src/aes.d" "tivaware/src/can.d" "tivaware/src/comp.d" "tivaware/src/cpu.d" "tivaware/src/crc.d" "tivaware/src/des.d" "tivaware/src/eeprom.d" "tivaware/src/emac.d" "tivaware/src/epi.d" "tivaware/src/flash.d" "tivaware/src/fpu.d" "tivaware/src/gpio.d" "tivaware/src/hibernate.d" "tivaware/src/i2c.d" "tivaware/src/interrupt.d" "tivaware/src/lcd.d" "tivaware/src/mpu.d" "tivaware/src/onewire.d" "tivaware/src/pwm.d" "tivaware/src/qei.d" "tivaware/src/shamd5.d" "tivaware/src/ssi.d" "tivaware/src/sw_crc.d" "tivaware/src/sysctl.d" "tivaware/src/sysexc.d" "tivaware/src/systick.d" "tivaware/src/timer.d" "tivaware/src/uart.d" "tivaware/src/udma.d" "tivaware/src/usb.d" 
+	-$(RM) "tivaware/src/watchdog.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
