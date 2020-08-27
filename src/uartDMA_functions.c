@@ -16,7 +16,7 @@
 #include <driverlib/interrupt.h>
 #include <driverlib/udma.h>
 
-#include <uartDMA.h>
+#include <uartDMA_functions.h>
 
 /********************************************************************************/
 // The control table used by the uDMA controller. This table must be aligned

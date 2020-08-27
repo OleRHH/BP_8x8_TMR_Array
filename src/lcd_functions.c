@@ -76,13 +76,11 @@ void drawString(char *, uint16_t, uint16_t, color, color);
 /*****************************  # global variables #    *************************/
 int16_t oldDiffSinResults[8][8];
 int16_t oldDiffCosResults[8][8];
-//color backColorTable;
+bool oldArrowActive[8][8];
+coordinates startCord[8][8];
 
 color arrowColor[768];
-color arrowBlack[768];
-
 Setup * set;
-
 
 /***********************  # extern global variables #    ************************/
 extern unsigned char imgArrayStopButton[PIXEL_COUNT];
@@ -96,12 +94,33 @@ extern unsigned char imgArrayArrowRButton[PIXEL_COUNT];
 /********************************************************************************/
 Setup * configureLCD(uint32_t SysClock, Settings * setting)
 {
+    uint16_t m, n;
+
+    // configure MCU hardware pins connected to LCD and setup LCD parameter
     configureLCDHardware(SysClock);
 
+    // generate an array with colors used for option 'colored arrows'
     generateColors();
 
-    set = &setting->setup[setting->setupNo];
+    // set is a pointer to the active settings used in this file and in main.
+    // there is an array of settings 'setup[4]'. The following command
+    // changes the address where 'set' points to
+    set = &setting->setup[setting->settingNo];
 
+
+    // calculate the grid position in advanced. They are later used to
+    // draw the arrows.
+    for(m = 0; m <= 7; m++)
+    {
+        for(n = 0; n <= 7; n++)
+        {
+            // I: set new start coordinates
+            startCord[m][n].x = n * 58 + GRID_OFFSET_X_7_INCH;
+            startCord[m][n].y = m * 60 + GRID_OFFSET_Y_7_INCH;
+        }
+    }
+
+    // now draw the hole display
     drawDisplayLayout();
 
     return set;
@@ -111,13 +130,9 @@ Setup * configureLCD(uint32_t SysClock, Settings * setting)
 /****************************  setLCDLayout()  **********************************/
 //       //
 /********************************************************************************/
-Setup * setLCDLayout(uint16_t num, Settings * setting)
+Setup * setLCDLayout(Settings * setting)
 {
-    setting->setupNo = num;
-    set = &setting->setup[setting->setupNo];
-
-    drawDisplayLayout();
-
+    set = &setting->setup[setting->settingNo];
     return set;
 }
 
@@ -165,33 +180,69 @@ void drawDisplayLayout(void)
 /***************************  drawArrowLengthMenu()  ****************************/
 // draws the 'Change max. arrow size' menu: background, lines and words.        //
 /********************************************************************************/
+void drawSettingsMenu(void)
+{
+    uint16_t n, value = 1;
+    char charValue[10];
+
+    // set menu background
+    drawRectangle(50, 50, 456, 150, set->backColorArrowLengthMenu);
+
+    // draw the vertical spacer lines
+    drawRectangle( 48, 48,  49, 150, set->spacerColor);   // spacer
+    drawRectangle(150, 50, 151, 150, set->spacerColor);   // spacer
+    drawRectangle(252, 50, 253, 150, set->spacerColor);   // spacer
+    drawRectangle(354, 50, 355, 150, set->spacerColor);   // spacer
+    drawRectangle(456, 48, 457, 150, set->spacerColor);   // spacer
+
+    // draw the horizontal spacer lines
+    drawRectangle(50,  48, 456,  49, set->spacerColor);   // spacer
+    drawRectangle(50, 150, 456, 151, set->spacerColor);   // spacer
+
+    // print available number choices
+    for(n = 0; n < 4; n++)
+    {
+        sprintf(charValue, "%.1d", value);
+        drawString(charValue, 95, 90 + 100 * n,
+                   set->fontColor, set->backColorArrowLengthMenu);
+        value++;
+    }
+}
+
+
+/***************************  drawArrowLengthMenu()  ****************************/
+// draws the 'Change settings' menu.                                            //
+/********************************************************************************/
 void drawArrowLengthMenu(void)
 {
     uint16_t m, n, value = 10;
     char charValue[10];
-    // the rectangle is the background to the menu
-    drawRectangle(50, 50, 456, 456, set->backColorArrowLengthMenu);  // background motor buttons
 
-    // the following rectangles are the fat lines that build the grid.
+    // set menu background
+    drawRectangle(50, 50, 456, 456, set->backColorArrowLengthMenu);
+
+    // draw the vertical spacer lines
     drawRectangle( 48, 48,  49, 458, set->spacerColor);   // spacer
     drawRectangle(150, 50, 151, 458, set->spacerColor);   // spacer
     drawRectangle(252, 50, 253, 458, set->spacerColor);   // spacer
     drawRectangle(354, 50, 355, 458, set->spacerColor);   // spacer
     drawRectangle(456, 48, 457, 458, set->spacerColor);   // spacer
 
+    // draw the horizontal spacer lines
     drawRectangle(50,  48, 456,  49, set->spacerColor);   // spacer
     drawRectangle(50, 150, 456, 151, set->spacerColor);   // spacer
     drawRectangle(50, 252, 456, 253, set->spacerColor);   // spacer
     drawRectangle(50, 354, 456, 355, set->spacerColor);   // spacer
     drawRectangle(50, 457, 456, 458, set->spacerColor);   // spacer
 
-    // now the available number choices are being printed out on the menu.
+    // print available number choices
     for(m = 0; m < 4; m++)
     {
         for(n = 0; n < 4; n++)
         {
             sprintf(charValue, "%.2d", value);
-            drawString(charValue, 95 + 100 * m, 90 + 100 * n, set->fontColor, set->backColorArrowLengthMenu);
+            drawString(charValue, 95 + 100 * m, 90 + 100 * n,
+                       set->fontColor, set->backColorArrowLengthMenu);
             value += 10;
         }
     }
@@ -356,77 +407,78 @@ void drawString(char *text, uint16_t rowStart, uint16_t columnStart, color fontC
 }
 
 
+//setup->coloredArrows = setup->coloredArrows ? false:true;
 /**************************  drawDisplay7Inch()   *******************************/
 // draws all arrows to the 7 inch LC-Display.                                   //
 /********************************************************************************/
-void drawDisplay7Inch(struct arrows * arrow)
+void drawDisplay7Inch(lcdArrows * arrow)
 {
-    int16_t m = 0, n = 0;               // m = row , n = column
-    coordinates start, stop;
-    color *arrowColor1;
-
-    // if the option 'colored arrows' is enabled, the colors get linked to an
-    // array with 768 different colors from dark blue to red.
-    // if option is disabled colors get linked to an array with only 'black'.
-    if( set->coloredArrows == true)
-    {
-        arrowColor1 = arrowColor;
-    }
-    else
-    {
-        arrowColor1 = arrowBlack;
-    }
-
+    static int16_t m, n;                            // m = row , n = column
+    static coordinates stop;
+    bool arrowActive;
     // write the arrows
     for(m = 0; m <= 7; m++)
     {
         for(n = 0; n <= 7; n++)
         {
-            // I: set new start coordinates
-            start.x = n * 58 + GRID_OFFSET_X_7_INCH;
-            start.y = m * 60 + GRID_OFFSET_Y_7_INCH;
-
             // II: delete old arrows
-            stop.x  = start.x + oldDiffCosResults[m][n];
-            stop.y  = start.y + oldDiffSinResults[m][n];
+            stop.x  = startCord[m][n].x + oldDiffCosResults[m][n];
+            stop.y  = startCord[m][n].y + oldDiffSinResults[m][n];
 
-            drawLine(start.x, start.y, stop.x, stop.y, set->backColorArrowWindow, WITH_ARROW);
+            drawLine(startCord[m][n].x, startCord[m][n].y, stop.x, stop.y, set->backColorArrowWindow, oldArrowActive[m][n]);
 
             // III: write grid cross
-            stop.x  = start.x;
-            stop.y  = start.y;
-            drawLine(start.x - 2, start.y, stop.x + 2, stop.y, set->gridColor, NO_ARROW);    // draw a small cross..
-            drawLine(start.x, start.y - 2, stop.x, stop.y + 2, set->gridColor, NO_ARROW);    // ..as as grid indicator
+            drawLine(startCord[m][n].x - 2, startCord[m][n].y, startCord[m][n].x + 2, startCord[m][n].y, set->gridColor, NO_ARROW);    // draw a small cross..
+            drawLine(startCord[m][n].x, startCord[m][n].y - 2, startCord[m][n].x, startCord[m][n].y + 2, set->gridColor, NO_ARROW);    // ..as as grid indicator
 
             // IV: write new arrows
-            stop.x  = start.x + arrow->dCos[m][n];
+            stop.x  = startCord[m][n].x + arrow->dCos[m][n];
 
             // IV a: check if arrow is in designated display window
+            // all good: arrow is in window
             if( (stop.x >= 0) && (stop.x < 507) )
             {
-                stop.y  = start.y + arrow->dSin[m][n];
+                stop.y  = startCord[m][n].y + arrow->dSin[m][n];
+                arrowActive = true;
             }
-            // if arrow moves out off screen on left side => scale down to left boundary
+            // arrow moved out off screen on left side => scale stop.y and stop.x  down to left boundary
             else if(stop.x < 0)
             {
-                arrow->dSin[m][n] *= (double)start.x / -arrow->dCos[m][n];
-                arrow->dCos[m][n] = -start.x;
-                stop.y  = start.y + arrow->dSin[m][n];
+                arrow->dSin[m][n] *= (double)startCord[m][n].x / -arrow->dCos[m][n];    // minus because we know: dCos < 0
+                arrow->dCos[m][n] = -startCord[m][n].x;
+                stop.y  = startCord[m][n].y + arrow->dSin[m][n];
                 stop.x  = 0;
+                arrowActive = false;
             }
             // if arrow moves out off screen on right side => scale down to right boundary
             else
             {
-                arrow->dSin[m][n] *= (double)(506 - start.x) / arrow->dCos[m][n];
-                arrow->dCos[m][n] = 506 - start.x;
-                stop.y  = start.y + arrow->dSin[m][n];
+                arrow->dSin[m][n] *= (double)(506 - startCord[m][n].x) / arrow->dCos[m][n];
+                arrow->dCos[m][n] = 506 - startCord[m][n].x;
+                stop.y  = startCord[m][n].y + arrow->dSin[m][n];
                 stop.x  = 506;
+                arrowActive = false;
+            }
+            if(stop.y < 0 || stop.y > 479)
+            {
+                arrowActive = false;
             }
 
-            drawLine(start.x, start.y, stop.x, stop.y, arrowColor1[arrow->arrowLength[m][n]], WITH_ARROW);
+            // if the option 'colored arrows' is enabled, the colors get linked to an
+            // array with 768 different colors from dark blue to red.
+            // if option is disabled colors get linked to an array with only 'black'.
+            if( set->coloredArrows == true)
+            {
+                drawLine(startCord[m][n].x, startCord[m][n].y, stop.x, stop.y, arrowColor[arrow->arrowLength[m][n]], arrowActive);
+            }
+            else
+            {
+                drawLine(startCord[m][n].x, startCord[m][n].y, stop.x, stop.y, set->arrowColor, arrowActive);
+            }
 
             oldDiffCosResults[m][n] = arrow->dCos[m][n];
             oldDiffSinResults[m][n] = arrow->dSin[m][n];
+            oldArrowActive[m][n] = arrowActive;
         }
     }
 }
@@ -464,7 +516,7 @@ void drawRectangle(short start_x, short start_y, short stop_x, short stop_y, col
 //
 /********************************************************************************/
 //draws a line from start point x to stop point y directly to the display
-void drawLine(short start_x, short start_y, short stop_x, short stop_y, color color, uint16_t arrowOption)
+void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, color color, uint16_t arrowOption)
 {
     int16_t delta_x = stop_x - start_x;
     int16_t delta_y = stop_y - start_y;
@@ -955,10 +1007,6 @@ void generateColors(void)
         arrowColor[i].green = green;
         arrowColor[i].blue = blue;
 
-        arrowBlack[i].red = 0x00;
-        arrowBlack[i].green = 0x00;
-        arrowBlack[i].blue = 0x00;
-
         val++;
     }
 }
@@ -1013,105 +1061,6 @@ void writePosition(uint16_t point1_x, uint16_t point1_y, uint16_t point2_x, uint
     writeCmdData(point1_y);             //                                   LB
     writeCmdData(point2_y >> 8);        // Set display_stop column address   HB
     writeCmdData(point2_y);             //                                   LB
-}
-
-
-/********************************************************************************/
-// LCD Panel initialize:
-void configureLCD5Inch(uint32_t SysClock) {
-    uint32_t value;
-
-    // Set Port L  0-4: Multiplexer address output for 8x8 Array
-    // Pin 3 = D; Pin 2 = C; Pin 1 = B; Pin 0 = A; Pin 4 = nD
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
-    GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4);
-
-    // Set Port M Pins 0-7: Output LCD Data
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
-    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
-
-    // Set Port Q Pins 0-4: LCD Control output:
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);  // Clock Port Q
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOQ));
-    GPIOPinTypeGPIOOutput(GPIO_PORTQ_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
-                                         | GPIO_PIN_4);
-
-//////////////////////////////////////////////////////////////////////////////////
-    GPIO_PORTQ_DATA_R = INITIAL_STATE;  // Initial state
-    SysCtlDelay((SysClock/3) / 100);    // wait 10 ms
-
-    GPIO_PORTQ_DATA_R &= ~RST;          // Hardware reset
-    SysCtlDelay((SysClock/3) / 1000);   // wait 1 ms
-    GPIO_PORTQ_DATA_R |= RST;
-    SysCtlDelay((SysClock/3) / 1000);   // wait 1 ms
-
-    writeCommand(SOFTWARE_RESET);       // Software reset
-    SysCtlDelay((SysClock/3) / 100);    // wait 10 ms
-
-    GPIO_PORTQ_DATA_R = INITIAL_STATE;  // Initial state
-    SysCtlDelay((SysClock/3) / 100);    // wait 10 ms
-
-    writeCommand(SET_PLL_MN);           // Set PLL Freq to 120 MHz
-    writeCmdData(0x24);
-    writeCmdData(0x02);
-    writeCmdData(0x04);
-
-    writeCommand(START_PLL);            // Start PLL
-    writeCmdData(0x01);                 //
-    SysCtlDelay((SysClock/3) / 1000);   // wait 1 ms
-
-    writeCommand(START_PLL);            // Lock PLL
-    writeCmdData(0x03);                 //
-    SysCtlDelay((SysClock/3) / 1000);   // wait 1 ms
-
-    writeCommand(SOFTWARE_RESET);       // Software reset
-    SysCtlDelay((SysClock/3) / 100);    // wait 10 ms
-
-//////////////////////////////////////////////////////////////////////////////////
-    value = 0x01EFFF;
-    writeCommand(SET_LSHIFT);           // Set LCD Pixel Clock 12.7 Mhz (0x01EFFF)
-    writeCmdData(value>>16);            //
-    writeCmdData(value>>8);             //
-    writeCmdData(value);                //
-
-    writeCommand(SET_LCD_MODE);         // Set LCD Panel mode to:
-    writeCmdData(0x20);                 // ..TFT panel 24bit
-    writeCmdData(0x00);                 // ..TFT mode
-    writeCmdData(0x01);                 // Horizontal size 480-1 (aka 479 ;)   HB
-    writeCmdData(0xDF);                 // Horizontal size 480-1               LB
-    writeCmdData(0x01);                 // Vertical size 272-1   (aka 271 ;)   HB
-    writeCmdData(0x0F);                 // Vertical size 272-1                 LB
-    writeCmdData(0x00);                 // even/odd line RGB
-
-    writeCommand(SET_HORI_PERIOD);      // Set Horizontal period
-    writeCmdData(0x02);                 // Set HT total pixel=531              HB
-    writeCmdData(0x13);                 // Set HT total pixel=531              LB
-    writeCmdData(0x00);                 // Set Horiz.sync pulse start pos = 43 HB
-    writeCmdData(0x2B);                 // Set Horiz.sync pulse start pos = 43 LB
-    writeCmdData(0x0A);                 // Set horiz.sync pulse with = 10
-    writeCmdData(0x00);                 // Set horiz.Sync pulse start pos= 8   HB
-    writeCmdData(0x08);                 // Set horiz.Sync pulse start pos= 8   LB
-    writeCmdData(0x00);
-
-    writeCommand(SET_VERT_PERIOD);      // Set Vertical Period
-    writeCmdData(0x01);                 // Set VT lines = 288                  HB
-    writeCmdData(0x20);                 // Set VT lines = 288                  LB
-    writeCmdData(0x00);                 // Set VPS = 12                        HB
-    writeCmdData(0x0C);                 // Set VPS = 12                        LB
-    writeCmdData(0x0A);                 // Set vert.sync pulse with = 10
-    writeCmdData(0x00);                 // Set vert.Sync pulse start pos= 8    HB
-    writeCmdData(0x00);                 // Set vert.Sync pulse start pos= 8    LB
-    writeCmdData(0x04);
-
-    writeCommand(0xF0);                // Set LCD color data format
-    writeCmdData(0x00);                // Set pixel data format = 8 bit
-
-//    writeCommand(SET_ADRESS_MODE);     // Set address mode
-//    writeCmdData(0b00000001);          // flip vertical
-
-    writeCommand(0x29);                // Set display on
 }
 
 

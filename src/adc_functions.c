@@ -28,12 +28,11 @@
 #define ROW_3_L ADC_CTL_CH9         // PE4
 #define ROW_2_L ADC_CTL_CH0         // PE3
 #define ROW_1_L ADC_CTL_CH1         // PE2
-#define GPIO_PIN_3_DOWNTO_0 0x0F    // ADC1InterruptHandler()
+#define GPIO_PIN_3_DOWNTO_0 0x0F    // adcInterruptHandler()
 
 // Interrupt priority. Lower numbers = higher priority.
 // Valid numbers: 0x00, 0x20, 0x40, 0x60, 0x80, 0xA0, 0xC0, 0xE0
-#define HIGH_PRIORITY 0x00
-#define LOW_PRIORITY  0x80
+#define MID_PRIORITY_3 0x60
 
 
 /***************************  # global variables #   ****************************/
@@ -51,6 +50,9 @@ int16_t CosOffset[8][8];
 TMRSensorData SensorData;
 
 
+/***************************  startADConversion()  ******************************/
+/* This function has been outsourced for better readability. It simply starts   */
+/* a ad-conversion sequence.                                                    */
 /********************************************************************************/
 void startADConversion(void)
 {
@@ -60,6 +62,9 @@ void startADConversion(void)
 }
 
 
+/***************************  adcIntClear()  ************************************/
+/* Clear all pending adc interrupts. This is outsourced because the needed      */
+/* include file is declared here.                                               */
 /********************************************************************************/
 void adcIntClear(void)
 {
@@ -67,12 +72,14 @@ void adcIntClear(void)
 }
 
 
+/***************************  setMultiplexer()  *********************************/
+/* Sets the addresses for the analog multiplexers.                              */
+/* Port L is used to address the analog multiplexers on the TMR sensor array.   */
+/* GPIO_PIN_4 is inverted after half the measures (Step 0 - 7, measure 0 - 127) */
+/* are done. This is because of the sensor-array hardware layout.               */
 /********************************************************************************/
 void setMultiplexer(uint16_t step)
 {
-    // Port L is used to address the analog multiplexers on the TMR sensor array
-    // GPIO_PIN_4 is inverted after half the measures are done. This is because
-    // of the sensor-array hardware layout.
     if(step == 0)
     {
         GPIOPinWrite(GPIO_PORTL_BASE, GPIO_PIN_4, GPIO_PIN_4);
@@ -85,9 +92,8 @@ void setMultiplexer(uint16_t step)
 }
 
 
-/********************************************************************************/
-// Toogles the hardware averaging feature.
-
+/***********************  setADCHardwareAveraging()  ****************************/
+/* Toggles the hardware averaging feature.                                      */
 /********************************************************************************/
 bool setADCHardwareAveraging(bool adcAVG)
 {
@@ -110,8 +116,9 @@ bool setADCHardwareAveraging(bool adcAVG)
 }
 
 
+/***********************  storeArraySensorData()  ****************************/
+/* After converting all 256 analog signals from sensor-array this function                 */
 /********************************************************************************/
-//Read TMR sensor array
 void storeArraySensorData(uint16_t step)
 {
     uint32_t ADCValues_SS0[8];
@@ -217,7 +224,7 @@ void computeArrows(bool relative, uint16_t maxArrowLength)
         }
     }
 
-    if(relative == true)
+    if(relative == true)    // scaling: relative
     {
         // diff.dSin and diff.dSin are needed to display the arrows.
         // They are being normalized in this function to the maximum arrow length.
@@ -228,14 +235,12 @@ void computeArrows(bool relative, uint16_t maxArrowLength)
         {
             for(n = 0; n <= 7; n++)
             {
-                SensorData.arrows.dCos[m][n]  = SensorData.dCos[7-m][n] * maxArrowLength;
-                SensorData.arrows.dCos[m][n] /= SensorData.maxAnalogValue;
-                SensorData.arrows.dSin[m][n]  =-SensorData.dSin[7-m][n] * maxArrowLength;
-                SensorData.arrows.dSin[m][n] /= SensorData.maxAnalogValue;
+                SensorData.arrows.dCos[m][n]  = (int16_t) ( SensorData.dCos[7-m][n] * maxArrowLength / SensorData.maxAnalogValue);
+                SensorData.arrows.dSin[m][n]  = (int16_t) (-SensorData.dSin[7-m][n] * maxArrowLength / SensorData.maxAnalogValue);
             }
         }
     }
-    else
+    else    // scaling: absolute
     {
         for(m = 0; m <= 7; m++)
         {
@@ -247,10 +252,8 @@ void computeArrows(bool relative, uint16_t maxArrowLength)
                 // limit the maximum arrow length to the max allowed value.
                 if(SensorData.arrows.arrowLength[7-m][n] > maxArrowLength)
                 {
-                    SensorData.arrows.dCos[m][n] *= maxArrowLength;
-                    SensorData.arrows.dCos[m][n] /= SensorData.arrows.arrowLength[7-m][n];
-                    SensorData.arrows.dSin[m][n] *= maxArrowLength;
-                    SensorData.arrows.dSin[m][n] /= SensorData.arrows.arrowLength[7-m][n];
+                    SensorData.arrows.dCos[m][n] *= (double)maxArrowLength / SensorData.arrows.arrowLength[7-m][n];
+                    SensorData.arrows.dSin[m][n] *= (double)maxArrowLength / SensorData.arrows.arrowLength[7-m][n];
                 }
             }
         }
@@ -322,8 +325,8 @@ TMRSensorData * configureADC(bool adcAVG)
     ADCSequenceEnable(ADC1_BASE, 2);        // ADC1 for sample sequencer2
 
 
-    IntPrioritySet(INT_ADC0SS2, HIGH_PRIORITY);           // set priority
-    ADCIntRegister(ADC1_BASE, 2, ADC1InterruptHandler);
+    IntPrioritySet(INT_ADC0SS2, MID_PRIORITY_3);           // set priority
+    ADCIntRegister(ADC1_BASE, 2, adcInterruptHandler);
     ADCIntEnable(ADC1_BASE, 2);
     IntEnable(INT_ADC1SS2);
 

@@ -112,9 +112,9 @@ PDE_DEPS__QUOTED :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 . \
-Image_Src \
 main \
 src \
+src_images \
 tivaware/driverlib \
 tivaware/src \
 

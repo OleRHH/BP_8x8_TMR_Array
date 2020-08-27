@@ -8,24 +8,29 @@
 #define LEFT_BUTTON  ( 1 )
 #define RIGHT_BUTTON ( 2 )
 #define STOP_BUTTON  ( 3 )
-#define START_BUTTON ( 4 )
+#define CHANGE_SETTING_BUTTON ( 4 )
 #define ARROW_LENGTH_BUTTON ( 5 )
 #define SCALING_BUTTON ( 6 )
 #define HARDW_AVG_BUTTON ( 7 )
 
-/*****************************  # Includes #   ****************************/
-#include <stdbool.h>            // for variable type bool
-#include <tm4c1294ncpdt.h>      // GPIO_PORTF_AHB_DATA_R
+
+/*****************************  # Includes #   ************** if(xposSum > 1760)**************/
+#include <stdbool.h>
+#include <stdint.h>
+
+//#include <tm4c1294ncpdt.h>      // GPIO_PORTF_AHB_DATA_R
+//#include <inc/hw_memmap.h>      // needed for UART0_BASE
+//#include <driverlib/gpio.h>
 
 
-#include <inc/hw_memmap.h>      // needed for UART0_BASE
-#include <driverlib/gpio.h>
 /*********************  # public Prototypes #   ***************************/
 void configureTouch(void);
-uint16_t touchGetMenuItem(uint16_t *, uint16_t *);
-uint16_t touchGetArrowLength(uint16_t, uint16_t *, uint16_t *);
+void touchInterruptClear(void);
+uint16_t touchGetMenuItem(void);
+uint16_t touchGetArrowLength(uint16_t);
+uint16_t touchGetSettingNum(uint16_t);
 
-extern void TouchInterruptHandler(void);
+extern void touchInterruptHandler(void);
 
 
 #endif /* TOUCH_H_ */
