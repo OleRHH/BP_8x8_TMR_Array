@@ -1,9 +1,10 @@
+/********************************************************************************/
 /*  Bachelor-Project Visualization of a 8x8 TMR sensor-array on a 7'' LCD       */
-/*  HAW-Hamburg, August 2020, Ole Rönna, van Hung Le.                           */
+/*  HAW-Hamburg, September 2020, Ole Rönna, van Hung Le.                        */
 /********************************************************************************/
 #include <stdbool.h>
 #include <stdint.h>
-#include <driverlib/sysctl.h>                           // SysCtlClockFreqSet
+#include <driverlib/sysctl.h>                           // for SysCtlClockFreqSet
 // each module has its own include file
 #include <adc_functions.h>
 #include <EEPROM_functions.h>
@@ -20,8 +21,8 @@
 // Default values see list in function initROM() at end of document.
 //#define EEPROM_INIT
 
+
 /*****************************  # global variables #   **************************/
-extern uint16_t xpos, ypos;
 // structure to hold all relevant sensor data information
 static TMRSensorData * sensorData;
 // structure to hold all relevant information for displaying the data on LCD
@@ -82,6 +83,7 @@ void main(void)
     // 3. UART0InterruptHandler():  gets called on UART0 data receive.
     // 4. adcInterruptHandler():   gets called when ADC complete.
     // 5. touchInterruptHandler():  gets called when display is touched.
+
     while(1)
     {
     }
@@ -90,8 +92,8 @@ void main(void)
 
 /***********************  TIMER 0 interrupt handler  ****************************/
 /* Timer 0 is set to call this handler every 100 ms. This handler calls the     */
-/* drawDisplay7Inch() function to refresh the LCD contents. It also starts      */
-/* Timer 1 which is programmed to call timer1InterruptHandler() 85 ms later.    */
+/* drawDisplay() function to refresh the LCD content. It also starts Timer 1    */
+/* which is programmed to call the timer1InterruptHandler() 85 ms later.        */
 /********************************************************************************/
 void timer0InterruptHandler(void)
 {
@@ -101,7 +103,7 @@ void timer0InterruptHandler(void)
     // start timer1 to delayed start a new ad-conversion process
     startTimer1();
 
-    // send sensor data to pc if requested.
+    // send sensor data to PC if requested.
     if(setup->reqSensorData == true)
     {
         setup->reqSensorData = false;
@@ -113,11 +115,10 @@ void timer0InterruptHandler(void)
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
     // the project.
-    drawDisplay7Inch((void *)&sensorData->arrows);
+    drawDisplay((void *)&sensorData->arrows);
 
-    #ifndef DEBUG_TOUCH
-        writeMaxAnalogValue(sensorData->maxAnalogValue);
-    #endif
+    // write the highest measured analog value to the display
+    writeMaxAnalogValue(sensorData->maxAnalogValue);
 }
 
 
@@ -125,7 +126,7 @@ void timer0InterruptHandler(void)
 /* Timer 1 gets started in timer0InterruptHandler(). It is set to 90 ms.        */
 /* Because Timer 0 is set to 100 ms, this handler always gets called 10 ms      */
 /* before the next timer0InterruptHandler call.                                 */
-/* This Timer 1 handler starts a new ADC process which takes 8 ms to convert    */
+/* This Timer 1 handler starts a new ADC process which takes 9 ms to convert    */
 /* all sensor-array signals with hardware averaging setting enabled. This       */
 /* means the adc process is always finished shortly before the next             */
 /* timer0InterruptHandler draws the new arrows.                                 */
@@ -289,12 +290,6 @@ void touchInterruptHandler(void)
         drawArrowLengthMenu();
         setup->maxArrowLength = touchGetArrowLength(setup->maxArrowLength);
         drawDisplayLayout();
-// show touch coordinates on LCD for debug verification and calibration
-//#ifdef DEBUG_TOUCH
-//            uint32_t touchPosition = (uint32_t)xpos << 16 | ypos;
-//            writeInfo(POS_DEBUG, (void *)&touchPosition);
-//            writeInfo(POS_DEBUG);
-//#endif
         saveSettingsToEEPROM(&settings, sizeof(settings));
         break;
 
@@ -329,20 +324,20 @@ void initROM(void)
     settings.setup[0].relative = true;
     settings.setup[0].adcAVG = true;
     settings.setup[0].coloredArrows = false;
-    settings.setup[0].maxArrowLength = 100;
+    settings.setup[0].maxArrowLength = 60;
     settings.setup[0].reqSensorData = false;
 
-    settings.setup[0].backColorArrowWindow = (color)WHITE;
+    settings.setup[0].backColorArrow = (color)WHITE;
     settings.setup[0].arrowColor = (color)BLACK;
     settings.setup[0].gridColor = (color)BLACK;
 
     settings.setup[0].backColorTable = (color)GREEN;
-    settings.setup[0].backColorMotor = (color)BLACK;
+    settings.setup[0].backColorMenu = (color)BLACK;
     settings.setup[0].backColorArrowLengthMenu = (color)YELLOW;
-    settings.setup[0].backColorImgStart = (color)BLUE;
     settings.setup[0].backColorImgStop  = (color)RED;
     settings.setup[0].backColorImgLeft  = (color)GREEN;
     settings.setup[0].backColorImgRight = (color)GREEN;
+    settings.setup[0].backColorMoreSettings = (color)BLUE;
     settings.setup[0].spacerColor = (color)BLUE;
     settings.setup[0].fontColor = (color)BLACK;
 
@@ -350,65 +345,66 @@ void initROM(void)
     settings.setup[1].relative = true;
     settings.setup[1].adcAVG = true;
     settings.setup[1].coloredArrows = false;
-    settings.setup[1].maxArrowLength = 100;
+    settings.setup[1].maxArrowLength = 60;
     settings.setup[1].reqSensorData = false;
 
-    settings.setup[1].backColorArrowWindow = (color)BLACK;
+    settings.setup[1].backColorArrow = (color)BLACK;
     settings.setup[1].arrowColor = (color)WHITE;
     settings.setup[1].gridColor = (color)YELLOW;
 
-    settings.setup[1].backColorArrowWindow = (color)BLACK;
+    settings.setup[1].backColorArrow = (color)BLACK;
     settings.setup[1].backColorTable = (color)GREEN;
-    settings.setup[1].backColorMotor = (color)BLACK;
+    settings.setup[1].backColorMenu = (color)BLACK;
     settings.setup[1].backColorArrowLengthMenu = (color)YELLOW;
-    settings.setup[1].backColorImgStart = (color)BLUE;
+    settings.setup[1].backColorMoreSettings = (color)BLUE;
     settings.setup[1].backColorImgStop  = (color)RED;
     settings.setup[1].backColorImgLeft  = (color)GREEN;
     settings.setup[1].backColorImgRight = (color)GREEN;
+    settings.setup[1].backColorMoreSettings = (color)BLUE;
     settings.setup[1].spacerColor = (color)BLUE;
     settings.setup[1].fontColor = (color)BLACK;
 
-// Setting No 2 (TODO)
+// Setting No 2:
     settings.setup[2].relative = true;
     settings.setup[2].adcAVG = true;
-    settings.setup[2].coloredArrows = false;
+    settings.setup[2].coloredArrows = true;
     settings.setup[2].maxArrowLength = 100;
     settings.setup[2].reqSensorData = false;
 
-    settings.setup[2].backColorArrowWindow = (color)BLACK;
-    settings.setup[2].arrowColor = (color)WHITE;
-    settings.setup[2].gridColor = (color)YELLOW;
+    settings.setup[2].backColorArrow = (color)GREY;
+    settings.setup[2].arrowColor = (color)BLACK;
+    settings.setup[2].gridColor = (color)BLACK;
 
-    settings.setup[2].backColorArrowWindow = (color)BLACK;
-    settings.setup[2].backColorTable = (color)GREEN;
-    settings.setup[2].backColorMotor = (color)BLACK;
+    settings.setup[2].backColorTable = (color)YELLOW;
+    settings.setup[2].backColorMenu = (color)YELLOW;
     settings.setup[2].backColorArrowLengthMenu = (color)YELLOW;
-    settings.setup[2].backColorImgStart = (color)BLUE;
     settings.setup[2].backColorImgStop  = (color)RED;
     settings.setup[2].backColorImgLeft  = (color)GREEN;
     settings.setup[2].backColorImgRight = (color)GREEN;
+    settings.setup[2].backColorMoreSettings = (color)BLUE;
     settings.setup[2].spacerColor = (color)BLUE;
     settings.setup[2].fontColor = (color)BLACK;
 
-// Setting No 3 (TODO)
+// Setting No 3:
     settings.setup[3].relative = true;
     settings.setup[3].adcAVG = true;
-    settings.setup[3].coloredArrows = false;
+    settings.setup[3].coloredArrows = true;
     settings.setup[3].maxArrowLength = 100;
     settings.setup[3].reqSensorData = false;
 
-    settings.setup[3].backColorArrowWindow = (color)BLACK;
+    settings.setup[3].backColorArrow = (color)BLACK;
     settings.setup[3].arrowColor = (color)WHITE;
     settings.setup[3].gridColor = (color)YELLOW;
 
-    settings.setup[3].backColorArrowWindow = (color)BLACK;
+    settings.setup[3].backColorArrow = (color)BLACK;
     settings.setup[3].backColorTable = (color)GREEN;
-    settings.setup[3].backColorMotor = (color)BLACK;
+    settings.setup[3].backColorMenu = (color)BLACK;
     settings.setup[3].backColorArrowLengthMenu = (color)YELLOW;
-    settings.setup[3].backColorImgStart = (color)BLUE;
+    settings.setup[3].backColorMoreSettings = (color)BLUE;
     settings.setup[3].backColorImgStop  = (color)RED;
     settings.setup[3].backColorImgLeft  = (color)GREEN;
     settings.setup[3].backColorImgRight = (color)GREEN;
+    settings.setup[3].backColorMoreSettings = (color)BLUE;
     settings.setup[3].spacerColor = (color)BLUE;
     settings.setup[3].fontColor = (color)BLACK;
 // ...

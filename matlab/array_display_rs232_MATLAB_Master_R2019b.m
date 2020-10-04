@@ -1,12 +1,10 @@
-
 %s = serialport('/dev/ttyUSB1', 'BaudRate', Bautrate); % Linux RS485
+    %s = serialport('/dev/ttyS0', Bautrate);     % Linux com port 
 %s = serialport('COM13', 'BaudRate', Bautrate); % Windows 10 com port
-
 
 Bautrate = 115200; 
 
 if (exist('s') == 0)
-    %s = serialport('/dev/ttyS0', Bautrate);     % Linux com port 
     s = serialport('/dev/ttyUSB0', Bautrate);   % RS232 (USBtoRS232 Adapter)
 end
 if (exist('t') == 1)  

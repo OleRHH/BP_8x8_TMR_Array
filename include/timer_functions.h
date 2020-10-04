@@ -1,9 +1,11 @@
-/* timer_functions.h */
-
+/*  Bachelor-Project Visualization of a 8x8 TMR sensor-array on a 7'' LCD       */
+/*  HAW-Hamburg, September 2020, Ole Rönna, van Hung Le.                        */
+/*  File: timer_functions.h                                                     */
+/********************************************************************************/
 #ifndef TIMER_FUNCTIONS_H_
 #define TIMER_FUNCTIONS_H_
 
-/*****************************  # Includes #   ****************************/
+/************************  # public Includes #   ********************************/
 #include <stdbool.h>
 #include <stdint.h>
 #include <driverlib/interrupt.h>        // IntMasterDisable

@@ -1,11 +1,13 @@
+/*  Bachelor-Project Visualization of a 8x8 TMR sensor-array on a 7'' LCD       */
+/*  HAW-Hamburg, September 2020, Ole Rönna, van Hung Le.                        */
+/*  File: timer_functions.c                                                     */
+/********************************************************************************/
 #include <timer_functions.h>
-
 #include <driverlib/sysctl.h>
 #include <tm4c1294ncpdt.h>
 #include <driverlib/interrupt.h>  // intEnable(), IntPrioritySet()
 #include <driverlib/timer.h>
-#include <inc/hw_memmap.h>      // TIMER0_BASE_BASE
-
+#include <inc/hw_memmap.h>       // TIMER0_BASE_BASE
 
 
 /********************************************************************************/
@@ -44,10 +46,11 @@ void startTimer1(void)
 }
 
 
+/*************************  configureTimer0()   *********************************/
+/* this timer is used to run the program periodically. Upon call the analog     */
+/* inputs are converted and send to the LC-Display                              */
 /********************************************************************************/
 void configureTimer0(uint32_t SysClock)
-/* this timer is used to run the program periodically. Upon call the analog
- * inputs are converted and send to the LC-Display */
 {
     // Configure Timer0 Interrupt
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);           // Clock Gate enable TIMER0upt
@@ -61,10 +64,11 @@ void configureTimer0(uint32_t SysClock)
 }
 
 
+/*************************  configureTimer1()   *********************************/
+/* this timer is used to start ad-conversion 85 ms after timer 0 has started    */
+/* to refresh the LCD.                                                          */
 /********************************************************************************/
 void configureTimer1(uint32_t SysClock)
-/* this timer is used to start ad-conversion 85 ms after timer 0 has started
- * to refresh the LCD.  */
 {
     // Configure Timer1 Interrupt
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);           // Clock Gate enable TIMER0upt

@@ -1,24 +1,22 @@
-/*
- * lcd_functions.h
- *
- *  Created on: 17.02.2020
- */
-
+/*  Bachelor-Project Visualization of a 8x8 TMR sensor-array on a 7'' LCD       */
+/*  HAW-Hamburg, September 2020, Ole Rönna, van Hung Le.                        */
+/*  File: lcd_functions.h                                                       */
+/********************************************************************************/
 #ifndef LCD_FUNCTIONS_H_
 #define LCD_FUNCTIONS_H_
 
+/************************  # public Includes #   ********************************/
+#include <stdbool.h>
+#include <stdint.h>
+
+/************************  # public defines #   ***********************************/
 #define MAX_ANALOG_VALUE ( 1 )
 #define MAX_ARROW_LENGTH ( 2 )
 #define SCALING ( 3 )
 #define HARDW_AVG ( 4 )
-#define POS_DEBUG ( 5 )
-
-/*****************************  # Includes #   ****************************/
-#include <stdbool.h>
-#include <stdint.h>
 
 
-/*******************  # typedefs, enums and structs #   *******************/
+/*******************  # typedefs, enums and structs #   *************************/
 typedef union Color
 {
     int32_t all;
@@ -54,7 +52,7 @@ typedef struct
 {
     int32_t x;
     int32_t y;
-    bool arrowActive;
+    bool arrowHeadActive;
 } coordinates;
 
 typedef struct
@@ -65,17 +63,17 @@ typedef struct
     bool reqSensorData;
 
     bool coloredArrows;
-    color backColorArrowWindow;
+    color backColorArrow;
     color arrowColor;
     color gridColor;
 
     color backColorTable;
-    color backColorMotor;
+    color backColorMenu;
     color backColorArrowLengthMenu;
-    color backColorImgStart;
     color backColorImgStop;
     color backColorImgLeft;
     color backColorImgRight;
+    color backColorMoreSettings;
     color spacerColor;
     color fontColor;
 } Setup;
@@ -87,21 +85,17 @@ typedef struct
   Setup setup[4];
 } Settings;
 
-/**************************  # public Prototypes #   **********************/
-void configureLCD5Inch(uint32_t);
+
+/**************************  # public Prototypes #   ****************************/
 Setup * configureLCD(uint32_t, Settings *);
-void configureLCDHardware(uint32_t);
 Setup * setLCDLayout(Settings *);
 void drawSettingsMenu(void);
 void drawDisplayLayout(void);
 
-void drawDisplay7Inch(lcdArrows *);
+void drawDisplay(lcdArrows *);
 void drawArrowLengthMenu(void);
 void writeInfo(uint16_t);
 void writeMaxAnalogValue(uint16_t);
 
-bool getAdcAVG(void);
-bool getScaling(void);
-uint16_t getmaxArrow(void);
 
 #endif /* LCD_FUNCTIONS_H_ */

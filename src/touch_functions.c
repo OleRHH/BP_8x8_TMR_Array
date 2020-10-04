@@ -1,3 +1,7 @@
+/*  Bachelor-Project Visualization of a 8x8 TMR sensor-array on a 7'' LCD       */
+/*  HAW-Hamburg, September 2020, Ole Rönna, van Hung Le.                        */
+/*  File: touch_functions.c                                                     */
+/********************************************************************************/
 #include <touch_functions.h>
 #include <tm4c1294ncpdt.h>      // GPIO_PORTF_AHB_DATA_R
 #include <driverlib/sysctl.h>
@@ -15,7 +19,7 @@
 #define TCLK GPIO_PIN_3         // 0b0 1000
 #define TIRQ GPIO_PIN_4         // 0b1 0000
 
-// these defines represent the return value from touch in the middle the buttons
+// these defines represent the return value from touch in the middle of the buttons
 #define LEFT_X ( 1125 )
 #define LEFT_Y ( 3455 )
 
@@ -40,9 +44,6 @@
 
 /*****************************  # intern prototypes #   *************************/
 uint16_t touchRead(unsigned char);
-uint16_t xpos, ypos;
-
-
 
 
 /***********************  touchInterruptClear()  ********************************/
@@ -51,52 +52,6 @@ uint16_t xpos, ypos;
 void touchInterruptClear(void)
 {
     GPIOIntClear(GPIO_PORTF_AHB_BASE, GPIO_PIN_4);
-}
-
-
-/************************  touchGetSettingNum()  ********************************/
-/*                                                                              */
-/********************************************************************************/
-uint16_t touchGetSettingNum(uint16_t oldValue)
-{
-    uint32_t xposSum = 0, yposSum = 0;
-    uint16_t pos = 0;
-
-    SysCtlDelay(1000);
-
-    // menu can only be left with a valid touch
-    while( pos <= 200)
-    {
-        pos = 0;
-        // sum up measurements. break after 1000 loops or if touch is released.
-        while( !(GPIO_PORTF_AHB_DATA_R & TIRQ) && pos < 1000)
-        {
-            xposSum += touchRead(0xD0);
-            yposSum += touchRead(0x90);
-            SysCtlDelay(100);               // wait
-            pos++;
-        }
-    }
-
-    xposSum /= pos;
-    yposSum /= pos;
-    xpos = xposSum;
-    ypos = yposSum;
-
-    // first check if window was hit at all. Else return old value.
-    // upper left corner: x = 4095, y = 4095
-    if(xposSum > 3725 || xposSum < 1760 || yposSum > 3600 || yposSum < 2040)
-        return oldValue;
-
-    // now check what field was hit
-    else if(xposSum > 3240)
-        return 0;
-    else if(xposSum > 2740)
-        return 1;
-    else if(xposSum > 2255)
-        return 2;
-    else
-        return 3;
 }
 
 
@@ -143,8 +98,6 @@ uint16_t touchGetArrowLength(uint16_t oldValue)
     // calculate the mean values.
     xposSum /= pos;
     yposSum /= pos;
-    xpos = xposSum; // read xpos
-    ypos = yposSum; // read ypos
 
     // first check if window was hit at all. Else return old value.
     // upper left corner: x = 4095, y = 4095
@@ -175,8 +128,52 @@ uint16_t touchGetArrowLength(uint16_t oldValue)
 }
 
 
+/************************  touchGetSettingNum()  ********************************/
+/* See touchGetArrowLength()                                                    */
+/********************************************************************************/
+uint16_t touchGetSettingNum(uint16_t oldValue)
+{
+    uint32_t xposSum = 0, yposSum = 0;
+    uint16_t pos = 0;
+
+    SysCtlDelay(1000);
+
+    // menu can only be left with a valid touch
+    while( pos <= 200)
+    {
+        pos = 0;
+        // sum up measurements. break after 1000 loops or if touch is released.
+        while( !(GPIO_PORTF_AHB_DATA_R & TIRQ) && pos < 1000)
+        {
+            xposSum += touchRead(0xD0);
+            yposSum += touchRead(0x90);
+            SysCtlDelay(100);               // wait
+            pos++;
+        }
+    }
+
+    xposSum /= pos;
+    yposSum /= pos;
+
+    // first check if window was hit at all. Else return old value.
+    // upper left corner: x = 4095, y = 4095
+    if(xposSum > 3725 || xposSum < 1760 || yposSum > 3600 || yposSum < 2040)
+        return oldValue;
+
+    // now check what field was hit
+    else if(xposSum > 3240)
+        return 0;
+    else if(xposSum > 2740)
+        return 1;
+    else if(xposSum > 2255)
+        return 2;
+    else
+        return 3;
+}
+
+
 /**************************  touchGetMenuItem()  ********************************/
-/*                                                                              */
+/* See touchGetArrowLength()                                                    */
 /********************************************************************************/
 uint16_t touchGetMenuItem(void)
 {
@@ -198,8 +195,6 @@ uint16_t touchGetMenuItem(void)
     {
         xposSum /= pos;
         yposSum /= pos;
-        xpos = xposSum; // read xpos
-        ypos = yposSum; // read ypos
 
         if(abs(LEFT_X - xposSum) < 250 && abs(LEFT_Y - yposSum) < 440)
             pos = LEFT_BUTTON;
@@ -233,7 +228,8 @@ uint16_t touchGetMenuItem(void)
 
 
 /****************************  touchRead()  *************************************/
-/*                                                                              */
+/* The Touch-Controller has a synchronous serial interface.                     */
+/* This code was taken from Mr. A. Prosch and modified.                         */
 /********************************************************************************/
 uint16_t touchRead(unsigned char command)
 {
@@ -291,11 +287,10 @@ void configureTouch(void)
     GPIOPinTypeGPIOInput (GPIO_PORTF_BASE, TDO  | TIRQ);
     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, TDIN | TCS | TCLK);
 
-    GPIOIntTypeSet(GPIO_PORTF_AHB_BASE, GPIO_PIN_4,
-                   GPIO_FALLING_EDGE);
-
     // the touch screen controller sets its output 'IRQ' pin to 0 when it detects
-    // a sensor touch.
+    // a sensor touch. This triggers an interrupt.
+    GPIOIntTypeSet(GPIO_PORTF_AHB_BASE, GPIO_PIN_4, GPIO_FALLING_EDGE);
+
     GPIOIntRegister(GPIO_PORTF_AHB_BASE, touchInterruptHandler);
     GPIOIntEnable(GPIO_PORTF_AHB_BASE, GPIO_PIN_4);
     IntEnable(INT_GPIOF);

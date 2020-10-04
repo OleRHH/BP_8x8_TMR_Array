@@ -1,3 +1,10 @@
+#include <adc_functions.h>
+#include <EEPROM_functions.h>
+#include <lcd_functions.h>
+#include <timer_functions.h>
+#include <uartDMA_functions.h>
+#include <touch_functions.h>
+
 /***********************  main() function  **************************************/
 /* the main() function initializes the hardware components and sets the         */
 /* LC-Display layout.                                                           */

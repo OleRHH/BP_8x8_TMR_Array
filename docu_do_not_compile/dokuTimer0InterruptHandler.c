@@ -1,7 +1,7 @@
 /***********************  TIMER 0 interrupt handler  ****************************/
 /* Timer 0 is set to call this handler every 100 ms. This handler calls the     */
-/* drawDisplay7Inch() function to refresh the LCD contents. It also starts      */
-/* Timer 1 which is programmed to call timer1InterruptHandler() 85 ms later.    */
+/* drawDisplay() function to refresh the LCD content. It also starts Timer 1    */
+/* which is programmed to call the timer1InterruptHandler() 85 ms later.        */
 /********************************************************************************/
 void timer0InterruptHandler(void)
 {
@@ -23,5 +23,5 @@ void timer0InterruptHandler(void)
     // Draw the arrows and button states to the LC-Display. This function also
     // calculates the new arrow lines. This is the most time consuming part of
     // the project.
-    drawDisplay7Inch((void *)&sensorData->arrows);
+    drawDisplay((void *)&sensorData->arrows);
 }

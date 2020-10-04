@@ -1,16 +1,19 @@
-/*****************************  # Includes #   ****************************/
+/*  Bachelor-Project Visualization of a 8x8 TMR sensor-array on a 7'' LCD       */
+/*  HAW-Hamburg, September 2020, Ole Rönna, van Hung Le.                        */
+/*  File: adc_functions.c                                                       */
+/********************************************************************************/
 #include <adc_functions.h>
-
 #include <driverlib/sysctl.h>
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <driverlib/interrupt.h>
-#include <driverlib/adc.h>      // ADCIntClear(), ADCIntStatus(), ADCProcessorTrigger(), ADCSequenceDataGet()
+#include <driverlib/adc.h>      // ADCIntClear(), ADCIntStatus(),
+                                // ADCProcessorTrigger(), ADCSequenceDataGet()
 #include <inc/hw_memmap.h>      // ADC0_BASE, ADC1_BASE, GPIO_PORTX_BASE
 #include <tm4c1294ncpdt.h>
 #include <math.h>               // sqrt()
 
 
-/*****************************  # defines #   *****************************/
+/*****************************  # defines #   ***********************************/
 // defines for ADC init             // Port and Pin
 #define ROW_1_R ADC_CTL_CH13        // PD2
 #define ROW_2_R ADC_CTL_CH15        // PD0
@@ -235,8 +238,10 @@ void computeArrows(bool relative, uint16_t maxArrowLength)
         {
             for(n = 0; n <= 7; n++)
             {
-                SensorData.arrows.dCos[m][n]  = (int16_t) ( SensorData.dCos[7-m][n] * maxArrowLength / SensorData.maxAnalogValue);
-                SensorData.arrows.dSin[m][n]  = (int16_t) (-SensorData.dSin[7-m][n] * maxArrowLength / SensorData.maxAnalogValue);
+                SensorData.arrows.dCos[m][n]  = (int16_t) ( SensorData.dCos[7-m][n]
+                                                * maxArrowLength / SensorData.maxAnalogValue);
+                SensorData.arrows.dSin[m][n]  = (int16_t) (-SensorData.dSin[7-m][n]
+                                                * maxArrowLength / SensorData.maxAnalogValue);
             }
         }
     }
@@ -252,8 +257,10 @@ void computeArrows(bool relative, uint16_t maxArrowLength)
                 // limit the maximum arrow length to the max allowed value.
                 if(SensorData.arrows.arrowLength[7-m][n] > maxArrowLength)
                 {
-                    SensorData.arrows.dCos[m][n] *= (double)maxArrowLength / SensorData.arrows.arrowLength[7-m][n];
-                    SensorData.arrows.dSin[m][n] *= (double)maxArrowLength / SensorData.arrows.arrowLength[7-m][n];
+                    SensorData.arrows.dCos[m][n] *= (double)maxArrowLength
+                                                    / SensorData.arrows.arrowLength[7-m][n];
+                    SensorData.arrows.dSin[m][n] *= (double)maxArrowLength
+                                                    / SensorData.arrows.arrowLength[7-m][n];
                 }
             }
         }
@@ -331,5 +338,4 @@ TMRSensorData * configureADC(bool adcAVG)
     IntEnable(INT_ADC1SS2);
 
     return &SensorData;
-
 }
