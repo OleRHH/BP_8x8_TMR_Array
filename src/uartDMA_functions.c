@@ -1,9 +1,8 @@
-/*
- * uartDMA.c
- *
- *  Created on: 10.05.2020
- */
-/*****************************  # Includes #   ****************************/
+/*  Bachelor-Project Visualization of a 8x8 TMR sensor-array on a 7'' LCD       */
+/*  HAW-Hamburg, September 2020, Ole Rönna, van Hung Le.                        */
+/*  File: uartDMA_functions.c                                                   */
+/********************************************************************************/
+#include <uartDMA_functions.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <driverlib/sysctl.h>
@@ -16,7 +15,6 @@
 #include <driverlib/interrupt.h>
 #include <driverlib/udma.h>
 
-#include <uartDMA_functions.h>
 
 /********************************************************************************/
 // The control table used by the uDMA controller. This table must be aligned
@@ -53,7 +51,7 @@ char * getUART0RxData(void)
 uint16_t getMaxArrowLengthUART(void)
 {
     return ( UART0receive[4]<<24 | UART0receive[5]<<16
-           | UART0receive[6]<<8 | UART0receive[7] );
+           | UART0receive[6]<<8  | UART0receive[7] );
 }
 
 
@@ -273,8 +271,8 @@ void configureUartUDMA(void)
 /* from the sensor array.                                                       */
 /* Other commands can set the displayed arrow length or switch modes like       */
 /* scaling and averaging.                                                       */
-/* The MCU operates in slave mode. This means it is configured with an input
- * interrupt. When a receive interrupt is triggered, the 'UART0InterruptHandler'*/
+/* The MCU operates in slave mode. This means it is configured with an input    */
+/* interrupt. When a receive interrupt is triggered, the 'UART0InterruptHandler'*/
 /* function is called to evaluate and execute the command from PC.              */
 /********************************************************************************/
 void ConfigureUART0(uint32_t SysClock)
@@ -314,7 +312,6 @@ void ConfigureUART0(uint32_t SysClock)
 }
 
 
-
 /********************************************************************************/
 /* UART2 is used for communication with the stepper motor via RS485             */
 /********************************************************************************/
@@ -342,8 +339,3 @@ void ConfigureUART2(uint32_t SysClock)
     IntEnable(INT_UART2);
     UARTIntEnable(UART2_BASE, UART_INT_RX | UART_INT_RT); // | UART_INT_TX);
 }
-
-
-
-
-

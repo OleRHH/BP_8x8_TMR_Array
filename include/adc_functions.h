@@ -1,13 +1,18 @@
-/* functions.h */
+/*  Bachelor-Project Visualization of a 8x8 TMR sensor-array on a 7'' LCD       */
+/*  HAW-Hamburg, September 2020, Ole Rönna, van Hung Le.                        */
+/*  File: adc_functions.h                                                       */
+/********************************************************************************/
 #ifndef ADC_FUNCTIONS_H_
 #define ADC_FUNCTIONS_H_
 
-/************************  # public Includes #   ****************************/
+/************************  # public Includes #   ********************************/
 #include <stdbool.h>
-#include <stdint.h>
+#include <stdint.h>                     // for 'int16_t'
 #include <driverlib/interrupt.h>        // IntMasterDisable
 
 
+/*********************  # public typedefs #   ***********************************/
+// Structure that holds all sensor data
 typedef struct {
     union {
         // 256 bytes array for transmit via RS-232 to matlab
@@ -19,6 +24,7 @@ typedef struct {
             int16_t dCos[8][8];
         };
     };
+
     // Structur that holds data for the LC-Display.
     struct {
         int16_t dSin[8][8];
@@ -32,7 +38,7 @@ typedef struct {
 } TMRSensorData;
 
 
-/*********************  # public Prototypes #   ****************************/
+/**************************  # public Prototypes #   **************************/
 TMRSensorData * configureADC(bool);
 void storeArraySensorData(uint16_t);
 void computeArrows(bool, uint16_t);

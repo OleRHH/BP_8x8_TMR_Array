@@ -11,22 +11,18 @@ void touchInterruptHandler(void)
     // check what (or if) a button was pressed and act accordingly
     switch(item)
     {
-    // start stepper-motor turning left
     case LEFT_BUTTON:
         sendCommandToMotor(LEFT_BUTTON);
         break;
 
-    // start stepper-motor turning right
     case RIGHT_BUTTON:
         sendCommandToMotor(RIGHT_BUTTON);
         break;
 
-    // stop stepper-motor
     case STOP_BUTTON:
         sendCommandToMotor(STOP_BUTTON);
         break;
 
-    // change the current layout setting
     case CHANGE_SETTING_BUTTON:
         drawSettingsMenu();
         settings.settingNo = touchGetSettingNum(settings.settingNo);

@@ -1,4 +1,7 @@
-/*****************************  # Includes #   **********************************/
+/*  Bachelor-Project Visualization of a 8x8 TMR sensor-array on a 7'' LCD       */
+/*  HAW-Hamburg, September 2020, Ole Rönna, van Hung Le.                        */
+/*  File: lcd_functions.c                                                       */
+/********************************************************************************/
 #include <lcd_functions.h>
 #include <tm4c1294ncpdt.h>
 #include <string.h>
@@ -11,7 +14,7 @@
 
 
 /*****************************  # defines #   ***********************************/
-// constants for LCD initializiation
+// constants for LCD initialization
 #define RST 0x10
 #define INITIAL_STATE (0x1F)
 #define SOFTWARE_RESET (0x01)
@@ -30,7 +33,7 @@
 #define FONT_HIGHT_BIG 16
 
 // constants for arrow output on display
-#define NO_ARROW        0
+#define NO_ARROWHEAD    0
 #define WITH_ARROW      1
 #define ARROW_ANGLE     0.7
 #define ARROW_LENGTH    5
@@ -47,13 +50,17 @@
 
 /*****************************  # intern prototypes #   *************************/
 void generateColors(void);  // create the color codes for colored arrows
-void setLCDBackgroundColor7(color);
+
+void configureLCDHardware(uint32_t);
+
 void writeCommand(unsigned char);
 void writeCmdData(unsigned char);
 void writeData(color);
-
 void writePosition(uint16_t, uint16_t, uint16_t, uint16_t);
+
 void writeButton(unsigned char *, short, short, color);
+void drawRectangle(short, short, short, short, color);
+void drawString(char *, uint16_t, uint16_t, color, color);
 
 void drawLine(short, short, short, short, color, uint16_t);
 void writeLine0Degree  (short, short, short, short, color);
@@ -69,28 +76,22 @@ void writeLineQuadrant3_II(short, short, short, short, double, color);  // 180°
 void writeLineQuadrant4_I (short, short, short, short, double, color);  // 270° < degree < 360°
 void writeLineQuadrant4_II(short, short, short, short, double, color);  // 270° < degree < 360°
 
-void drawRectangle(short, short, short, short, color);
-void drawString(char *, uint16_t, uint16_t, color, color);
-
 
 /*****************************  # global variables #    *************************/
-int16_t oldDiffSinResults[8][8];
-int16_t oldDiffCosResults[8][8];
-bool oldArrowActive[8][8];
+// The start coordinates are used each time the display is refreshed. The start
+// coordinates never change and can be computed in advanced in configureLCD().
 coordinates startCord[8][8];
-
 color arrowColor[768];
 Setup * set;
 
 /***********************  # extern global variables #    ************************/
 extern unsigned char imgArrayStopButton[PIXEL_COUNT];
-extern unsigned char imgArrayStartButton[PIXEL_COUNT];
 extern unsigned char imgArrayArrowLButton[PIXEL_COUNT];
 extern unsigned char imgArrayArrowRButton[PIXEL_COUNT];
 
 
 /**************************  configureLCD()  ************************************/
-//       //
+// Initialize hardware, create colors and LCD arrow grid.                       //
 /********************************************************************************/
 Setup * configureLCD(uint32_t SysClock, Settings * setting)
 {
@@ -128,7 +129,7 @@ Setup * configureLCD(uint32_t SysClock, Settings * setting)
 
 
 /****************************  setLCDLayout()  **********************************/
-//       //
+// Switch between stored layouts.                                               //
 /********************************************************************************/
 Setup * setLCDLayout(Settings * setting)
 {
@@ -138,54 +139,56 @@ Setup * setLCDLayout(Settings * setting)
 
 
 /*************************  drawDisplayLayout()  ********************************/
-//       //
+// Draws the hole display.                                                      //
 /********************************************************************************/
 void drawDisplayLayout(void)
 {
-    drawRectangle(0, 0, 506, 479, set->backColorArrowWindow); // arrow background
+    // draw background colors
+    drawRectangle(0, 0, 506, 479, set->backColorArrow);     // background arrow window
+    drawRectangle(510, 0, 799, 274, set->backColorMenu);    // background motor control
+    drawRectangle(510, 278, 799, 479, set->backColorTable); // background infos
+    drawRectangle(672, 142, 784, 254, set->backColorMoreSettings);// background 'more settings'
 
-    drawRectangle(510, 0, 799, 274, set->backColorMotor);  // background motor control
-    drawRectangle(510, 278, 799, 479, set->backColorTable);    // background infos
-
-    drawRectangle(507,   0, 510, 479, set->spacerColor);   // spacerColor
-    drawRectangle(680, 278, 682, 479, set->spacerColor); // little spacerColor
+    // draw spacer lines
+    drawRectangle(507,   0, 510, 479, set->spacerColor);    // spacerColor
+    drawRectangle(680, 278, 682, 479, set->spacerColor);    // little spacerColor
     drawRectangle(510, 275, 799, 278, set->spacerColor);
     drawRectangle(510, 330, 799, 333, set->spacerColor);
     drawRectangle(510, 385, 799, 388, set->spacerColor);
     drawRectangle(510, 440, 799, 443, set->spacerColor);
 
-    // 1.
+    // write 'left', 'right' and 'stop' button (they are stored as images)
     writeButton(imgArrayArrowLButton, 540, 20, set->backColorImgLeft);
-    // 2.
     writeButton(imgArrayArrowRButton, 680, 20, set->backColorImgRight);
-    // 3.
     writeButton(imgArrayStopButton, 540, 150, set->backColorImgStop);
-    // 4.
-    writeButton(imgArrayStartButton, 680, 150, set->backColorImgStart);
 
+    // write text
+    drawString("change", 180, 695, set->fontColor, set->backColorMoreSettings);
+    drawString("Layout", 200, 695, set->fontColor, set->backColorMoreSettings);
     drawString("max measured", 285, 520, set->fontColor, set->backColorTable);
     drawString("analog value", 305, 520, set->fontColor, set->backColorTable);
-
     drawString("max arrow", 340, 520, set->fontColor, set->backColorTable);
     drawString("length", 360, 520, set->fontColor, set->backColorTable);
-
     drawString("scaling", 410, 520, set->fontColor, set->backColorTable);
-
     drawString("hardware avg", 450, 520, set->fontColor, set->backColorTable);
 
+    // write stored values 'max arrow length', 'scaling' option and 'averaging'.
     writeInfo(MAX_ARROW_LENGTH | SCALING | HARDW_AVG);
 }
 
 
 /***************************  drawArrowLengthMenu()  ****************************/
-// draws the 'Change max. arrow size' menu: background, lines and words.        //
+// Draws the 'Change max. arrow size' menu: background, lines and words.        //
 /********************************************************************************/
 void drawSettingsMenu(void)
 {
     uint16_t n, value = 1;
     char charValue[10];
 
-    // set menu background
+    // heading
+    drawString("Choose Layout No.:", 30, 50, set->fontColor, set->backColorArrowLengthMenu);
+
+    // draw menu background
     drawRectangle(50, 50, 456, 150, set->backColorArrowLengthMenu);
 
     // draw the vertical spacer lines
@@ -211,14 +214,17 @@ void drawSettingsMenu(void)
 
 
 /***************************  drawArrowLengthMenu()  ****************************/
-// draws the 'Change settings' menu.                                            //
+// Draws the 'Change settings' menu.                                            //
 /********************************************************************************/
 void drawArrowLengthMenu(void)
 {
     uint16_t m, n, value = 10;
     char charValue[10];
 
-    // set menu background
+    // heading
+    drawString("Choose arrow length:", 30, 50, set->fontColor, set->backColorArrowLengthMenu);
+
+    // draw menu background
     drawRectangle(50, 50, 456, 456, set->backColorArrowLengthMenu);
 
     // draw the vertical spacer lines
@@ -250,23 +256,20 @@ void drawArrowLengthMenu(void)
 
 
 /******************************  writeButton()  *********************************/
-// Helper function for setDisplayLayout().                                      //
+// Helper function for setDisplayLayout(). The three buttons 'left', 'right'    //
+// and 'stop' are stored as B/W image in arrays. If array[x]=0 => draw          //
+// background color. If array[x] = 255 => draw color.                           //
 /********************************************************************************/
 void writeButton(unsigned char *imgArray, short offsetX, short offsetY, color color)
 {
     int pixel;
-    short stopX, stopY;
+    short stopX = offsetX + OFFSET_IMG;
+    short stopY = offsetY + OFFSET_IMG;
 
-    stopX = offsetX + OFFSET_IMG;
-    stopY = offsetY + OFFSET_IMG;
-
+    // First draw background. It is 'EDGE' pixel bigger on each side. This way
+    // the button appears bigger without making the image arrays larger.
+    // TODO: remove EDGE with more readable solution.
     drawRectangle(offsetX - EDGE, offsetY - EDGE, EDGE + stopX, EDGE + stopY, color);
-
-// draws a cross for touch calibration
-#ifdef DEBUG
-    drawLine( offsetX + OFFSET_IMG/2, offsetY - EDGE, offsetX + OFFSET_IMG/2, stopY + EDGE, (color)BLACK, NO_ARROW);
-    drawLine( offsetX - EDGE, offsetY + OFFSET_IMG/2, stopX + EDGE, offsetY + OFFSET_IMG/2, (color)BLACK, NO_ARROW);
-#endif
 
     writePosition(offsetX, offsetY, stopX, stopY);
     writeCommand(0x2C);                        // start writing
@@ -315,7 +318,7 @@ void writeInfo(uint16_t info)
 
     if( (info & MAX_ANALOG_VALUE) == MAX_ANALOG_VALUE)
     {
-        // TODO: implement here. Currently in separate function.
+        // TODO: implement here. Currently in separate function writeMaxAnalogValue()
     }
     if( (info & MAX_ARROW_LENGTH) == MAX_ARROW_LENGTH)
     {
@@ -332,18 +335,11 @@ void writeInfo(uint16_t info)
         (set->adcAVG) ?  sprintf(charValue, " on") : sprintf(charValue, "off");
         drawString(charValue, 450, 720, set->fontColor, set->backColorTable);
     }
-    if( (info & POS_DEBUG) == POS_DEBUG)
-    {
-//        sprintf(charValue, "x: %.4d", (*(uint32_t *)value) >> 16);
-//        drawString(charValue, 290, 700, (color)BLACK, backColorTable);
-//        sprintf(charValue, "y: %.4d", (*(uint16_t *)value));
-//        drawString(charValue, 310, 700, (color)BLACK, backColorTable);
-    }
 }
 
 
 /************************  writeMaxAnalogValue()   ******************************/
-// arrow max length.                                                            //
+// Write the arrow max length on display.                                       //
 /********************************************************************************/
 void writeMaxAnalogValue(uint16_t maxAnalogValue)
 {
@@ -354,10 +350,12 @@ void writeMaxAnalogValue(uint16_t maxAnalogValue)
 }
 
 
-/****************************  drawString()   **********************************/
-// writes a string to the given position on the LC-Display                      //
+/****************************  drawString()   ***********************************/
+// Writes a text string to the given position on the LC-Display. The character  */
+// array was copied from: https://www.mikrocontroller.net/topic/54860           */
 /********************************************************************************/
-void drawString(char *text, uint16_t rowStart, uint16_t columnStart, color fontColor, color backcolor)
+void drawString(char *text, uint16_t rowStart, uint16_t columnStart,
+                color fontColor, color backcolor)
 {
     uint16_t letter, numLetter, byteNum, lv;
     uint16_t columnStop = columnStart + FONT_WIDTH_BIG - 1;
@@ -407,78 +405,90 @@ void drawString(char *text, uint16_t rowStart, uint16_t columnStart, color fontC
 }
 
 
-//setup->coloredArrows = setup->coloredArrows ? false:true;
-/**************************  drawDisplay7Inch()   *******************************/
-// draws all arrows to the 7 inch LC-Display.                                   //
+/****************************  drawDisplay()  ***********************************/
+// draws all arrows on the 7 inch LC-Display to a window on the LCD             //
+// Window coordinates: start: (0,0) End: (506,479) [(x,y)]                      //
+// 1. delete old arrow                                                          //
+// 2. write cross grid                                                          //
+// 3. Check, if new arrow is in window boundary. If not: scale down.            //
+// 4. write new arrow                                                           //
 /********************************************************************************/
-void drawDisplay7Inch(lcdArrows * arrow)
+void drawDisplay(lcdArrows * arrow)
 {
-    static int16_t m, n;                            // m = row , n = column
-    static coordinates stop;
-    bool arrowActive;
+    int16_t m, n;   // m = row , n = column
+    static coordinates stop, oldStop[8][8];
+    static bool oldArrowActive[8][8];
+    bool arrowHeadActive;
+
     // write the arrows
     for(m = 0; m <= 7; m++)
     {
         for(n = 0; n <= 7; n++)
         {
-            // II: delete old arrows
-            stop.x  = startCord[m][n].x + oldDiffCosResults[m][n];
-            stop.y  = startCord[m][n].y + oldDiffSinResults[m][n];
+            // I: delete old arrow (paint it over with the background color)
+            drawLine(startCord[m][n].x, startCord[m][n].y, oldStop[m][n].x,
+                     oldStop[m][n].y, set->backColorArrow, oldArrowActive[m][n]);
 
-            drawLine(startCord[m][n].x, startCord[m][n].y, stop.x, stop.y, set->backColorArrowWindow, oldArrowActive[m][n]);
+            // II: write grid cross
+            drawLine(startCord[m][n].x-2, startCord[m][n].y, startCord[m][n].x+2,
+                     startCord[m][n].y, set->gridColor, NO_ARROWHEAD);
+            drawLine(startCord[m][n].x, startCord[m][n].y-2, startCord[m][n].x,
+                     startCord[m][n].y+2, set->gridColor, NO_ARROWHEAD);
 
-            // III: write grid cross
-            drawLine(startCord[m][n].x - 2, startCord[m][n].y, startCord[m][n].x + 2, startCord[m][n].y, set->gridColor, NO_ARROW);    // draw a small cross..
-            drawLine(startCord[m][n].x, startCord[m][n].y - 2, startCord[m][n].x, startCord[m][n].y + 2, set->gridColor, NO_ARROW);    // ..as as grid indicator
-
-            // IV: write new arrows
+            // III: check if new arrow is inside the display window. scale down
+            // if not. Otherwise the arrows would paint over the menu.
+            // Due to the LCD's internal memory layout it is only
+            // necessary to check the x-axes.
             stop.x  = startCord[m][n].x + arrow->dCos[m][n];
 
-            // IV a: check if arrow is in designated display window
             // all good: arrow is in window
             if( (stop.x >= 0) && (stop.x < 507) )
             {
                 stop.y  = startCord[m][n].y + arrow->dSin[m][n];
-                arrowActive = true;
+                arrowHeadActive = true;
             }
-            // arrow moved out off screen on left side => scale stop.y and stop.x  down to left boundary
+            // bad: arrow moved out off screen on left side
+            // => scale stop.x and stop.y  down to left boundary
             else if(stop.x < 0)
             {
-                arrow->dSin[m][n] *= (double)startCord[m][n].x / -arrow->dCos[m][n];    // minus because we know: dCos < 0
-                arrow->dCos[m][n] = -startCord[m][n].x;
-                stop.y  = startCord[m][n].y + arrow->dSin[m][n];
                 stop.x  = 0;
-                arrowActive = false;
+                // minus because we know dCos < 0:
+                arrow->dSin[m][n] *= (double)startCord[m][n].x / -arrow->dCos[m][n];
+                stop.y  = startCord[m][n].y + arrow->dSin[m][n];
+                // disable arrowhead to indicate that the arrow was cropped
+                arrowHeadActive = false;
             }
-            // if arrow moves out off screen on right side => scale down to right boundary
+            // bad:  moved out off screen on right side => scale stop.y and stop.x
+            // => scale down to right boundary
             else
             {
-                arrow->dSin[m][n] *= (double)(506 - startCord[m][n].x) / arrow->dCos[m][n];
-                arrow->dCos[m][n] = 506 - startCord[m][n].x;
-                stop.y  = startCord[m][n].y + arrow->dSin[m][n];
+                // 506 is the x-coordinate from right boundary
                 stop.x  = 506;
-                arrowActive = false;
+                arrow->dSin[m][n] *= (double)(stop.x-startCord[m][n].x) / arrow->dCos[m][n];
+                stop.y  = startCord[m][n].y + arrow->dSin[m][n];
+                // disable arrowhead to indicate that the arrow was cropped
+                arrowHeadActive = false;
             }
             if(stop.y < 0 || stop.y > 479)
             {
-                arrowActive = false;
+                arrowHeadActive = false;
             }
-
             // if the option 'colored arrows' is enabled, the colors get linked to an
             // array with 768 different colors from dark blue to red.
             // if option is disabled colors get linked to an array with only 'black'.
             if( set->coloredArrows == true)
             {
-                drawLine(startCord[m][n].x, startCord[m][n].y, stop.x, stop.y, arrowColor[arrow->arrowLength[m][n]], arrowActive);
+                drawLine(startCord[m][n].x, startCord[m][n].y, stop.x, stop.y,
+                         arrowColor[arrow->arrowLength[m][n]], arrowHeadActive);
             }
             else
             {
-                drawLine(startCord[m][n].x, startCord[m][n].y, stop.x, stop.y, set->arrowColor, arrowActive);
+                drawLine(startCord[m][n].x, startCord[m][n].y, stop.x, stop.y,
+                         set->arrowColor, arrowHeadActive);
             }
-
-            oldDiffCosResults[m][n] = arrow->dCos[m][n];
-            oldDiffSinResults[m][n] = arrow->dSin[m][n];
-            oldArrowActive[m][n] = arrowActive;
+            oldStop[m][n].x = stop.x;
+            oldStop[m][n].y = stop.y;
+            oldArrowActive[m][n] = arrowHeadActive;
         }
     }
 }
@@ -513,10 +523,12 @@ void drawRectangle(short start_x, short start_y, short stop_x, short stop_y, col
 
 
 /******************************  LCD WRITE LINE  ********************************/
-//
+// This function draws lines from start point x to stop point y directly to     */
+// the display. If 'arrowOption' is activated. An arrowhead isadded at the      */
+// end of the line.                                                             */
 /********************************************************************************/
-//draws a line from start point x to stop point y directly to the display
-void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, color color, uint16_t arrowOption)
+void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y,
+              color color, uint16_t arrowOption)
 {
     int16_t delta_x = stop_x - start_x;
     int16_t delta_y = stop_y - start_y;
@@ -531,9 +543,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
             if(arrowOption == WITH_ARROW && -delta_y > 1)
             {
                 drawLine(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
-                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROWHEAD);
                 drawLine(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
-                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROWHEAD);
             }
         }
         else                        // 90° line
@@ -543,9 +555,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
             if(arrowOption == WITH_ARROW && delta_y > 1)
             {
                 drawLine(start_x, stop_y, start_x - ARROW_LENGTH*sin(ARROW_ANGLE),
-                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROWHEAD);
                 drawLine(start_x, stop_y, start_x + ARROW_LENGTH*sin(ARROW_ANGLE),
-                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROWHEAD);
             }
         }
     }
@@ -559,9 +571,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
             if(arrowOption == WITH_ARROW && -delta_x > 1)
             {
                 drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
-                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROWHEAD);
                 drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*sin(ARROW_ANGLE),
-                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROWHEAD);
             }
         }
         else                    // 0° line
@@ -571,9 +583,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
             if(arrowOption == WITH_ARROW && delta_x > 1)
             {
                 drawLine(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
-                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                           stop_y - ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROWHEAD);
                 drawLine(stop_x, stop_y, stop_x - ARROW_LENGTH*sin(ARROW_ANGLE),
-                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROW);
+                           stop_y + ARROW_LENGTH*cos(ARROW_ANGLE), color, NO_ARROWHEAD);
             }
         }
     }
@@ -594,10 +606,10 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
                     {
                         angle = atan2(delta_y, delta_x);
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);    // upper arrow line
+                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROWHEAD);    // upper arrow line
 
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);    // lower arrow line
+                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROWHEAD);    // lower arrow line
                     }
                 }
                 else                            // quadrant I  2. (gain >= 1)
@@ -609,9 +621,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
                     {
                         angle = atan2(delta_y, delta_x);
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper arrow line
+                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROWHEAD);// upper arrow line
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower arrow line
+                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROWHEAD);// lower arrow line
                     }
                 }
             }
@@ -628,9 +640,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
                         angle = atan2(delta_y, delta_x);
                         //                        printf("%lf\n", angle);
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle - 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROW);// upper arrow line
+                                   stop_y + ARROW_LENGTH*sin(angle - 2.5), color, NO_ARROWHEAD);// upper arrow line
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(angle + 2.5),
-                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROW);// lower arrow line
+                                   stop_y + ARROW_LENGTH*sin(angle + 2.5), color, NO_ARROWHEAD);// lower arrow line
                     }
                 }
                 else                            // quadrant IV  2. (gain >= 1)
@@ -642,9 +654,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
                     {
                         angle = 1.571 - atan(gain);
                         drawLine(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROWHEAD);// upper arrow line
                         drawLine(stop_x, stop_y, stop_x - ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROWHEAD);// lower arrow line
                     }
                 }
             }
@@ -663,9 +675,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
                     {
                         angle = atan(gain);
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE - angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE - angle), color, NO_ARROW);// upper arrow line
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE - angle), color, NO_ARROWHEAD);// upper arrow line
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE + angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE + angle), color, NO_ARROW);// lower arrow line
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE + angle), color, NO_ARROWHEAD);// lower arrow line
                     }
                 }
                 else                            // quadrant II  2. (gain >= 1)
@@ -677,9 +689,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
                     {
                         angle = 1.571 - atan(gain);
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROWHEAD);// upper arrow line
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROWHEAD);// lower arrow line
                     }
                 }
             }
@@ -694,9 +706,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
                     {
                         angle = atan(gain);
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROWHEAD);// upper arrow line
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROWHEAD);// lower arrow line
                     }
                 }
                 else                                // quadrant III 1.
@@ -708,9 +720,9 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
                     {
                         angle = 1.571 - atan(gain);
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE-angle),
-                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROW);// upper arrow line
+                                   stop_y - ARROW_LENGTH*sin(ARROW_ANGLE-angle), color, NO_ARROWHEAD);// upper arrow line
                         drawLine(stop_x, stop_y, stop_x + ARROW_LENGTH*cos(ARROW_ANGLE+angle),
-                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROW);// lower arrow line
+                                   stop_y + ARROW_LENGTH*sin(ARROW_ANGLE+angle), color, NO_ARROWHEAD);// lower arrow line
                     }
                 }
             }
@@ -719,8 +731,11 @@ void drawLine(int16_t start_x, int16_t start_y, int16_t stop_x, int16_t stop_y, 
 }
 
 
+/*                  Now following helper functions for drawLine()               */
+
 /********************************************************************************/
-void writeLine0Degree(short start_x, short start_y, short stop_x, short stop_y, color color)
+void writeLine0Degree(short start_x, short start_y,
+                      short stop_x, short stop_y, color color)
 {
     int16_t x;
 
@@ -734,7 +749,8 @@ void writeLine0Degree(short start_x, short start_y, short stop_x, short stop_y, 
 
 
 /********************************************************************************/
-void writeLine90Degree(short start_x, short start_y, short stop_x, short stop_y, color color)
+void writeLine90Degree(short start_x, short start_y,
+                       short stop_x, short stop_y, color color)
 {
     int16_t y;
 
@@ -748,7 +764,8 @@ void writeLine90Degree(short start_x, short start_y, short stop_x, short stop_y,
 
 
 /********************************************************************************/
-void writeLine180Degree(short start_x, short start_y, short stop_x, short stop_y, color color)
+void writeLine180Degree(short start_x, short start_y,
+                        short stop_x, short stop_y, color color)
 {
     int16_t x;
 
@@ -762,7 +779,8 @@ void writeLine180Degree(short start_x, short start_y, short stop_x, short stop_y
 
 
 /********************************************************************************/
-void writeLine270Degree(short start_x, short start_y, short stop_x, short stop_y, color color)
+void writeLine270Degree(short start_x, short start_y,
+                        short stop_x, short stop_y, color color)
 {
     int16_t y;
 
@@ -776,7 +794,8 @@ void writeLine270Degree(short start_x, short start_y, short stop_x, short stop_y
 
 
 /********************************************************************************/
-void writeLineQuadrant1_I(short start_x, short start_y, short stop_x, short stop_y, double gain,color color)
+void writeLineQuadrant1_I(short start_x, short start_y,
+                          short stop_x, short stop_y, double gain,color color)
 {
     double gain2 = 0.5;
 
@@ -800,7 +819,8 @@ void writeLineQuadrant1_I(short start_x, short start_y, short stop_x, short stop
 
 
 /********************************************************************************/
-void writeLineQuadrant1_II(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
+void writeLineQuadrant1_II(short start_x, short start_y,
+                           short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -824,7 +844,8 @@ void writeLineQuadrant1_II(short start_x, short start_y, short stop_x, short sto
 
 
 /********************************************************************************/
-void writeLineQuadrant2_I(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
+void writeLineQuadrant2_I(short start_x, short start_y,
+                          short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -848,7 +869,8 @@ void writeLineQuadrant2_I(short start_x, short start_y, short stop_x, short stop
 
 
 /********************************************************************************/
-void writeLineQuadrant2_II(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
+void writeLineQuadrant2_II(short start_x, short start_y,
+                           short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -872,7 +894,8 @@ void writeLineQuadrant2_II(short start_x, short start_y, short stop_x, short sto
 
 
 /********************************************************************************/
-void writeLineQuadrant3_I(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
+void writeLineQuadrant3_I(short start_x, short start_y,
+                          short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -896,7 +919,8 @@ void writeLineQuadrant3_I(short start_x, short start_y, short stop_x, short stop
 
 
 /********************************************************************************/
-void writeLineQuadrant3_II(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
+void writeLineQuadrant3_II(short start_x, short start_y,
+                           short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -920,7 +944,8 @@ void writeLineQuadrant3_II(short start_x, short start_y, short stop_x, short sto
 
 
 /********************************************************************************/
-void writeLineQuadrant4_I(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
+void writeLineQuadrant4_I(short start_x, short start_y,
+                          short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -944,7 +969,8 @@ void writeLineQuadrant4_I(short start_x, short start_y, short stop_x, short stop
 
 
 /********************************************************************************/
-void writeLineQuadrant4_II(short start_x, short start_y, short stop_x, short stop_y, double gain, color color)
+void writeLineQuadrant4_II(short start_x, short start_y,
+                           short stop_x, short stop_y, double gain, color color)
 {
     double gain2 = 0.5;
 
@@ -1174,5 +1200,4 @@ void configureLCDHardware(uint32_t SysClock)
     writeCmdData(0x00);
 
     writeCommand(SET_DISPLAY_ON);           // Set display on
-
 }

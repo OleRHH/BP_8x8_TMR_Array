@@ -8,7 +8,7 @@
 #ifndef DEBUG_FUNCTIONS_H_
 #define DEBUG_FUNCTIONS_H_
 
-
+/************************  # public Includes #   ********************************/
 #include <stdbool.h>
 #include <stdint.h>
 
